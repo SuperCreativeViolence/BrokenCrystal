@@ -1,15 +1,14 @@
 #pragma once
 #include <iostream>
-#include <glut.h>
+#include <gl/glut.h>
 
-void Lighting(void)
+void Lighting(void) 
 {
 	glShadeModel(GL_SMOOTH);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-
 
 	float light_pos[] = { 25.0f, 50.0f, 50.0f, 0.0f };
 	float light_dir[] = { 0.0f, -1.0f, -1.0f };

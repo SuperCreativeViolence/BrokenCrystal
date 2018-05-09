@@ -5,6 +5,7 @@
 class Camera : public Object
 {
 public:
+	typedef std::unique_ptr<Camera> p;
 	Camera();
 };
 

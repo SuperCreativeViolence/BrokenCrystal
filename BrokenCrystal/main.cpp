@@ -1,10 +1,8 @@
-﻿#include "Init.h"
+#include "Init.h"
 #include "Camera.h"
 
-using namespace std;
-
-Camera* camera;
-Object* cube;
+Camera::p camera(new Camera());
+Object::p cube(new Object());
 
 void DrawAxis(int size)
 {
@@ -188,10 +186,6 @@ void EventHandlingAndLoop()
 int main(int argc, char** argv)
 {
 	Initialize(argc, argv);
-
-	camera = new Camera();
-	cube = new Object();
-
 	EventHandlingAndLoop();
 	return 0;
 }

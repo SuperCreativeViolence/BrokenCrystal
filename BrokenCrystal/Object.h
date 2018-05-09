@@ -1,5 +1,6 @@
 #ifndef OBJECT_H
 #define OBJECT_H
+#include <memory>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -13,10 +14,10 @@ class Object
 {
 
 public:
+	typedef std::unique_ptr<Object> p;
 	vec3 position;
 	quat rotation;
-	vec3 scale;
-
+	vec3 scale;
 	mat4 GetViewMatrix()
 	{
 		Rotate();

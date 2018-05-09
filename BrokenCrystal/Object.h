@@ -14,24 +14,32 @@ class Object
 {
 
 public:
+	Object();
+
 	typedef std::unique_ptr<Object> p;
+	static p Create() { return p(new Object); }
+
 	vec3 position;
 	quat rotation;
-	vec3 scale;
+	vec3 scale;
+
 	mat4 GetViewMatrix()
 	{
-		Rotate();
-		return toMat4(rotation);
+		return view_matrix;
 	}
 
 	void Rotate(vec3 euler);
+	void Rotate(float x, float y, float z);
+	void Translate(vec3 vector);
+	void Translate(float x, float y, float z);
+	void Scale(vec3 vector);
+	void Scale(float x, float y, float z);
 
-
+	void UpdateView();
 
 private:
 	float key_pitch, key_yaw, key_roll;
-
-	void Rotate();
+	mat4 view_matrix;
 };
 
 #endif

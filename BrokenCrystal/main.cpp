@@ -1,8 +1,13 @@
 #include "Init.h"
 #include "Camera.h"
 
-Camera::p camera(new Camera());
-Object::p cube(new Object());
+bool IsLMBPressed = false;
+float DragX, DragY;
+float DragPrevX, DragPrevY;
+float DragDeltaX, DragDeltaY;
+
+Camera::p camera = Camera::Create();
+Object::p cube = Object::Create();
 
 void DrawAxis(int size)
 {
@@ -59,7 +64,6 @@ void DrawCube()
 {
 	glPushMatrix();
 
-	glTranslatef(cube->position.x, cube->position.y, cube->position.z);
 	mat4 view_matrix = cube->GetViewMatrix();
 	glMultMatrixf(value_ptr(view_matrix));
 
@@ -105,16 +109,35 @@ void DrawCube()
 	glPopMatrix();
 }
 
+void SetDeltaDrag()
+{
+
+}
 
 void Mouse(int mouse_event, int state, int x, int y)
 {
+	IsLMBPressed = mouse_event == 0 && state == 0;
+	if (IsLMBPressed)
+	{
+		DragPrevX = x;
+		DragPrevY = y;
+	}
 
 	glutPostRedisplay();
 }
 
 void Motion(int x, int y)
 {
-	
+	if (IsLMBPressed)
+	{
+		DragX = x;
+		DragY = y;
+		DragDeltaX = (DragPrevX - DragX) * 0.1f;
+		DragDeltaY = (DragPrevY - DragY) * 0.1f;
+		DragPrevX = DragX;
+		DragPrevY = DragY;
+		SetDeltaDrag();
+	}
 	glutPostRedisplay();
 }
 
@@ -166,6 +189,18 @@ void Keyboard(unsigned char key, int x, int y)
 		case 'e':
 			cube->Rotate(vec3(0, 0, -10));
 			break;
+		case '1':
+			cube->Translate(1, 0, 0);
+			break;
+		case '2':
+			cube->Translate(-1, 0, 0);
+			break;
+		case '3':
+			cube->Scale(1, 1, 1);
+			break;
+		case '4':
+			cube->Scale(-1, -1, -1);
+			break;
 		default:
 			break;
 	}
@@ -174,11 +209,11 @@ void Keyboard(unsigned char key, int x, int y)
 
 void EventHandlingAndLoop()
 {
-	glutKeyboardFunc(Keyboard); 
-	glutDisplayFunc(Rendering); 
-	glutReshapeFunc(Reshape);   
-	glutMouseFunc(Mouse);       
-	glutMotionFunc(Motion);      
+	glutKeyboardFunc(Keyboard);
+	glutDisplayFunc(Rendering);
+	glutReshapeFunc(Reshape);
+	glutMouseFunc(Mouse);
+	glutMotionFunc(Motion);
 
 	glutMainLoop();
 }

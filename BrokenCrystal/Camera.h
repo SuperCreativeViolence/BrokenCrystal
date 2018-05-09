@@ -6,6 +6,8 @@ class Camera : public Object
 {
 public:
 	typedef std::unique_ptr<Camera> p;
+	static p Create(){ return p(new Camera);}
+
 	Camera();
 };
 

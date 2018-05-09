@@ -45,6 +45,7 @@ public:
 protected:
 	quat rotation;
 	mat4 view_matrix;
+	bool isdirty_update;
 
 private:
 	float key_pitch, key_yaw, key_roll;

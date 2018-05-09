@@ -21,5 +21,5 @@ void Camera::Rotate(float x, float y, float z)
 
 	quat rotation = toQuat(eulerAngleYX(radians(yaw), radians(pitch)));
 	SetRotation(rotation);
-	UpdateView();
+	isdirty_update = true;
 }

@@ -40,15 +40,19 @@ public:
 	void Scale(vec3 vector);
 	void Scale(float x, float y, float z);
 
-	void UpdateView();
+	virtual void LookAt(vec3 position);
+	virtual void LookAt(float x, float y, float z);
+
+	vec3 GetForward();
+
+	virtual void UpdateView();
 
 protected:
 	quat rotation;
 	mat4 view_matrix;
 	bool isdirty_update;
-
-private:
 	float key_pitch, key_yaw, key_roll;
+
 };
 
 #endif

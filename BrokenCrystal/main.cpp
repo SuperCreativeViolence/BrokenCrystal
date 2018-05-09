@@ -178,7 +178,6 @@ void KeyDown(unsigned char key, int x, int y)
 
 void Timer(int timer)
 {
-
 	if (key_state['w'])
 	{
 		camera->Translate(0, 0, -1);
@@ -202,6 +201,11 @@ void Timer(int timer)
 	if (key_state['e'])
 	{
 		camera->Translate(0, 1, 0);
+	}
+
+	if (key_state['t'])
+	{
+		cube->LookAt(camera->position);
 	}
 
 	glutPostRedisplay();

@@ -14,6 +14,10 @@ public:
 
 	void Rotate(vec3 euler) override;
 	void Rotate(float x, float y, float z) override;
+	void LookAt(vec3 position) override;
+	void LookAt(float x, float y, float z) override;
+
+	void UpdateView() override;
 
 };
 

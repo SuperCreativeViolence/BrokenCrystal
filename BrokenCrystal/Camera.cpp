@@ -23,3 +23,34 @@ void Camera::Rotate(float x, float y, float z)
 	SetRotation(rotation);
 	isdirty_update = true;
 }
+
+void Camera::LookAt(vec3 pos)
+{
+	Object::LookAt(pos);
+	pitch = glm::pitch(rotation);
+	yaw = glm::yaw(rotation);
+}
+
+void Camera::LookAt(float x, float y, float z)
+{
+	LookAt(vec3(x, y, z));
+}
+
+void Camera::UpdateView()
+{
+	if (!isdirty_update)
+		return;
+
+	mat4 translation_mat = translate(-position);
+
+	rotation = rotation * quat(vec3(key_pitch, key_yaw, key_roll));
+	rotation = normalize(rotation);
+	key_pitch = key_yaw = key_roll = 0;
+	mat4 rotation_mat = transpose(toMat4(rotation));
+
+	mat4 scale_mat;
+	scale_mat = glm::scale(scale_mat, scale);
+
+	view_matrix = scale_mat * rotation_mat * translation_mat;
+	isdirty_update = false;
+}

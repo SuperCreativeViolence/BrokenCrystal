@@ -64,8 +64,7 @@ void DrawCube()
 {
 	glPushMatrix();
 
-	mat4 view_matrix = cube->GetViewMatrix();
-	glMultMatrixf(value_ptr(view_matrix));
+	glMultMatrixf(value_ptr(cube->GetViewMatrix()));
 
 	DrawAxis(10);
 
@@ -111,7 +110,7 @@ void DrawCube()
 
 void SetDeltaDrag()
 {
-
+	camera->Rotate(DragDeltaY, DragDeltaX, 0);
 }
 
 void Mouse(int mouse_event, int state, int x, int y)
@@ -146,7 +145,7 @@ void Rendering(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(camera->position.x, camera->position.y, camera->position.z, 0, 0, 0, 0, 1, 0);
+	glMultMatrixf(value_ptr(camera->GetViewMatrix()));
 
 	DrawGrid(50, 5);
 	DrawCube();
@@ -167,53 +166,57 @@ void Reshape(int w, int h)
 	glLoadIdentity();
 }
 
-void Keyboard(unsigned char key, int x, int y)
+void KeyUp(unsigned char key, int x, int y)
 {
-	switch (key)
+	key_state[key] = false;
+}
+
+void KeyDown(unsigned char key, int x, int y)
+{
+	key_state[key] = true;
+}
+
+void Timer(int timer)
+{
+
+	if (key_state['w'])
 	{
-		case 'w':
-			cube->Rotate(vec3(10, 0, 0));
-			break;
-		case 's':
-			cube->Rotate(vec3(-10, 0, 0));
-			break;
-		case 'a':
-			cube->Rotate(vec3(0, 10, 0));
-			break;
-		case 'd':
-			cube->Rotate(vec3(0, -10, 0));
-			break;
-		case 'q':
-			cube->Rotate(vec3(0, 0, 10));
-			break;
-		case 'e':
-			cube->Rotate(vec3(0, 0, -10));
-			break;
-		case '1':
-			cube->Translate(1, 0, 0);
-			break;
-		case '2':
-			cube->Translate(-1, 0, 0);
-			break;
-		case '3':
-			cube->Scale(1, 1, 1);
-			break;
-		case '4':
-			cube->Scale(-1, -1, -1);
-			break;
-		default:
-			break;
+		camera->Translate(0, 0, -1);
 	}
+	if (key_state['s'])
+	{
+		camera->Translate(0, 0, 1);
+	}
+	if (key_state['a'])
+	{
+		camera->Translate(-1, 0, 0);
+	}
+	if (key_state['d'])
+	{
+		camera->Translate(1, 0, 0);
+	}
+	if (key_state['q'])
+	{
+		camera->Translate(0, -1, 0);
+	}
+	if (key_state['e'])
+	{
+		camera->Translate(0, 1, 0);
+	}
+
 	glutPostRedisplay();
+	glutTimerFunc(1000 / 60, Timer, 1);
 }
 
 void EventHandlingAndLoop()
 {
-	glutKeyboardFunc(Keyboard);
+	glutKeyboardFunc(KeyDown);
+	glutKeyboardUpFunc(KeyUp);
 	glutDisplayFunc(Rendering);
 	glutReshapeFunc(Reshape);
 	glutMouseFunc(Mouse);
 	glutMotionFunc(Motion);
+	glutTimerFunc(1000/60, Timer, 1);
 
 	glutMainLoop();
 }

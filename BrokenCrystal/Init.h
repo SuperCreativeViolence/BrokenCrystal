@@ -2,6 +2,8 @@
 #include <iostream>
 #include <gl/glut.h>
 
+bool key_state[256] = { false };
+
 void Lighting(void) 
 {
 	glShadeModel(GL_SMOOTH);

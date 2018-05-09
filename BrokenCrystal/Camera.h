@@ -9,6 +9,12 @@ public:
 	static p Create(){ return p(new Camera);}
 
 	Camera();
+
+	float pitch, yaw, roll;
+
+	void Rotate(vec3 euler) override;
+	void Rotate(float x, float y, float z) override;
+
 };
 
 #endif

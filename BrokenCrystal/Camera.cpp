@@ -26,9 +26,10 @@ void Camera::Rotate(float x, float y, float z)
 
 void Camera::LookAt(vec3 pos)
 {
-	Object::LookAt(pos);
+	SetRotation(conjugate(toQuat(lookAt(position, pos, vec3(0, 1, 0)))));
 	pitch = glm::pitch(rotation);
 	yaw = glm::yaw(rotation);
+	isdirty_update = true;
 }
 
 void Camera::LookAt(float x, float y, float z)

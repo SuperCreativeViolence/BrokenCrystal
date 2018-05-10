@@ -2,6 +2,9 @@
 #include <iostream>
 #include <gl/glut.h>
 
+#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 1280
+
 void Lighting(void) 
 {
 	glShadeModel(GL_SMOOTH);
@@ -35,8 +38,8 @@ void Initialize(int argc, char** argv)
 	glutInit(&argc, argv);
 
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-	glutInitWindowPosition(400, 100);
-	glutInitWindowSize(1280, 720);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	glutCreateWindow("SCV");
 	
 	glEnable(GL_DEPTH_TEST);

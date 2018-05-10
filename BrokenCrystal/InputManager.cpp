@@ -1,10 +1,9 @@
 #include "InputManager.h"
-#include <stdio.h>
 
 bool InputManager::key_state[256];
 bool InputManager::mouse_state[3];
-float InputManager::drag_prev[2];
-float InputManager::drag_delta[2];
+int InputManager::click_pos[2];
+int InputManager::drag_delta[2];
 Event<int, int> InputManager::OnMouseDrag;
 Event<int, int> InputManager::OnMouseMove;
 Event<int, int, int, int> InputManager::OnMouseClick;
@@ -19,10 +18,14 @@ void InputManager::MouseInput(int mouse_event, int state, int x, int y)
 	mouse_state[mouse_event] = state;
 	if (IsMouseDown(0))
 	{
-		drag_prev[0] = x;
-		drag_prev[1] = y;
+		glutSetCursor(GLUT_CURSOR_NONE);
+		click_pos[0] = x;
+		click_pos[1] = y;
 	}
-
+	else
+	{
+		glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+	}
 	OnMouseClick.fire(mouse_event, state, x, y);
 }
 
@@ -30,17 +33,16 @@ void InputManager::MouseMotion(int x, int y)
 {
 	if (IsMouseDown(0))
 	{
-		drag_delta[0] = (drag_prev[0] - x);
-		drag_delta[1] = (drag_prev[1] - y);
-		drag_prev[0] = x;
-		drag_prev[1] = y;
+		drag_delta[0] = (click_pos[0] - x);
+		drag_delta[1] = (click_pos[1] - y);
+		glutWarpPointer(click_pos[0], click_pos[1]);
 		OnMouseDrag.fire(drag_delta[0], drag_delta[1]);
 	}
 
 	OnMouseMove.fire(x, y);
 }
 
-float* InputManager::GetDragDelta()
+int* InputManager::GetDragDelta()
 {
 	return drag_delta;
 }

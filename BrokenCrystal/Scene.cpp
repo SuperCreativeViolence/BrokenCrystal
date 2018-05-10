@@ -4,7 +4,7 @@ Scene::Scene()
 {
 	camera = Camera::Create();
 	cube = Object::Create();
-	InputManager::OnMouseDrag.permanent_bind([this](float deltaX, float deltaY) { this->camera->Rotate(deltaY * 0.1f, deltaX * 0.1f, 0); });
+	InputManager::OnMouseDrag.permanent_bind([this](int deltaX, int deltaY) { this->camera->Rotate(deltaY * 0.1f, deltaX * 0.1f, 0); });
 }
 
 void Scene::Update()

@@ -5,7 +5,9 @@ bool InputManager::key_state[256];
 bool InputManager::mouse_state[3];
 float InputManager::drag_prev[2];
 float InputManager::drag_delta[2];
-Event<float, float> InputManager::OnMouseDrag;
+Event<int, int> InputManager::OnMouseDrag;
+Event<int, int> InputManager::OnMouseMove;
+Event<int, int, int, int> InputManager::OnMouseClick;
 
 void InputManager::KeyboardInput(unsigned char key, bool down, int x, int y)
 {
@@ -20,6 +22,8 @@ void InputManager::MouseInput(int mouse_event, int state, int x, int y)
 		drag_prev[0] = x;
 		drag_prev[1] = y;
 	}
+
+	OnMouseClick.fire(mouse_event, state, x, y);
 }
 
 void InputManager::MouseMotion(int x, int y)
@@ -32,6 +36,8 @@ void InputManager::MouseMotion(int x, int y)
 		drag_prev[1] = y;
 		OnMouseDrag.fire(drag_delta[0], drag_delta[1]);
 	}
+
+	OnMouseMove.fire(x, y);
 }
 
 float* InputManager::GetDragDelta()

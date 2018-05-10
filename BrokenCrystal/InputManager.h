@@ -13,7 +13,9 @@ public:
 	static bool IsKeyDown(unsigned char key);
 	static bool IsMouseDown(int mouse);
 
-	static Event<float, float> OnMouseDrag;
+	static Event<int, int> OnMouseDrag;
+	static Event<int, int> OnMouseMove;
+	static Event<int, int, int, int> OnMouseClick;
 
 private:
 	static bool key_state[256];

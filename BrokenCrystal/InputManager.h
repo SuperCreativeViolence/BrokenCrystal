@@ -1,6 +1,7 @@
 #ifndef INPUTMANAGER_H
 #define INPUTMANAGER_H
-#include <cmath>
+
+#include "Event.h"
 
 class InputManager
 {
@@ -11,6 +12,8 @@ public:
 	static float* GetDragDelta();
 	static bool IsKeyDown(unsigned char key);
 	static bool IsMouseDown(int mouse);
+
+	static Event<float, float> OnMouseDrag;
 
 private:
 	static bool key_state[256];

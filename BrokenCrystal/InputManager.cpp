@@ -5,6 +5,7 @@ bool InputManager::key_state[256];
 bool InputManager::mouse_state[3];
 float InputManager::drag_prev[2];
 float InputManager::drag_delta[2];
+Event<float, float> InputManager::OnMouseDrag;
 
 void InputManager::KeyboardInput(unsigned char key, bool down, int x, int y)
 {
@@ -25,16 +26,11 @@ void InputManager::MouseMotion(int x, int y)
 {
 	if (IsMouseDown(0))
 	{
-		drag_delta[0] = (drag_prev[0] - x) * 0.1f;
-		drag_delta[1] = (drag_prev[1] - y) * 0.1f;
+		drag_delta[0] = (drag_prev[0] - x);
+		drag_delta[1] = (drag_prev[1] - y);
 		drag_prev[0] = x;
 		drag_prev[1] = y;
-
-		drag_delta[0] = abs(drag_delta[0]) > 0.1f ? drag_delta[0] : 0;
-		drag_delta[1] = abs(drag_delta[1]) > 0.1f ? drag_delta[1] : 0;
-
-
-		printf("%f %f \n", drag_delta[0], drag_delta[1]);
+		OnMouseDrag.fire(drag_delta[0], drag_delta[1]);
 	}
 }
 

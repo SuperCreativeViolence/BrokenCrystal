@@ -4,15 +4,11 @@ Scene::Scene()
 {
 	camera = Camera::Create();
 	cube = Object::Create();
+	InputManager::OnMouseDrag.permanent_bind([this](float deltaX, float deltaY) { this->camera->Rotate(deltaY * 0.1f, deltaX * 0.1f, 0); });
 }
 
 void Scene::Update()
 {
-	if (InputManager::IsMouseDown(0))
-	{
-		float* drag = InputManager::GetDragDelta();
-		camera->Rotate(drag[1] * 3, drag[0] * 3, 0);
-	}
 	if (InputManager::IsKeyDown('w'))
 	{
 		camera->Translate(0, 0, -1);

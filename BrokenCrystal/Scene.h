@@ -1,5 +1,6 @@
 #ifndef SCENE_H
 #define SCENE_H
+#include <BulletPhysics/btBulletDynamicsCommon.h>
 #include "Camera.h"
 #include "InputManager.h"
 #include <gl/glut.h>

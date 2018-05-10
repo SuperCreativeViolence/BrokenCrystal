@@ -143,11 +143,11 @@ void Scene::InitializePhysics()
 
 void Scene::ShutdownPhysics()
 {
-	delete bt_Broadphase;
-	delete bt_CollisionConfiguration;
-	delete bt_Dispatcher;
-	delete bt_Solver;
 	delete bt_World;
+	delete bt_Solver;
+	delete bt_Broadphase;
+	delete bt_Dispatcher;
+	delete bt_CollisionConfiguration;
 }
 
 void Scene::CreateObjects()

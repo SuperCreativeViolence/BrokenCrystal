@@ -1,9 +1,7 @@
 #include "Object.h"
-#include <stdio.h>
 
 Object::Object()
 {
-	printf("Create No\n");
 	position = vec3();
 	rotation = quat();
 	scale = vec3(1);
@@ -12,7 +10,6 @@ Object::Object()
 
 Object::Object(btCollisionShape* pShape, float mass, const btVector3 &color, const btVector3 &initialPosition, const btQuaternion &initialRotation)
 {
-	printf("Create New Object\n");
 	bt_Shape = pShape;
 	bt_Color = color;
 
@@ -31,6 +28,7 @@ Object::Object(btCollisionShape* pShape, float mass, const btVector3 &color, con
 	btRigidBody::btRigidBodyConstructionInfo cInfo(mass, bt_MotionState, pShape, localInertia);
 
 	bt_Body = new btRigidBody(cInfo);
+	isdirty_update = true;
 }
 
 Object::~Object()

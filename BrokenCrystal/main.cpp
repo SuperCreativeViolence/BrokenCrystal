@@ -65,9 +65,7 @@ void DrawCube()
 	glPushMatrix();
 
 	glMultMatrixf(value_ptr(cube->GetViewMatrix()));
-
 	DrawAxis(10);
-
 	glBegin(GL_QUADS);
 	glColor3f(0.0, 1.0, 0.0);
 	glVertex3f(1.0, 1.0, 1.0);

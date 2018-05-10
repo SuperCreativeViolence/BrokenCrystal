@@ -57,19 +57,13 @@ void Object::Scale(float x, float y, float z)
 
 void Object::LookAt(vec3 pos)
 {
-	SetRotation(lookAt(position, pos, vec3(0, 1, 0)));
+	SetRotation(lookAt(position, -pos, vec3(0, 1, 0)));
 	isdirty_update = true;
 }
 
 void Object::LookAt(float x, float y, float z)
 {
 	LookAt(vec3(x, y, z));
-}
-
-glm::vec3 Object::GetForward()
-{
-	//Todo
-	return vec3();
 }
 
 void Object::UpdateView()

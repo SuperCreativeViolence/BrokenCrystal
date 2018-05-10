@@ -43,8 +43,6 @@ public:
 	virtual void LookAt(vec3 position);
 	virtual void LookAt(float x, float y, float z);
 
-	vec3 GetForward();
-
 	virtual void UpdateView();
 
 protected:

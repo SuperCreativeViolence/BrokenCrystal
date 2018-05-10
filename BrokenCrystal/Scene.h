@@ -6,6 +6,7 @@
 #include <gl/freeglut.h>
 #include "DebugDrawer.h"
 
+#include <iostream>
 #include <vector>
 #include <set>
 #include <iterator>
@@ -27,12 +28,10 @@ public:
 	static p Create() { return p(new(Scene)); }
 
 	Camera::p camera;
-	Object::p cube;
 
 	void Initialize();
 
 	void Update();
-	void Render();
 
 	void Idle();
 	void RenderScene();

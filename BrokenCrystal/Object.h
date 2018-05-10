@@ -38,6 +38,9 @@ public:
 		return view_matrix;
 	}
 
+	btQuaternion GetWorldRotation();
+	btVector3 GetWorldPosition();
+	btVector3 GetWorldEulerRotation();
 	void SetRotation(const glm::quat& rot);
 	quat GetRotation() const;
 

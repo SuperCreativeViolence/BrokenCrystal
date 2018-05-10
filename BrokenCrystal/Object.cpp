@@ -38,6 +38,24 @@ Object::~Object()
 	delete bt_Shape;
 }
 
+btQuaternion Object::GetWorldRotation()
+{
+	return bt_MotionState->GetWorldRotation();
+}
+
+btVector3 Object::GetWorldPosition()
+{
+	return bt_MotionState->GetWorldPosition();
+}
+
+btVector3 Object::GetWorldEulerRotation()
+{
+	btQuaternion q = GetWorldRotation();
+	btScalar yaw, pitch, roll;
+	q.getEulerZYX(yaw, pitch, roll);
+	return btVector3(pitch, yaw, roll);
+}
+
 void Object::SetRotation(const quat& rot)
 {
 	rotation = rot;

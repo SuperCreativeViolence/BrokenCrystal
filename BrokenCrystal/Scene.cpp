@@ -3,7 +3,6 @@
 Scene::Scene()
 {
 	camera = Camera::Create();
-	cube = Object::Create();
 	InputManager::OnMouseDrag.permanent_bind([this](int deltaX, int deltaY) { this->camera->Rotate(deltaY * 0.1f, deltaX * 0.1f, 0); });
 }
 
@@ -72,17 +71,6 @@ void Scene::Update()
 	{
 		camera->Translate(0, 1, 0);
 	}
-	if (InputManager::IsKeyDown('t'))
-	{
-		cube->LookAt(camera->position);
-	}
-}
-
-void Scene::Render()
-{
-	glMultMatrixf(value_ptr(camera->GetViewMatrix()));
-	DrawGrid(50, 5);
-	DrawDebugCube();
 }
 
 void Scene::Idle()
@@ -152,14 +140,16 @@ void Scene::ShutdownPhysics()
 
 void Scene::CreateObjects()
 {
-	CreateGameObject(new btBoxShape(btVector3(1, 50, 50)), 0,
-		btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, 0.0f, 0.0f));
+	CreateGameObject(new btBoxShape(btVector3(1, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, 0.0f, 0.0f));
 
-	CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0,
-		btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
+	for (int i = 0; i < 10; i++)
+	{
+		CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f * i, 0.0f));
+	}
 
-	CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0,
-		btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
+	CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
+
+	CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
 
 	//m_pTrigger = new btCollisionObject();
 	//// create a box for the trigger's shape
@@ -235,7 +225,6 @@ void Scene::CheckForCollisionEvents()
 void Scene::CollisionEvent(btRigidBody* body0, btRigidBody * body1)
 {
 
-
 }
 
 void Scene::SeparationEvent(btRigidBody * body0, btRigidBody * body1)
@@ -292,52 +281,6 @@ void Scene::DrawGrid(float size, float step)
 	glVertex3f(0, 0, size);
 	glEnd();
 	glEnable(GL_LIGHTING);
-}
-
-void Scene::DrawDebugCube()
-{
-	glPushMatrix();
-
-	glMultMatrixf(value_ptr(cube->GetViewMatrix()));
-	DrawAxis(10);
-	glBegin(GL_QUADS);
-	glColor3f(0.0, 1.0, 0.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-
-	glColor3f(1.0, 0.0, 0.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, -1.0);
-
-	glColor3f(1.0, 1.0, 0.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, -1.0);
-
-	glColor3f(0.0, 0.0, 1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(1.0, 1.0, -1.0);
-	glVertex3f(1.0, -1.0, -1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-
-	glColor3f(1.0, 0.5, 0.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, -1.0);
-	glVertex3f(-1.0, -1.0, -1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-
-	glColor3f(1.0, 0.5, 1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(-1.0, 1.0, 1.0);
-	glVertex3f(-1.0, -1.0, 1.0);
-	glVertex3f(1.0, -1.0, 1.0);
-	glEnd();
-	glPopMatrix();
 }
 
 void Scene::DrawBox(const btVector3 &halfSize)

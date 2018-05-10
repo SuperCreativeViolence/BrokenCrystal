@@ -81,7 +81,6 @@ void Object::UpdateView()
 	mat4 scale_mat;
 	scale_mat = glm::scale(scale_mat, scale);
 
-	//view_matrix = scale_mat * rotation_mat * translation_mat;
 	view_matrix = translation_mat * rotation_mat * scale_mat;
 	isdirty_update = false;
 }

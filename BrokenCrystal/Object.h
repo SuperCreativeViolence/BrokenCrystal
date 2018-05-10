@@ -10,6 +10,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
+#include <BulletPhysics/btBulletDynamicsCommon.h>
+#include "OpenGLMotionState.h"
+
+
 using namespace glm;
 
 class Object
@@ -17,6 +21,10 @@ class Object
 
 public:
 	Object();
+	Object(btCollisionShape* pShape, float mass, const btVector3 &color,
+		const btVector3 &initialPosition = btVector3(0, 0, 0),
+		const btQuaternion &initialRotation = btQuaternion(0, 0, 1, 1));
+	~Object();
 
 	typedef std::unique_ptr<Object> p;
 	static p Create() { return p(new Object); }
@@ -45,11 +53,23 @@ public:
 
 	virtual void UpdateView();
 
+	btCollisionShape* GetShape();
+	btRigidBody* GetRigidBody();
+	btMotionState* GetMotionState();
+	void GetTransform(btScalar* transform);
+	btVector3 GetColor();
+	void SetColor(const btVector3 &color);
+
 protected:
 	quat rotation;
 	mat4 view_matrix;
 	bool isdirty_update;
 	float key_pitch, key_yaw, key_roll;
+
+	btCollisionShape* bt_Shape;
+	btRigidBody* bt_Body;
+	OpenGLMotionState* bt_MotionState;
+	btVector3 bt_Color;
 
 };
 

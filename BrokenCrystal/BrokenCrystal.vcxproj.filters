@@ -33,6 +33,12 @@
     <ClInclude Include="Event.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="OpenGLMotionState.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugDrawer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,6 +54,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="InputManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugDrawer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

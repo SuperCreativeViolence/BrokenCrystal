@@ -18,13 +18,13 @@ void Motion(int x, int y)
 
 void Rendering(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
 
-	scene->Render();
-	
-	glutSwapBuffers();
+	//scene->RenderScene();
+	//
+	//glutSwapBuffers();
 
 }
 
@@ -57,6 +57,11 @@ void Timer(int timer)
 	glutTimerFunc(1000 / 60, Timer, 1);
 }
 
+void Idle()
+{
+	scene->Idle();
+}
+
 void EventHandlingAndLoop()
 {
 	glutKeyboardFunc(KeyDown);
@@ -65,6 +70,7 @@ void EventHandlingAndLoop()
 	glutReshapeFunc(Reshape);
 	glutMouseFunc(Mouse);
 	glutMotionFunc(Motion);
+	glutIdleFunc(Idle);
 	glutTimerFunc(1000/60, Timer, 1);
 
 	glutMainLoop();
@@ -73,6 +79,7 @@ void EventHandlingAndLoop()
 int main(int argc, char** argv)
 {
 	Initialize(argc, argv);
+	scene->Initialize();
 	EventHandlingAndLoop();
 	return 0;
 }

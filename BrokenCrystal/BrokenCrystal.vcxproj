@@ -20,14 +20,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="DebugDrawer.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="Init.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="OpenGLMotionState.h" />
     <ClInclude Include="Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DebugDrawer.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Object.cpp" />

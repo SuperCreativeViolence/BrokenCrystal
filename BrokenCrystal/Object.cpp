@@ -3,10 +3,41 @@
 
 Object::Object()
 {
+	printf("Create No\n");
 	position = vec3();
 	rotation = quat();
 	scale = vec3(1);
 	isdirty_update = true;
+}
+
+Object::Object(btCollisionShape* pShape, float mass, const btVector3 &color, const btVector3 &initialPosition, const btQuaternion &initialRotation)
+{
+	printf("Create New Object\n");
+	bt_Shape = pShape;
+	bt_Color = color;
+
+	btTransform transform;
+	transform.setIdentity();
+	transform.setOrigin(initialPosition);
+	transform.setRotation(initialRotation);
+
+	bt_MotionState = new OpenGLMotionState(transform);
+
+	btVector3 localInertia(0, 0, 0);
+
+	if (mass != 0.0f)
+		pShape->calculateLocalInertia(mass, localInertia);
+
+	btRigidBody::btRigidBodyConstructionInfo cInfo(mass, bt_MotionState, pShape, localInertia);
+
+	bt_Body = new btRigidBody(cInfo);
+}
+
+Object::~Object()
+{
+	delete bt_Body;
+	delete bt_MotionState;
+	delete bt_Shape;
 }
 
 void Object::SetRotation(const quat& rot)
@@ -83,4 +114,35 @@ void Object::UpdateView()
 
 	view_matrix = translation_mat * rotation_mat * scale_mat;
 	isdirty_update = false;
+}
+
+btCollisionShape* Object::GetShape()
+{
+	return bt_Shape;
+}
+
+btRigidBody* Object::GetRigidBody()
+{
+	return bt_Body;
+}
+
+btMotionState* Object::GetMotionState()
+{
+	return bt_MotionState;
+}
+
+void Object::GetTransform(btScalar* transform)
+{
+	if (bt_MotionState)
+		bt_MotionState->GetWorldTransform(transform);
+}
+
+btVector3 Object::GetColor()
+{
+	return bt_Color;
+}
+
+void Object::SetColor(const btVector3 &color)
+{
+	bt_Color = color;
 }

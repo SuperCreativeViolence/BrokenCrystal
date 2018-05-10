@@ -3,7 +3,7 @@
 #include <BulletPhysics/btBulletDynamicsCommon.h>
 #include "Camera.h"
 #include "InputManager.h"
-#include <gl/glut.h>
+#include <gl/freeglut.h>
 #include "DebugDrawer.h"
 
 #include <vector>

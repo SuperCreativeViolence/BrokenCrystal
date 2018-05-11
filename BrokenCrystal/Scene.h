@@ -25,6 +25,15 @@ typedef std::vector<Object*> Objects;
 typedef std::pair<const btRigidBody*, const btRigidBody*> CollisionPair;
 typedef std::set<CollisionPair> CollisionPairs;
 
+
+// 레이케스팅과 관련
+struct RayResult
+{
+	btRigidBody* pBody;
+	btVector3 hitPoint;
+	btVector3 hitNormal;
+};
+
 class Scene
 {
 public:
@@ -41,7 +50,6 @@ public:
 
 	void Idle();
 	void Reshape(int w, int h);
-
 
 	void RenderScene();
 	void UpdateScene(float deltaTime);
@@ -60,6 +68,9 @@ public:
 	void CheckForCollisionEvents();
 	void CollisionEvent(btRigidBody* body0, btRigidBody * body1);
 	void SeparationEvent(btRigidBody * body0, btRigidBody * body1);
+
+	//레이케스팅
+	bool RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out, bool includeStatic = false);
 
 private:
 	void DrawAxis(int size);

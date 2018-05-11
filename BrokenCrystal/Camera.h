@@ -3,6 +3,7 @@
 
 #include <gl/freeglut.h>
 #include <BulletPhysics/btBulletDynamicsCommon.h>
+#include "InputManager.h"
 
 class Camera
 {
@@ -12,10 +13,13 @@ public:
 	void UpdateCamera();
 	void Rotate(float deltaX, float deltaY);
 	void Zoom(float distance);
-
+	btVector3 GetWorldPosition();
+	btVector3 GetPickingRay(btVector3 pos);
+	btVector3 GetPickingRay(int x, int y);
 	void SetScreen(int w, int h);
 private:
 	btVector3 cameraPosition;
+	btVector3 _cameraTempPosition;
 	btVector3 cameraTarget;
 	float nearPlane;
 	float farPlane;

@@ -96,6 +96,22 @@ void Scene::RenderScene()
 		DrawShape(transform, obj->GetShape(), obj->GetColor());
 	}
 
+	if (InputManager::IsMouseDown(2))
+	{
+		RayResult result;
+		btVector3 cameraPosition = camera->GetWorldPosition();
+		if (RayCast(cameraPosition, camera->GetPickingRay(InputManager::GetMousePos()), result))
+		{
+			btRigidBody* pickedBody = result.pBody;
+			pickedBody->applyCentralForce((result.hitPoint - cameraPosition).normalize() * 10.0f);
+			glPushMatrix();
+			glTranslatef(result.hitPoint[0], result.hitPoint[1], result.hitPoint[2]);
+			DrawSphere(0.3, 10, 10);
+
+			glPopMatrix();
+		}
+	}
+
 	bt_World->debugDrawWorld();
 }
 
@@ -228,6 +244,37 @@ void Scene::CollisionEvent(btRigidBody* body0, btRigidBody * body1)
 void Scene::SeparationEvent(btRigidBody * body0, btRigidBody * body1)
 {
 
+}
+
+bool Scene::RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out, bool includeStatic /*= false*/)
+{
+	if (!bt_World)
+		return false;
+
+	btVector3 rayTo = dir;
+	btVector3 rayFrom = start;
+
+	btCollisionWorld::ClosestRayResultCallback rayCallBack(rayFrom, rayTo);
+
+	bt_World->rayTest(rayFrom, rayTo, rayCallBack);
+
+	if (rayCallBack.hasHit())
+	{
+		btRigidBody* pBody = (btRigidBody*) btRigidBody::upcast(rayCallBack.m_collisionObject);
+		if (!pBody)
+			return false;
+
+		if (!includeStatic)
+			if (pBody->isStaticObject() || pBody->isKinematicObject())
+				return false;
+
+		out.pBody = pBody;
+		out.hitPoint = rayCallBack.m_hitPointWorld;
+		out.hitNormal = rayCallBack.m_hitNormalWorld;
+		return true;
+	}
+
+	return false;
 }
 
 void Scene::DrawAxis(int size)

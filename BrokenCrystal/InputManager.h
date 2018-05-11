@@ -3,6 +3,7 @@
 
 #include "Event.h"
 #include "gl/glut.h"
+#include <BulletPhysics/LinearMath/btVector3.h>
 
 class InputManager
 {
@@ -13,6 +14,7 @@ public:
 	static int* GetDragDelta();
 	static bool IsKeyDown(unsigned char key);
 	static bool IsMouseDown(int mouse);
+	static btVector3 GetMousePos();
 
 	static Event<int, int> OnMouseDrag;
 	static Event<int, int> OnMouseMove;
@@ -21,6 +23,7 @@ public:
 private:
 	static bool key_state[256];
 	static bool mouse_state[3];
+	static int mouse_pos[2];
 	static int click_pos[2];
 	static int drag_delta[2];
 };

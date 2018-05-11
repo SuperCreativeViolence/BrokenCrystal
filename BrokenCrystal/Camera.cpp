@@ -1,7 +1,7 @@
 #include "Camera.h"
 
 Camera::Camera() : 
-	cameraPosition(10.0f, 5.0f, 0.0f),
+	_cameraTempPosition(10.0f, 5.0f, 0.0f),
 	cameraTarget(0.0f, 0.0f, 0.0f),
 	cameraDistance(15.0f),
 	cameraPitch(20.0f),
@@ -29,6 +29,47 @@ void Camera::Zoom(float distance)
 	UpdateCamera();
 }
 
+btVector3 Camera::GetWorldPosition()
+{
+	return cameraPosition;
+}
+
+btVector3 Camera::GetPickingRay(int x, int y)
+{
+	float tanFov = 1.0f / nearPlane;
+	float fov = btScalar(2.0) * btAtan(tanFov);
+
+	btVector3 rayFrom = cameraPosition;
+	btVector3 rayForward = (cameraTarget - cameraPosition);
+	rayForward.normalize();
+	rayForward *= farPlane;
+
+	btVector3 ver = upVector;
+	btVector3 hor = rayForward.cross(ver);
+	hor.normalize();
+	ver = hor.cross(rayForward);
+	ver.normalize();
+	hor *= 2.f * farPlane * tanFov;
+	ver *= 2.f * farPlane * tanFov;
+
+	btScalar aspect = screenWidth / (btScalar) screenHeight;
+
+	hor *= aspect;
+	btVector3 rayToCenter = rayFrom + rayForward;
+	btVector3 dHor = hor * 1.f / float(screenWidth);
+	btVector3 dVert = ver * 1.f / float(screenHeight);
+	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
+	rayTo += btScalar(x) * dHor;
+	rayTo -= btScalar(y) * dVert;
+
+	return rayTo;
+}
+
+btVector3 Camera::GetPickingRay(btVector3 pos)
+{
+	return GetPickingRay(pos[0], pos[1]);
+}
+
 void Camera::SetScreen(int w, int h)
 {
 	screenWidth = w;
@@ -51,10 +92,10 @@ void Camera::UpdateCamera()
 	float yaw = cameraYaw * 0.01745329f;
 
 	btQuaternion rotation(upVector, yaw);
-	btVector3 cameraPosition(0, 0, 0);
+	btVector3 _cameraTempPosition(0, 0, 0);
 
-	cameraPosition[2] = -cameraDistance;
-	btVector3 forward(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
+	_cameraTempPosition[2] = -cameraDistance;
+	btVector3 forward(_cameraTempPosition[0], _cameraTempPosition[1], _cameraTempPosition[2]);
 	if (forward.length2() < SIMD_EPSILON)
 	{
 		forward.setValue(1.f, 0.f, 0.f);
@@ -63,11 +104,11 @@ void Camera::UpdateCamera()
 	btVector3 right = upVector.cross(forward);
 	btQuaternion roll(right, -pitch);
 
-	cameraPosition = btMatrix3x3(rotation) * btMatrix3x3(roll) * cameraPosition;
-	cameraPosition[0] = cameraPosition.getX();
-	cameraPosition[1] = cameraPosition.getY();
-	cameraPosition[2] = cameraPosition.getZ();
-	cameraPosition += cameraTarget;
-
-	gluLookAt(cameraPosition[0], cameraPosition[1], cameraPosition[2], cameraTarget[0], cameraTarget[1], cameraTarget[2], upVector.getX(), upVector.getY(), upVector.getZ());
+	_cameraTempPosition = btMatrix3x3(rotation) * btMatrix3x3(roll) * _cameraTempPosition;
+	_cameraTempPosition[0] = _cameraTempPosition.getX();
+	_cameraTempPosition[1] = _cameraTempPosition.getY();
+	_cameraTempPosition[2] = _cameraTempPosition.getZ();
+	_cameraTempPosition += cameraTarget;
+	cameraPosition = _cameraTempPosition;
+	gluLookAt(_cameraTempPosition[0], _cameraTempPosition[1], _cameraTempPosition[2], cameraTarget[0], cameraTarget[1], cameraTarget[2], upVector.getX(), upVector.getY(), upVector.getZ());
 }

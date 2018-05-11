@@ -133,7 +133,7 @@ void Scene::CreateObjects()
 {
 	camera = CreateCamera();
 
-	CreateObject(new btBoxShape(btVector3(1, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, 0.0f, 0.0f));
+	CreateObject(new btBoxShape(btVector3(0.01, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, -1.0f, 0.0f));
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -376,8 +376,128 @@ void Scene::DrawShape(btScalar* transform, const btCollisionShape* pShape, const
 			DrawSphere(radius, 15, 15);
 			break;
 		}
+		// 나머지 btConvexHullShape 등 드로우 (메쉬)
 		default:
-			break;
+		{
+			if (pShape->isConvex())
+			{
+				const btConvexPolyhedron* poly = pShape->isPolyhedral() ? ((btPolyhedralConvexShape*) pShape)->getConvexPolyhedron() : 0;
+				if (poly)
+				{
+					int i;
+					glBegin(GL_TRIANGLES);
+					for (i = 0; i < poly->m_faces.size(); i++)
+					{
+						btVector3 centroid(0, 0, 0);
+						int numVerts = poly->m_faces[i].m_indices.size();
+						if (numVerts > 2)
+						{
+							btVector3 v1 = poly->m_vertices[poly->m_faces[i].m_indices[0]];
+							for (int v = 0; v < poly->m_faces[i].m_indices.size() - 2; v++)
+							{
+
+								btVector3 v2 = poly->m_vertices[poly->m_faces[i].m_indices[v + 1]];
+								btVector3 v3 = poly->m_vertices[poly->m_faces[i].m_indices[v + 2]];
+								btVector3 normal = (v3 - v1).cross(v2 - v1);
+								normal.normalize();
+								glNormal3f(normal.getX(), normal.getY(), normal.getZ());
+								glVertex3f(v1.x(), v1.y(), v1.z());
+								glVertex3f(v2.x(), v2.y(), v2.z());
+								glVertex3f(v3.x(), v3.y(), v3.z());
+							}
+						}
+					}
+					glEnd();
+				}
+				else
+				{
+					ShapeCache*	sc = cache((btConvexShape*) pShape);
+					btShapeHull* hull = &sc->m_shapehull;
+
+					if (hull->numTriangles() > 0)
+					{
+						int index = 0;
+						const unsigned int* idx = hull->getIndexPointer();
+						const btVector3* vtx = hull->getVertexPointer();
+
+						glBegin(GL_TRIANGLES);
+
+						for (int i = 0; i < hull->numTriangles(); i++)
+						{
+							int i1 = index++;
+							int i2 = index++;
+							int i3 = index++;
+							btAssert(i1 < hull->numIndices() &&
+									 i2 < hull->numIndices() &&
+									 i3 < hull->numIndices());
+
+							int index1 = idx[i1];
+							int index2 = idx[i2];
+							int index3 = idx[i3];
+							btAssert(index1 < hull->numVertices() &&
+									 index2 < hull->numVertices() &&
+									 index3 < hull->numVertices());
+
+							btVector3 v1 = vtx[index1];
+							btVector3 v2 = vtx[index2];
+							btVector3 v3 = vtx[index3];
+							btVector3 normal = (v3 - v1).cross(v2 - v1);
+							normal.normalize();
+							glNormal3f(normal.getX(), normal.getY(), normal.getZ());
+							glVertex3f(v1.x(), v1.y(), v1.z());
+							glVertex3f(v2.x(), v2.y(), v2.z());
+							glVertex3f(v3.x(), v3.y(), v3.z());
+
+						}
+						glEnd();
+
+					}
+				}
+			}
+		}
 	}
 	glPopMatrix();
+}
+
+Scene::ShapeCache* Scene::cache(btConvexShape* shape)
+{
+	ShapeCache*		sc = (ShapeCache*) shape->getUserPointer();
+	if (!sc)
+	{
+		sc = new(btAlignedAlloc(sizeof(ShapeCache), 16)) ShapeCache(shape);
+		sc->m_shapehull.buildHull(shape->getMargin());
+		m_shapecaches.push_back(sc);
+		shape->setUserPointer(sc);
+		/* Build edges	*/
+		const int			ni = sc->m_shapehull.numIndices();
+		const int			nv = sc->m_shapehull.numVertices();
+		const unsigned int*	pi = sc->m_shapehull.getIndexPointer();
+		const btVector3*	pv = sc->m_shapehull.getVertexPointer();
+		btAlignedObjectArray<ShapeCache::Edge*>	edges;
+		sc->m_edges.reserve(ni);
+		edges.resize(nv*nv, 0);
+		for (int i = 0; i < ni; i += 3)
+		{
+			const unsigned int* ti = pi + i;
+			const btVector3		nrm = btCross(pv[ti[1]] - pv[ti[0]], pv[ti[2]] - pv[ti[0]]).normalized();
+			for (int j = 2, k = 0; k < 3; j = k++)
+			{
+				const unsigned int	a = ti[j];
+				const unsigned int	b = ti[k];
+				ShapeCache::Edge*&	e = edges[btMin(a, b)*nv + btMax(a, b)];
+				if (!e)
+				{
+					sc->m_edges.push_back(ShapeCache::Edge());
+					e = &sc->m_edges[sc->m_edges.size() - 1];
+					e->n[0] = nrm; e->n[1] = -nrm;
+					e->v[0] = a; e->v[1] = b;
+				}
+				else
+				{
+					e->n[1] = nrm;
+				}
+			}
+		}
+	}
+	return(sc);
 }

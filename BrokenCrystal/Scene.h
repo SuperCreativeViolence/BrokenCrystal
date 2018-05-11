@@ -13,6 +13,11 @@
 #include <iterator>
 #include <algorithm>
 
+// Draw 관련
+#include <BulletPhysics/BulletCollision/CollisionShapes/btTriangleMeshShape.h>
+#include <BulletPhysics/BulletCollision/CollisionShapes/btShapeHull.h>
+#include <BulletPhysics/BulletCollision/CollisionShapes/btConvexPolyhedron.h>
+
 // Object 목록 관리를 위해
 typedef std::vector<Object*> Objects;
 
@@ -76,6 +81,22 @@ private:
 
 	// 충돌 관련 컴포넌트
 	CollisionPairs collisionPairs_LastUpdate;
+
+	// 드로우 관련 (나중에 Drawer로 따로 빼자)
+	struct ShapeCache
+	{
+		struct Edge
+		{
+			btVector3 n[2]; int v[2];
+		};
+		ShapeCache(btConvexShape* s) : m_shapehull(s)
+		{
+		}
+		btShapeHull					m_shapehull;
+		btAlignedObjectArray<Edge>	m_edges;
+	};
+	btAlignedObjectArray<ShapeCache*>	m_shapecaches;
+	ShapeCache* cache(btConvexShape* shape);
 };
 
 #endif

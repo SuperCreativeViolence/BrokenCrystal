@@ -18,6 +18,7 @@ void Initialize(int argc, char** argv)
 
 	glClearColor(0, 0, 0, 1.0f);
 
-	glEnable(GL_CULL_FACE);
-	glFrontFace(GL_BACK);
+	glDisable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
+	//glFrontFace(GL_BACK);
 }

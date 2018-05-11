@@ -1,6 +1,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 #include <BulletPhysics/btBulletDynamicsCommon.h>
+#include "Object.h"
 #include "Camera.h"
 #include "InputManager.h"
 #include <gl/freeglut.h>
@@ -27,23 +28,28 @@ public:
 	typedef std::unique_ptr<Scene> p;
 	static p Create() { return p(new(Scene)); }
 
-	Camera::p camera;
+	Camera* camera;
 
 	void Initialize();
 
 	void Update();
 
 	void Idle();
+	void Reshape(int w, int h);
+
+
 	void RenderScene();
 	void UpdateScene(float deltaTime);
 	void InitializePhysics();
 	void ShutdownPhysics();
 	void CreateObjects();
 
-	Object* CreateGameObject(btCollisionShape* pShape, const float &mass,
+	Object* CreateObject(btCollisionShape* pShape, const float &mass,
 		const btVector3 &color = btVector3(1.0f, 1.0f, 1.0f),
 		const btVector3 &initialPosition = btVector3(0.0f, 0.0f, 0.0f),
 		const btQuaternion &initialRotation = btQuaternion(0, 0, 1, 1));
+
+	Camera* CreateCamera();
 
 	//충돌 이벤트 함수들
 	void CheckForCollisionEvents();

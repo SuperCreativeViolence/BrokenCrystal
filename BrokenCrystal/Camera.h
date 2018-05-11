@@ -1,23 +1,31 @@
 #ifndef CAMERA_H
 #define CAMERA_H
-#include "Object.h"
 
-class Camera : public Object
+#include <gl/freeglut.h>
+#include <BulletPhysics/btBulletDynamicsCommon.h>
+#include "OpenGLMotionState.h"
+
+class Camera
 {
 public:
-	typedef std::unique_ptr<Camera> p;
-	static p Create(){ return p(new Camera);}
-
 	Camera();
 
-	float pitch, yaw, roll;
+	void UpdateCamera();
+	void Rotate(float deltaX, float deltaY);
+	void Zoom(float distance);
 
-	void Rotate(vec3 euler) override;
-	void Rotate(float x, float y, float z) override;
-	void LookAt(vec3 position) override;
-	void LookAt(float x, float y, float z) override;
-
-	void UpdateView() override;
+	void SetScreen(int w, int h);
+private:
+	btVector3 cameraPosition;
+	btVector3 cameraTarget;
+	float nearPlane;
+	float farPlane;
+	btVector3 upVector;
+	float cameraDistance;
+	float cameraPitch;
+	float cameraYaw;
+	int screenWidth;
+	int screenHeight;
 
 };
 

@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
+#include <gl/freeglut.h>
 #include <BulletPhysics/btBulletDynamicsCommon.h>
 #include "OpenGLMotionState.h"
 
@@ -32,29 +33,29 @@ public:
 	vec3 position;
 	vec3 scale;
 
-	mat4 GetViewMatrix()
+	btScalar* GetViewMatrix()
 	{
-		UpdateView();
-		return view_matrix;
+		btScalar transform[16];
+		bt_MotionState->GetWorldTransform(transform);
+		return transform;
 	}
 
 	btQuaternion GetWorldRotation();
 	btVector3 GetWorldPosition();
 	btVector3 GetWorldEulerRotation();
+	void SetRotation(btQuaternion quat);
 	void SetRotation(const glm::quat& rot);
 	quat GetRotation() const;
 
 	virtual void Rotate(vec3 euler);
 	virtual void Rotate(float x, float y, float z);
-	void Translate(vec3 vector, bool isLocal = true);
+	void Translate(const btVector3& vector, bool isLocal = true);
 	void Translate(float x, float y, float z, bool isLocal = true);
 	void Scale(vec3 vector);
 	void Scale(float x, float y, float z);
 
 	virtual void LookAt(vec3 position);
 	virtual void LookAt(float x, float y, float z);
-
-	virtual void UpdateView();
 
 	btCollisionShape* GetShape();
 	btRigidBody* GetRigidBody();

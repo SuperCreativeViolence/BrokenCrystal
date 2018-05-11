@@ -5,7 +5,6 @@ Object::Object()
 	position = vec3();
 	rotation = quat();
 	scale = vec3(1);
-	isdirty_update = true;
 }
 
 Object::Object(btCollisionShape* pShape, float mass, const btVector3 &color, const btVector3 &initialPosition, const btQuaternion &initialRotation)
@@ -28,7 +27,6 @@ Object::Object(btCollisionShape* pShape, float mass, const btVector3 &color, con
 	btRigidBody::btRigidBodyConstructionInfo cInfo(mass, bt_MotionState, pShape, localInertia);
 
 	bt_Body = new btRigidBody(cInfo);
-	isdirty_update = true;
 }
 
 Object::~Object()
@@ -61,6 +59,17 @@ void Object::SetRotation(const quat& rot)
 	rotation = rot;
 }
 
+void Object::SetRotation(btQuaternion quat)
+{
+	btTransform transform;
+	transform.setIdentity();
+	transform.setOrigin(btVector3(0,0,0));
+	btVector3 offset = GetWorldPosition();
+	transform.setRotation(quat);
+	transform.setOrigin(offset);
+	bt_MotionState->setWorldTransform(transform);
+}
+
 quat Object::GetRotation() const
 {
 	return rotation;
@@ -76,25 +85,25 @@ void Object::Rotate(float x, float y, float z)
 	key_pitch += radians(x);
 	key_yaw += radians(y);
 	key_roll += radians(z);
-
-	isdirty_update = true;
 }
 
-void Object::Translate(vec3 vector, bool isLocal)
+void Object::Translate(const btVector3& vector, bool isLocal)
 {
-	position += isLocal ? rotation * vector : vector;
-	isdirty_update = true;
+	btTransform transform;
+	transform.setIdentity();
+	transform.setOrigin(GetWorldPosition() + vector);
+	transform.setRotation(GetWorldRotation());
+	bt_MotionState->setWorldTransform(transform);
 }
 
 void Object::Translate(float x, float y, float z, bool isLocal)
 {
-	Translate(vec3(x, y, z), isLocal);
+	Translate(btVector3(x, y, z), isLocal);
 }
 
 void Object::Scale(vec3 vector)
 {
 	scale += vector;
-	isdirty_update = true;
 }
 
 void Object::Scale(float x, float y, float z)
@@ -111,25 +120,6 @@ void Object::LookAt(vec3 pos)
 void Object::LookAt(float x, float y, float z)
 {
 	LookAt(vec3(x, y, z));
-}
-
-void Object::UpdateView()
-{
-	if (!isdirty_update)
-		return;
-
-	mat4 translation_mat = translate(-position);
-
-	rotation = rotation * quat(vec3(key_pitch, key_yaw, key_roll));
-	rotation = normalize(rotation);
-	key_pitch = key_yaw = key_roll = 0;
-	mat4 rotation_mat = transpose(toMat4(rotation));
-
-	mat4 scale_mat;
-	scale_mat = glm::scale(scale_mat, scale);
-
-	view_matrix = translation_mat * rotation_mat * scale_mat;
-	isdirty_update = false;
 }
 
 btCollisionShape* Object::GetShape()

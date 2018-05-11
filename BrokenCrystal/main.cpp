@@ -30,14 +30,7 @@ void Rendering(void)
 
 void Reshape(int w, int h)
 {
-	glViewport(0, 0, w, h);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45, (float) w / h, 0.1, 500);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	scene->Reshape(w, h);
 }
 
 void KeyUp(unsigned char key, int x, int y)

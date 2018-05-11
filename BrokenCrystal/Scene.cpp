@@ -2,8 +2,10 @@
 
 Scene::Scene()
 {
-	camera = Camera::Create();
-	InputManager::OnMouseDrag.permanent_bind([this](int deltaX, int deltaY) { this->camera->Rotate(deltaY * 0.1f, deltaX * 0.1f, 0); });
+	InputManager::OnMouseDrag.permanent_bind([this](int deltaX, int deltaY)
+	{
+		this->camera->Rotate(deltaY, deltaX);
+	});
 }
 
 Scene::~Scene()
@@ -49,27 +51,11 @@ void Scene::Update()
 {
 	if (InputManager::IsKeyDown('w'))
 	{
-		camera->Translate(0, 0, -1);
+		camera->Zoom(1);
 	}
 	if (InputManager::IsKeyDown('s'))
 	{
-		camera->Translate(0, 0, 1);
-	}
-	if (InputManager::IsKeyDown('a'))
-	{
-		camera->Translate(-1, 0, 0);
-	}
-	if (InputManager::IsKeyDown('d'))
-	{
-		camera->Translate(1, 0, 0);
-	}
-	if (InputManager::IsKeyDown('q'))
-	{
-		camera->Translate(0, -1, 0);
-	}
-	if (InputManager::IsKeyDown('e'))
-	{
-		camera->Translate(0, 1, 0);
+		camera->Zoom(-1);
 	}
 }
 
@@ -78,22 +64,27 @@ void Scene::Idle()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	camera->UpdateView();
-
 
 	float deltaTime = clock.getTimeMilliseconds();
 	clock.reset();
 	UpdateScene(deltaTime / 1000.0f);
+
+	camera->UpdateCamera();
 
 	RenderScene();
 
 	glutSwapBuffers();
 }
 
+void Scene::Reshape(int w, int h)
+{
+	camera->SetScreen(w, h);
+	glViewport(0, 0, w, h);
+	camera->UpdateCamera();
+}
+
 void Scene::RenderScene()
 {
-
-	glMultMatrixf(value_ptr(camera->GetViewMatrix()));
 	DrawGrid(50, 5);
 
 	btScalar transform[16];
@@ -140,16 +131,18 @@ void Scene::ShutdownPhysics()
 
 void Scene::CreateObjects()
 {
-	CreateGameObject(new btBoxShape(btVector3(1, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, 0.0f, 0.0f));
+	camera = CreateCamera();
+
+	CreateObject(new btBoxShape(btVector3(1, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, 0.0f, 0.0f));
 
 	for (int i = 0; i < 10; i++)
 	{
-		CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f * i, 0.0f));
+		CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f * i, 0.0f));
 	}
 
-	CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
+	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
 
-	CreateGameObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
+	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
 
 	//m_pTrigger = new btCollisionObject();
 	//// create a box for the trigger's shape
@@ -164,7 +157,7 @@ void Scene::CreateObjects()
 	//bt_World->addCollisionObject(m_pTrigger);
 }
 
-Object* Scene::CreateGameObject(btCollisionShape* pShape, const float &mass, const btVector3 &color /*= btVector3(1.0f, 1.0f, 1.0f)*/, const btVector3 &initialPosition /*= btVector3(0.0f, 0.0f, 0.0f)*/, const btQuaternion &initialRotation /*= btQuaternion(0, 0, 1, 1)*/)
+Object* Scene::CreateObject(btCollisionShape* pShape, const float &mass, const btVector3 &color /*= btVector3(1.0f, 1.0f, 1.0f)*/, const btVector3 &initialPosition /*= btVector3(0.0f, 0.0f, 0.0f)*/, const btQuaternion &initialRotation /*= btQuaternion(0, 0, 1, 1)*/)
 {
 	Object* pObject = new Object(pShape, mass, color, initialPosition, initialRotation);
 
@@ -175,6 +168,18 @@ Object* Scene::CreateGameObject(btCollisionShape* pShape, const float &mass, con
 		bt_World->addRigidBody(pObject->GetRigidBody());
 	}
 	return pObject;
+}
+
+Camera* Scene::CreateCamera()
+{
+	Camera* pCamera = new Camera();
+
+	//if (bt_World)
+	//{
+	//	bt_World->addRigidBody(pCamera->GetRigidBody());
+	//}
+
+	return pCamera;
 }
 
 void Scene::CheckForCollisionEvents()

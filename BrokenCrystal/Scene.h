@@ -59,8 +59,8 @@ public:
 private:
 	void DrawAxis(int size);
 	void DrawGrid(float size, float step);
-	void DrawDebugCube();
 	void DrawBox(const btVector3 &halfSize);
+	void DrawSphere(btScalar radius, int lats, int longs);
 	void DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3 &color);
 
 	DebugDrawer* debugDrawer;

@@ -140,21 +140,14 @@ void Scene::CreateObjects()
 		CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f * i, 0.0f));
 	}
 
+	for (int i = 0; i < 10; i++)
+	{
+		CreateObject(new btSphereShape(1), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(3.0f, 10.0f * i, 3.0f));
+	}
+
 	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
 
 	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
-
-	//m_pTrigger = new btCollisionObject();
-	//// create a box for the trigger's shape
-	//m_pTrigger->setCollisionShape(new btBoxShape(btVector3(1, 0.25, 1)));
-	//// set the trigger's position
-	//btTransform triggerTrans;
-	//triggerTrans.setIdentity();
-	//triggerTrans.setOrigin(btVector3(0, 1.5, 0));
-	//m_pTrigger->setWorldTransform(triggerTrans);
-	//// flag the trigger to ignore contact responses
-	//m_pTrigger->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-	//bt_World->addCollisionObject(m_pTrigger);
 }
 
 Object* Scene::CreateObject(btCollisionShape* pShape, const float &mass, const btVector3 &color /*= btVector3(1.0f, 1.0f, 1.0f)*/, const btVector3 &initialPosition /*= btVector3(0.0f, 0.0f, 0.0f)*/, const btQuaternion &initialRotation /*= btQuaternion(0, 0, 1, 1)*/)
@@ -330,6 +323,34 @@ void Scene::DrawBox(const btVector3 &halfSize)
 	glEnd();
 }
 
+void Scene::DrawSphere(btScalar radius, int lats, int longs)
+{
+	int i, j;
+	for (i = 0; i <= lats; i++)
+	{
+		btScalar lat0 = SIMD_PI * (-btScalar(0.5) + (btScalar) (i - 1) / lats);
+		btScalar z0 = radius * sin(lat0);
+		btScalar zr0 = radius * cos(lat0);
+
+		btScalar lat1 = SIMD_PI * (-btScalar(0.5) + (btScalar) i / lats);
+		btScalar z1 = radius * sin(lat1);
+		btScalar zr1 = radius * cos(lat1);
+
+		glBegin(GL_QUAD_STRIP);
+		for (j = 0; j <= longs; j++)
+		{
+			btScalar lng = 2 * SIMD_PI * (btScalar) (j - 1) / longs;
+			btScalar x = cos(lng);
+			btScalar y = sin(lng);
+			glNormal3f(x * zr1, y * zr1, z1);
+			glVertex3f(x * zr1, y * zr1, z1);
+			glNormal3f(x * zr0, y * zr0, z0);
+			glVertex3f(x * zr0, y * zr0, z0);
+		}
+		glEnd();
+	}
+}
+
 void Scene::DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3 &color)
 {
 	glColor3f(color.getX(), color.getY(), color.getZ());
@@ -339,12 +360,20 @@ void Scene::DrawShape(btScalar* transform, const btCollisionShape* pShape, const
 
 	switch (pShape->getShapeType())
 	{
-		//Box 드로우
+		// Box 드로우
 		case BOX_SHAPE_PROXYTYPE:
 		{
 			const btBoxShape* box = static_cast<const btBoxShape*>(pShape);
 			btVector3 halfSize = box->getHalfExtentsWithMargin();
 			DrawBox(halfSize);
+			break;
+		}
+		// Sphere 드로우
+		case SPHERE_SHAPE_PROXYTYPE:
+		{
+			const btSphereShape* sphere = static_cast<const btSphereShape*>(pShape);
+			float radius = sphere->getMargin();
+			DrawSphere(radius, 15, 15);
 			break;
 		}
 		default:

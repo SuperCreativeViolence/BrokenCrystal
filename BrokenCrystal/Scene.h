@@ -46,8 +46,6 @@ public:
 
 	void Initialize();
 
-	void Update();
-
 	void Idle();
 	void Reshape(int w, int h);
 
@@ -71,6 +69,9 @@ public:
 
 	//레이케스팅
 	bool RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out, bool includeStatic = false);
+	void CreatePickingConstraint(int x, int y);
+	void RemovePickingConstraint();
+	void ApplyCentralForce(int x, int y, float power);
 
 private:
 	void DrawAxis(int size);
@@ -84,14 +85,17 @@ private:
 	btClock clock;
 
 	// Bullet Physics 필수 컴포넌트
-	btBroadphaseInterface* bt_Broadphase;
-	btCollisionConfiguration* bt_CollisionConfiguration;
-	btCollisionDispatcher* bt_Dispatcher;
-	btConstraintSolver* bt_Solver;
-	btDynamicsWorld* bt_World;
+	btBroadphaseInterface* broadphase;
+	btCollisionConfiguration* collisionConfiguration;
+	btCollisionDispatcher* dispatcher;
+	btConstraintSolver* solver;
+	btDynamicsWorld* world;
 
 	// 충돌 관련 컴포넌트
 	CollisionPairs collisionPairs_LastUpdate;
+	btRigidBody* pickedBody;
+	btTypedConstraint* pickConstraint;
+	btScalar oldPickingDistance;
 
 	// 드로우 관련 (나중에 Drawer로 따로 빼자)
 	struct ShapeCache

@@ -6,6 +6,46 @@ Scene::Scene()
 	{
 		this->camera->Rotate(deltaY, deltaX);
 	});
+
+	InputManager::OnMouseClick.permanent_bind([this](int mouse_event, int state, int x, int y)
+	{
+		switch (mouse_event)
+		{
+			case 0: // 왼쪽 마우스 버튼
+			{
+				if (state == 0)
+				{
+
+				}
+				else
+				{
+
+				}
+				break;
+			}
+			case 2: // 오른쪽 마우스 버튼
+			{
+				if (state == 0)
+				{
+					this->CreatePickingConstraint(x, y);
+				}
+				else
+				{
+					this->RemovePickingConstraint();
+				}
+				break;
+			}
+
+		}
+	});
+
+	world = 0;
+	broadphase = 0;
+	collisionConfiguration = 0;
+	dispatcher = 0;
+	solver = 0;
+	pickedBody = 0;
+	pickConstraint = 0;
 }
 
 Scene::~Scene()
@@ -44,19 +84,7 @@ void Scene::Initialize()
 
 	debugDrawer = new DebugDrawer();
 	debugDrawer->setDebugMode(0);
-	bt_World->setDebugDrawer(debugDrawer);
-}
-
-void Scene::Update()
-{
-	if (InputManager::IsKeyDown('w'))
-	{
-		camera->Zoom(1);
-	}
-	if (InputManager::IsKeyDown('s'))
-	{
-		camera->Zoom(-1);
-	}
+	world->setDebugDrawer(debugDrawer);
 }
 
 void Scene::Idle()
@@ -95,54 +123,67 @@ void Scene::RenderScene()
 		obj->GetTransform(transform);
 		DrawShape(transform, obj->GetShape(), obj->GetColor());
 	}
-
-	if (InputManager::IsMouseDown(2))
-	{
-		RayResult result;
-		btVector3 cameraPosition = camera->GetWorldPosition();
-		if (RayCast(cameraPosition, camera->GetPickingRay(InputManager::GetMousePos()), result))
-		{
-			btRigidBody* pickedBody = result.pBody;
-			pickedBody->applyCentralForce((result.hitPoint - cameraPosition).normalize() * 10.0f);
-			glPushMatrix();
-			glTranslatef(result.hitPoint[0], result.hitPoint[1], result.hitPoint[2]);
-			DrawSphere(0.3, 10, 10);
-
-			glPopMatrix();
-		}
-	}
-
-	bt_World->debugDrawWorld();
+	world->debugDrawWorld();
 }
 
 void Scene::UpdateScene(float deltaTime)
 {
-	if (bt_World)
+	if (world)
 	{
-		bt_World->stepSimulation(deltaTime);
+		world->stepSimulation(deltaTime);
 		
 		CheckForCollisionEvents();
+	}
+
+	if (InputManager::IsKeyDown('w'))
+	{
+		camera->Zoom(1);
+	}
+	if (InputManager::IsKeyDown('s'))
+	{
+		camera->Zoom(-1);
+	}
+	if (InputManager::IsKeyDown('f'))
+	{
+		btVector3 mousePosition = InputManager::GetMousePos();
+		ApplyCentralForce(mousePosition[0], mousePosition[1], 100);
+	}
+
+	if (pickedBody)
+	{
+		btGeneric6DofConstraint* pickCon = static_cast<btGeneric6DofConstraint*>(pickConstraint);
+		if (!pickCon)
+			return;
+		btVector3 cameraPosition = camera->GetWorldPosition();
+		btVector3 mousePosition = InputManager::GetMousePos();
+		btVector3 dir = camera->GetPickingRay(mousePosition[0], mousePosition[1]) - cameraPosition;
+		dir.normalize();
+
+		dir *= oldPickingDistance;
+		btVector3 newPivot = cameraPosition + dir;
+
+		pickCon->getFrameOffsetA().setOrigin(newPivot);
 	}
 }
 
 void Scene::InitializePhysics()
 {
-	bt_CollisionConfiguration = new btDefaultCollisionConfiguration();
-	bt_Dispatcher = new btCollisionDispatcher(bt_CollisionConfiguration);
-	bt_Broadphase = new btDbvtBroadphase();
-	bt_Solver = new btSequentialImpulseConstraintSolver();
-	bt_World = new btDiscreteDynamicsWorld(bt_Dispatcher, bt_Broadphase, bt_Solver, bt_CollisionConfiguration);
+	collisionConfiguration = new btDefaultCollisionConfiguration();
+	dispatcher = new btCollisionDispatcher(collisionConfiguration);
+	broadphase = new btDbvtBroadphase();
+	solver = new btSequentialImpulseConstraintSolver();
+	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
 
 	CreateObjects();
 }
 
 void Scene::ShutdownPhysics()
 {
-	delete bt_World;
-	delete bt_Solver;
-	delete bt_Broadphase;
-	delete bt_Dispatcher;
-	delete bt_CollisionConfiguration;
+	delete world;
+	delete solver;
+	delete broadphase;
+	delete dispatcher;
+	delete collisionConfiguration;
 }
 
 void Scene::CreateObjects()
@@ -172,9 +213,9 @@ Object* Scene::CreateObject(btCollisionShape* pShape, const float &mass, const b
 
 	objects.push_back(pObject);
 
-	if (bt_World)
+	if (world)
 	{
-		bt_World->addRigidBody(pObject->GetRigidBody());
+		world->addRigidBody(pObject->GetRigidBody());
 	}
 	return pObject;
 }
@@ -182,12 +223,6 @@ Object* Scene::CreateObject(btCollisionShape* pShape, const float &mass, const b
 Camera* Scene::CreateCamera()
 {
 	Camera* pCamera = new Camera();
-
-	//if (bt_World)
-	//{
-	//	bt_World->addRigidBody(pCamera->GetRigidBody());
-	//}
-
 	return pCamera;
 }
 
@@ -195,9 +230,9 @@ void Scene::CheckForCollisionEvents()
 {
 	CollisionPairs pairsThisUpdate;
 
-	for (int i = 0; i < bt_Dispatcher->getNumManifolds(); ++i)
+	for (int i = 0; i < dispatcher->getNumManifolds(); ++i)
 	{
-		btPersistentManifold* pManifold = bt_Dispatcher->getManifoldByIndexInternal(i);
+		btPersistentManifold* pManifold = dispatcher->getManifoldByIndexInternal(i);
 
 		// 충돌하지 않은 도형은 체크안함
 		if (pManifold->getNumContacts() > 0)
@@ -248,7 +283,7 @@ void Scene::SeparationEvent(btRigidBody * body0, btRigidBody * body1)
 
 bool Scene::RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out, bool includeStatic /*= false*/)
 {
-	if (!bt_World)
+	if (!world)
 		return false;
 
 	btVector3 rayTo = dir;
@@ -256,7 +291,7 @@ bool Scene::RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out
 
 	btCollisionWorld::ClosestRayResultCallback rayCallBack(rayFrom, rayTo);
 
-	bt_World->rayTest(rayFrom, rayTo, rayCallBack);
+	world->rayTest(rayFrom, rayTo, rayCallBack);
 
 	if (rayCallBack.hasHit())
 	{
@@ -275,6 +310,80 @@ bool Scene::RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out
 	}
 
 	return false;
+}
+
+void Scene::CreatePickingConstraint(int x, int y)
+{
+	if (!world)
+		return;
+
+	RayResult result;
+	btVector3 cameraPosition = camera->GetWorldPosition();
+	if (!RayCast(cameraPosition, camera->GetPickingRay(x, y), result))
+		return;
+
+	pickedBody = result.pBody;
+	pickedBody->setActivationState(DISABLE_DEACTIVATION);
+	btVector3 localPivot = pickedBody->getCenterOfMassTransform().inverse() * result.hitPoint;
+
+	btTransform pivot = btTransform::getIdentity();
+	pivot.setOrigin(localPivot);
+
+	btGeneric6DofConstraint* dof6 = new btGeneric6DofConstraint(*pickedBody, pivot, true);
+	dof6->setAngularLowerLimit(btVector3(0, 0, 0));
+	dof6->setAngularUpperLimit(btVector3(0, 0, 0));
+
+	world->addConstraint(dof6, true);
+	pickConstraint = dof6;
+
+	float cfm = 0.5f;
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 0);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 1);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 2);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 3);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 4);
+	dof6->setParam(BT_CONSTRAINT_STOP_CFM, cfm, 5);
+
+	float erp = 0.5f;
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 0);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 1);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 2);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 3);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 4);
+	dof6->setParam(BT_CONSTRAINT_STOP_ERP, erp, 5);
+
+	oldPickingDistance = (result.hitPoint - cameraPosition).length();
+}
+
+void Scene::RemovePickingConstraint()
+{
+	if (!pickConstraint || !world)
+		return;
+
+	world->removeConstraint(pickConstraint);
+
+	delete pickConstraint;
+
+	pickedBody->forceActivationState(ACTIVE_TAG);
+	pickedBody->setDeactivationTime(0.f);
+
+	pickConstraint = 0;
+	pickedBody = 0;
+}
+
+void Scene::ApplyCentralForce(int x, int y, float power)
+{
+	if (!world)
+		return;
+
+	RayResult result;
+	btVector3 cameraPosition = camera->GetWorldPosition();
+	if (RayCast(cameraPosition, camera->GetPickingRay(btVector3(x, y)), result))
+	{
+		btRigidBody* pickedBody = result.pBody;
+		pickedBody->setActivationState(ACTIVE_TAG);
+		pickedBody->applyCentralForce((result.hitPoint - cameraPosition).normalize() * power);
+	}
 }
 
 void Scene::DrawAxis(int size)

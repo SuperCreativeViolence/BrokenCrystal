@@ -36,13 +36,6 @@ void KeyDown(unsigned char key, int x, int y)
 	InputManager::KeyboardInput(key, true, x, y);
 }
 
-void Timer(int timer)
-{
-	scene->Update();
-	glutPostRedisplay();
-	glutTimerFunc(1000 / 60, Timer, 1);
-}
-
 void Idle()
 {
 	scene->Idle();
@@ -56,8 +49,8 @@ void EventHandlingAndLoop()
 	glutReshapeFunc(Reshape);
 	glutMouseFunc(Mouse);
 	glutMotionFunc(Motion);
+	glutPassiveMotionFunc(Motion);
 	glutIdleFunc(Idle);
-	glutTimerFunc(1000/60, Timer, 1);
 
 	glutMainLoop();
 }

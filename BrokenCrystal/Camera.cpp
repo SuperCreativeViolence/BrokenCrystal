@@ -1,14 +1,15 @@
 #include "Camera.h"
+#include "erand48.h"
 
 Camera::Camera() : 
-	_cameraTempPosition(10.0f, 5.0f, 0.0f),
-	cameraTarget(0.0f, 0.0f, 0.0f),
-	cameraDistance(15.0f),
-	cameraPitch(20.0f),
-	cameraYaw(0.0f),
-	upVector(	0.0f, 1.0f, 0.0f),
-	nearPlane(1.0f),
-	farPlane(1000.0f)
+	_cameraTempPosition(10.0, 5.0, 0.0),
+	cameraTarget(0.0, 0.0, 0.0),
+	cameraDistance(15.0),
+	cameraPitch(20.0),
+	cameraYaw(0.0),
+	upVector(0.0, 1.0, 0.0),
+	nearPlane(1.0),
+	farPlane(1000.0)
 {
 
 }
@@ -74,6 +75,43 @@ void Camera::SetScreen(int w, int h)
 {
 	screenWidth = w;
 	screenHeight = h;
+}
+
+Ray Camera::GetPathRay(int x, int y, bool jitter, unsigned short *Xi)
+{
+	float tanFov = 1.0f / nearPlane;
+	float fov = btScalar(2.0) * btAtan(tanFov);
+
+	btVector3 rayFrom = cameraPosition;
+	btVector3 rayForward = (cameraTarget - cameraPosition);
+	rayForward.normalize();
+	rayForward *= farPlane;
+
+	btVector3 ver = upVector;
+	btVector3 hor = rayForward.cross(ver);
+	hor.normalize();
+	ver = hor.cross(rayForward);
+	ver.normalize();
+	hor *= 2.f * farPlane * fov;
+	ver *= 2.f * farPlane * fov;
+
+	btScalar aspect = screenWidth / (btScalar) screenHeight;
+
+	hor *= aspect;
+	btVector3 rayToCenter = rayFrom + rayForward;
+	btVector3 dHor = hor * 1.f / float(screenWidth);
+	btVector3 dVert = ver * 1.f / float(screenHeight);
+	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
+	rayTo += btScalar(x) * dHor;
+	rayTo -= btScalar(y) * dVert;
+
+	/*
+	
+	Todo : Jitter
+	
+	*/
+
+	return Ray(cameraPosition, rayTo.normalize());
 }
 
 void Camera::UpdateCamera()

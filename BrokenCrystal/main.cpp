@@ -1,7 +1,7 @@
 #include "Init.h"
 #include "Scene.h"
 
-Scene::p scene = Scene::Create();
+Scene* scene = new Scene(SCREEN_WIDTH, SCREEN_HEIGHT, 1, true);
 
 void Mouse(int mouse_event, int state, int x, int y)
 {

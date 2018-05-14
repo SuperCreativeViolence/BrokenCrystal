@@ -1,6 +1,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 #include <memory>
+#include "Material.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -15,21 +16,29 @@
 
 #include "OpenGLMotionState.h"
 
-
+// 나중에 지워야함
 using namespace glm;
+
+struct ObjectIntersection
+{
+	bool hit;	// If there was an intersection
+	double u;	// Distance to intersection along ray
+	btVector3 n;		// Normal of intersected face
+	Material m;	// Material of intersected face
+
+	ObjectIntersection(bool hit_ = false, double u_ = 0, const btVector3& n_ = btVector3(0, 0, 0), Material m_ = Material());
+};
 
 class Object
 {
 
 public:
 	Object();
-	Object(btCollisionShape* pShape, float mass, const btVector3 &color,
-		const btVector3 &initialPosition = btVector3(0, 0, 0),
-		const btQuaternion &initialRotation = btQuaternion(0, 0, 1, 1));
+	Object(btCollisionShape* pShape, float mass,
+		   const btVector3 &color = btVector3(0, 0, 0),
+		   const btVector3 &initialPosition = btVector3(0, 0, 0),
+		   const btQuaternion &initialRotation = btQuaternion(0, 0, 1, 1));
 	~Object();
-
-	typedef std::unique_ptr<Object> p;
-	static p Create() { return p(new Object); }
 
 	vec3 position;
 	vec3 scale;
@@ -45,8 +54,6 @@ public:
 	btVector3 GetWorldPosition();
 	btVector3 GetWorldEulerRotation();
 	void SetRotation(btQuaternion quat);
-	void SetRotation(const glm::quat& rot);
-	quat GetRotation() const;
 
 	virtual void Rotate(vec3 euler);
 	virtual void Rotate(float x, float y, float z);
@@ -65,17 +72,35 @@ public:
 	btVector3 GetColor();
 	void SetColor(const btVector3 &color);
 
-protected:
-	quat rotation;
-	mat4 view_matrix;
-	bool isdirty_update;
-	float key_pitch, key_yaw, key_roll;
+	// 레이트레이싱과 관련
+	virtual bool Intersect(const btVector3 &from, const btVector3 &to, float &t)
+	{
+		return true;
+	};
 
+	// 패스트레이싱과 관련
+	virtual ObjectIntersection get_intersection(const Ray &r) = 0;
+	Material GetMaterial();
+
+
+protected:
 	btCollisionShape* bt_Shape;
 	btRigidBody* bt_Body;
 	OpenGLMotionState* bt_MotionState;
 	btVector3 bt_Color;
+	Material material;
 
+};
+
+class Sphere : public Object
+{
+public:
+	Sphere(const btVector3 & position_, double radius_, double mass_, Material material_);
+	virtual double get_radius();
+	virtual ObjectIntersection get_intersection(const Ray &ray);
+
+private:
+	double radius;
 };
 
 #endif

@@ -2,8 +2,8 @@
 #include <iostream>
 #include <gl/freeglut.h>
 
-#define SCREEN_HEIGHT 720
-#define SCREEN_WIDTH 1280
+#define SCREEN_WIDTH 150
+#define SCREEN_HEIGHT 150
 
 void Initialize(int argc, char** argv)
 {
@@ -18,7 +18,5 @@ void Initialize(int argc, char** argv)
 
 	glClearColor(0, 0, 0, 1.0f);
 
-	glDisable(GL_CULL_FACE);
-	//glEnable(GL_CULL_FACE);
-	//glFrontFace(GL_BACK);
+	glEnable(GL_CULL_FACE);
 }

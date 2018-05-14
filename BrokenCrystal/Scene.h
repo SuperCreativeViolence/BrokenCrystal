@@ -1,11 +1,12 @@
 #ifndef SCENE_H
 #define SCENE_H
+#undef NDEBUG
 #include <BulletPhysics/btBulletDynamicsCommon.h>
 #include "Object.h"
 #include "Camera.h"
 #include "InputManager.h"
+#include "lodepng.h"
 #include <gl/freeglut.h>
-#include "DebugDrawer.h"
 
 #include <iostream>
 #include <vector>
@@ -17,6 +18,10 @@
 #include <BulletPhysics/BulletCollision/CollisionShapes/btTriangleMeshShape.h>
 #include <BulletPhysics/BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletPhysics/BulletCollision/CollisionShapes/btConvexPolyhedron.h>
+
+#define AT_R(row, col) ((col) * width * 3 + ((row) * 3))
+#define AT_G(row, col) (AT_R(row, col) + 1)
+#define AT_B(row, col) (AT_R(row, col) + 2)
 
 // Object 목록 관리를 위해
 typedef std::vector<Object*> Objects;
@@ -38,9 +43,8 @@ class Scene
 {
 public:
 	Scene();
+	Scene(int width, int height, int maxLevel, bool antialiasing);
 	~Scene();
-	typedef std::unique_ptr<Scene> p;
-	static p Create() { return p(new(Scene)); }
 
 	Camera* camera;
 
@@ -60,18 +64,28 @@ public:
 		const btVector3 &initialPosition = btVector3(0.0f, 0.0f, 0.0f),
 		const btQuaternion &initialRotation = btQuaternion(0, 0, 1, 1));
 
-	Camera* CreateCamera();
-
-	//충돌 이벤트 함수들
+	// 충돌 이벤트 함수들
 	void CheckForCollisionEvents();
 	void CollisionEvent(btRigidBody* body0, btRigidBody * body1);
 	void SeparationEvent(btRigidBody * body0, btRigidBody * body1);
 
-	//레이케스팅
+	// 레이케스팅
 	bool RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out, bool includeStatic = false);
 	void CreatePickingConstraint(int x, int y);
 	void RemovePickingConstraint();
 	void ApplyCentralForce(int x, int y, float power);
+
+	// 레이트레이싱
+	void RayTrace();
+	btVector3 Trace(const btVector3 &from, const btVector3 &to, int level);
+
+	// 패스트레이싱
+	void PathTrace(int samples);
+	btVector3 TracePath(const Ray &ray, int depth, unsigned short *Xi);
+	ObjectIntersection intersect(const Ray &ray);
+	void SaveImage(const char *file_path);
+
+	void CreateSphere(const btVector3& position, const float& radius, const Material& material, const float &mass);
 
 private:
 	void DrawAxis(int size);
@@ -80,7 +94,6 @@ private:
 	void DrawSphere(btScalar radius, int lats, int longs);
 	void DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3 &color);
 
-	DebugDrawer* debugDrawer;
 	Objects objects;
 	btClock clock;
 
@@ -112,6 +125,18 @@ private:
 	};
 	btAlignedObjectArray<ShapeCache*>	m_shapecaches;
 	ShapeCache* cache(btConvexShape* shape);
+
+	// 레이트레이싱 관련
+	int height;
+	int width;
+	int maxLevel;
+	bool antialiasing;
+	float *pixels;
+	bool test = false;
+
+	// 패스트레이싱 관련
+	int samples = 500;
+	btVector3 *pixel_buffer;
 };
 
 #endif

@@ -46,10 +46,26 @@ Scene::Scene()
 	solver = 0;
 	pickedBody = 0;
 	pickConstraint = 0;
+
+	width = 0;
+	height = 0;
+	maxLevel = 0;
+	antialiasing = false;
+	pixels = nullptr;
+}
+
+Scene::Scene(int width, int height, int maxLevel, bool antialiasing) : Scene()
+{
+	this->width = width;
+	this->height = height;
+	this->maxLevel = maxLevel;
+	this->antialiasing = antialiasing;
+	pixels = new float[height * width * 3];
 }
 
 Scene::~Scene()
 {
+	delete camera;
 	ShutdownPhysics();
 }
 
@@ -74,21 +90,34 @@ void Scene::Initialize()
 
 	glShadeModel(GL_SMOOTH);
 
-
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 
 	glClearColor(0.6, 0.65, 0.85, 0);
+	glDisable(GL_LIGHTING);
 
 	InitializePhysics();
-
-	debugDrawer = new DebugDrawer();
-	debugDrawer->setDebugMode(0);
-	world->setDebugDrawer(debugDrawer);
 }
 
 void Scene::Idle()
 {
+	//if (test)
+	//{
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//	glDisable(GL_LIGHTING);
+	//	glMatrixMode(GL_PROJECTION);
+	//	glLoadIdentity();
+	//	glViewport(0, 0, width, height);
+	//	gluOrtho2D(0, width, 0, height);
+	//	glMatrixMode(GL_MODELVIEW);
+	//	glLoadIdentity();
+	//	glRasterPos2i(0, 0);
+	//	glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
+	//	glMatrixMode(GL_MODELVIEW);
+
+	//	glEnable(GL_LIGHTING);
+	//	glutSwapBuffers();
+	//}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -106,6 +135,9 @@ void Scene::Idle()
 
 void Scene::Reshape(int w, int h)
 {
+	width = w;
+	height = h;
+	printf("%d %d\n", w, h);
 	camera->SetScreen(w, h);
 	glViewport(0, 0, w, h);
 	camera->UpdateCamera();
@@ -121,7 +153,7 @@ void Scene::RenderScene()
 	{
 		Object* obj = *i;
 		obj->GetTransform(transform);
-		DrawShape(transform, obj->GetShape(), obj->GetColor());
+		DrawShape(transform, obj->GetShape(), obj->GetMaterial().get_colour());
 	}
 	world->debugDrawWorld();
 }
@@ -148,6 +180,13 @@ void Scene::UpdateScene(float deltaTime)
 		btVector3 mousePosition = InputManager::GetMousePos();
 		ApplyCentralForce(mousePosition[0], mousePosition[1], 100);
 	}
+	if (InputManager::IsKeyDown('o'))
+	{
+		//RayTrace();
+		PathTrace(samples);
+		SaveImage("render.png");
+		test = true;
+	}
 
 	if (pickedBody)
 	{
@@ -173,7 +212,6 @@ void Scene::InitializePhysics()
 	broadphase = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver();
 	world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-
 	CreateObjects();
 }
 
@@ -188,43 +226,41 @@ void Scene::ShutdownPhysics()
 
 void Scene::CreateObjects()
 {
-	camera = CreateCamera();
+	camera = new Camera();
+	CreateSphere(btVector3(0, 5, 0), 3, Material(DIFF, btVector3(0.9, 0.9, 0.9)), 1.0);
+	
+	CreateSphere(btVector3(0, -1000, 0), 1000, Material(DIFF, btVector3(0.4, 0.2, 1.0)), 0);
+	CreateSphere(btVector3(0, 10, 0), 5, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)), 0);
+	//CreateSphere(btVector3(0, 5, 0), 5, Material(DIFF, btVector3(0.5, 0.5, 0)), 0);
+	//CreateObject(new btBoxShape(btVector3(0.01, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, -1.0f, 0.0f));
 
-	CreateObject(new btBoxShape(btVector3(0.01, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, -1.0f, 0.0f));
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f * i, 0.0f));
+	//}
 
-	for (int i = 0; i < 10; i++)
-	{
-		CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f * i, 0.0f));
-	}
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	CreateObject(new btSphereShape(1), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(3.0f, 10.0f * i, 3.0f));
+	//}
 
-	for (int i = 0; i < 10; i++)
-	{
-		CreateObject(new btSphereShape(1), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(3.0f, 10.0f * i, 3.0f));
-	}
+	//CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
 
-	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
-
-	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
+	//CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
 }
 
-Object* Scene::CreateObject(btCollisionShape* pShape, const float &mass, const btVector3 &color /*= btVector3(1.0f, 1.0f, 1.0f)*/, const btVector3 &initialPosition /*= btVector3(0.0f, 0.0f, 0.0f)*/, const btQuaternion &initialRotation /*= btQuaternion(0, 0, 1, 1)*/)
-{
-	Object* pObject = new Object(pShape, mass, color, initialPosition, initialRotation);
-
-	objects.push_back(pObject);
-
-	if (world)
-	{
-		world->addRigidBody(pObject->GetRigidBody());
-	}
-	return pObject;
-}
-
-Camera* Scene::CreateCamera()
-{
-	Camera* pCamera = new Camera();
-	return pCamera;
-}
+//Object* Scene::CreateObject(btCollisionShape* pShape, const float &mass, const btVector3 &color /*= btVector3(1.0f, 1.0f, 1.0f)*/, const btVector3 &initialPosition /*= btVector3(0.0f, 0.0f, 0.0f)*/, const btQuaternion &initialRotation /*= btQuaternion(0, 0, 1, 1)*/)
+//{
+//	Object* pObject = new Object(pShape, mass, color, initialPosition, initialRotation);
+//
+//	objects.push_back(pObject);
+//
+//	if (world)
+//	{
+//		world->addRigidBody(pObject->GetRigidBody());
+//	}
+//	return pObject;
+//}
 
 void Scene::CheckForCollisionEvents()
 {
@@ -308,7 +344,6 @@ bool Scene::RayCast(const btVector3 &start, const btVector3 &dir, RayResult &out
 		out.hitNormal = rayCallBack.m_hitNormalWorld;
 		return true;
 	}
-
 	return false;
 }
 
@@ -383,6 +418,173 @@ void Scene::ApplyCentralForce(int x, int y, float power)
 		btRigidBody* pickedBody = result.pBody;
 		pickedBody->setActivationState(ACTIVE_TAG);
 		pickedBody->applyCentralForce((result.hitPoint - cameraPosition).normalize() * power);
+	}
+}
+
+void Scene::RayTrace()
+{
+	btVector3 cameraPosition = camera->GetWorldPosition();
+
+	// 안티 계수 설정
+	float inc = 1.0f, adj = 1.0f;
+	if (antialiasing)
+	{
+		inc = 0.5f;
+		adj = inc * inc;
+	}
+	// 스크린 픽셀 순회
+	for (int i = 0; i < width; i++)
+	{
+		for (int j = 0; j < height; j++)
+		{
+			btVector3 color(0, 0, 0);
+			btVector3 screenPosition = camera->GetPickingRay(i, height - j);
+			color += Trace(cameraPosition, screenPosition, 0);
+			color *= adj;
+			pixels[AT_R(i, j)] = color[0];
+			pixels[AT_G(i, j)] = color[1];
+			pixels[AT_B(i, j)] = color[2];
+		}
+	}
+}
+
+btVector3 Scene::Trace(const btVector3 &from, const btVector3 &to, int level)
+{
+	if (level >= maxLevel)
+		return btVector3(0, 0, 0);
+
+	btCollisionWorld::ClosestRayResultCallback rayCallBack(from, to);
+	world->rayTest(from, to, rayCallBack);
+
+	if (rayCallBack.hasHit())
+	{
+		return btVector3(0.4, 0.3, 0.2);
+	}
+	else
+	{
+		return btVector3(0, 0, 0);
+	}
+}
+
+void Scene::PathTrace(int samples)
+{
+	double samples_recp = 1.0 / samples;
+	pixel_buffer = new btVector3[width * height];
+#pragma omp parallel for schedule(dynamic, 1)
+	for (int y = 0; y < height; y++)
+	{
+		unsigned short Xi[3] = { 0, 0, y*y*y };
+		fprintf(stderr, "\rRendering (%i samples): %.2f%% ", samples, (double) y / height * 100);
+
+		for (int x = 0; x < width; x++)
+		{
+			btVector3 color = btVector3(0, 0, 0);
+
+			for (int s = 0; s < samples; s++)
+			{
+				Ray ray = camera->GetPathRay(x, y, s > 0, Xi);
+				color = color + TracePath(ray, 0, Xi);
+				//printf("%f, %f, %f\n", color[0], color[1], color[2]);
+				//Sleep(1000);
+			}
+			pixel_buffer[(y) *width + x] = color * samples_recp;
+			//printf("%.2f, %.2f, %.2f\n", pixel_buffer[(y) *width + x][0], pixel_buffer[(y) *width + x][1], pixel_buffer[(y) *width + x][2]);
+		}
+	}
+}
+
+btVector3 Scene::TracePath(const Ray &ray, int depth, unsigned short *Xi)
+{
+	ObjectIntersection isct = intersect(ray);
+
+	if (!isct.hit)
+	{
+		//printf("Return : 0.2, 0.2, 0.2 안맞음\n");
+		return btVector3(0.2, 0.2, 0.2);
+	}
+
+	if (isct.m.get_type() == EMIT)
+	{
+		//printf("Return : %f, %f, %f 이미션에 맞음\n", isct.m.get_emission()[0], isct.m.get_emission()[1], isct.m.get_emission()[2]);
+		return isct.m.get_emission();
+	}
+	btVector3 color = isct.m.get_colour();
+	double p = color.x() > color.y() && color.x() > color.z() ? color.x() : color.y() > color.z() ? color.y() : color.z();
+	double rnd = erand48(Xi);
+	if (++depth > 5)
+	{
+		if (rnd < p * 0.9)
+		{
+			color = color * (0.9 / p);
+		}
+		else
+		{
+			//printf("Return : %f, %f, %f 뎁스 5 이상에서 이미션 리턴함\n", isct.m.get_emission()[0], isct.m.get_emission()[1], isct.m.get_emission()[2]);
+			return isct.m.get_emission();
+		}
+	}
+
+	btVector3 x = ray.origin + ray.direction * isct.u;
+	Ray reflected = isct.m.get_reflected_ray(ray, x, isct.n, Xi);
+	//printf("Return : %f, %f, %f 정상 리턴\n", color[0], color[1], color[2]);
+	return color * TracePath(reflected, depth, Xi);
+}
+
+ObjectIntersection Scene::intersect(const Ray &ray)
+{
+	ObjectIntersection isct = ObjectIntersection();
+	ObjectIntersection temp;
+	long size = objects.size();
+
+	for (int i = 0; i < size; i++)
+	{
+		temp = objects.at((unsigned) i)->get_intersection(ray);
+
+		if (temp.hit)
+		{
+			if (isct.u == 0 || temp.u < isct.u) isct = temp;
+		}
+	}
+	return isct;
+}
+
+inline double clamp(double x)
+{
+	return x < 0 ? 0 : x>1 ? 1 : x;
+}
+
+inline int toInt(double x)
+{
+	return int(clamp(x) * 255 + .5);
+}
+
+void Scene::SaveImage(const char *file_path)
+{
+	std::vector<unsigned char> buffer;
+
+	int pixel_count = width * height;
+
+	for (int i = 0; i < pixel_count; i++)
+	{
+		buffer.push_back(toInt(pixel_buffer[i].x()));
+		buffer.push_back(toInt(pixel_buffer[i].y()));
+		buffer.push_back(toInt(pixel_buffer[i].z()));
+		buffer.push_back(255);
+	}
+
+	unsigned error = lodepng::encode(file_path, buffer, width, height);
+	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+
+	buffer.clear();
+}
+
+void Scene::CreateSphere(const btVector3& position, const float& radius, const Material& material, const float &mass)
+{
+	Object * object = dynamic_cast<Object*>(new Sphere(position, radius, mass, material));
+	objects.push_back(object);
+	if (world)
+	{
+		world->addRigidBody(object->GetRigidBody());
 	}
 }
 

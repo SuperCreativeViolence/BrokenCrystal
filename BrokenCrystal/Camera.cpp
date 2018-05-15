@@ -111,6 +111,13 @@ Ray Camera::GetPathRay(int x, int y, bool jitter, unsigned short *Xi)
 	
 	*/
 
+	double xSpacing = 
+
+	if (jitter)
+	{
+
+	}
+
 	return Ray(cameraPosition, rayTo.normalize());
 }
 

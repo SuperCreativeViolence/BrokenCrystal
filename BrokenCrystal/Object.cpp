@@ -179,3 +179,4 @@ ObjectIntersection Sphere::get_intersection(const Ray & ray)
 
 	return ObjectIntersection(hit, distance, n, material);
 }
+

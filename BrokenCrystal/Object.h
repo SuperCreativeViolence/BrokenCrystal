@@ -40,7 +40,6 @@ public:
 		   const btQuaternion &initialRotation = btQuaternion(0, 0, 1, 1));
 	~Object();
 
-	vec3 position;
 	vec3 scale;
 
 	btScalar* GetViewMatrix()
@@ -96,8 +95,8 @@ class Sphere : public Object
 {
 public:
 	Sphere(const btVector3 & position_, double radius_, double mass_, Material material_);
-	virtual double get_radius();
-	virtual ObjectIntersection get_intersection(const Ray &ray);
+	double get_radius();
+	virtual ObjectIntersection get_intersection(const Ray &ray) override;
 
 private:
 	double radius;

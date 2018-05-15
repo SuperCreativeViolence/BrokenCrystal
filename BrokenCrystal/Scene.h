@@ -59,11 +59,6 @@ public:
 	void ShutdownPhysics();
 	void CreateObjects();
 
-	Object* CreateObject(btCollisionShape* pShape, const float &mass,
-		const btVector3 &color = btVector3(1.0f, 1.0f, 1.0f),
-		const btVector3 &initialPosition = btVector3(0.0f, 0.0f, 0.0f),
-		const btQuaternion &initialRotation = btQuaternion(0, 0, 1, 1));
-
 	// 충돌 이벤트 함수들
 	void CheckForCollisionEvents();
 	void CollisionEvent(btRigidBody* body0, btRigidBody * body1);
@@ -93,6 +88,7 @@ private:
 	void DrawBox(const btVector3 &halfSize);
 	void DrawSphere(btScalar radius, int lats, int longs);
 	void DrawShape(btScalar* transform, const btCollisionShape* pShape, const btVector3 &color);
+	void AddObject(Object* object);
 
 	Objects objects;
 	btClock clock;
@@ -135,7 +131,7 @@ private:
 	bool test = false;
 
 	// 패스트레이싱 관련
-	int samples = 500;
+	int samples = 4;
 	btVector3 *pixel_buffer;
 };
 

@@ -101,23 +101,6 @@ void Scene::Initialize()
 
 void Scene::Idle()
 {
-	//if (test)
-	//{
-	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//	glDisable(GL_LIGHTING);
-	//	glMatrixMode(GL_PROJECTION);
-	//	glLoadIdentity();
-	//	glViewport(0, 0, width, height);
-	//	gluOrtho2D(0, width, 0, height);
-	//	glMatrixMode(GL_MODELVIEW);
-	//	glLoadIdentity();
-	//	glRasterPos2i(0, 0);
-	//	glDrawPixels(width, height, GL_RGB, GL_FLOAT, pixels);
-	//	glMatrixMode(GL_MODELVIEW);
-
-	//	glEnable(GL_LIGHTING);
-	//	glutSwapBuffers();
-	//}
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -182,10 +165,8 @@ void Scene::UpdateScene(float deltaTime)
 	}
 	if (InputManager::IsKeyDown('o'))
 	{
-		//RayTrace();
 		PathTrace(samples);
 		SaveImage("render.png");
-		test = true;
 	}
 
 	if (pickedBody)
@@ -227,40 +208,15 @@ void Scene::ShutdownPhysics()
 void Scene::CreateObjects()
 {
 	camera = new Camera();
-	CreateSphere(btVector3(0, 5, 0), 3, Material(DIFF, btVector3(0.9, 0.9, 0.9)), 1.0);
-	
-	CreateSphere(btVector3(0, -1000, 0), 1000, Material(DIFF, btVector3(0.4, 0.2, 1.0)), 0);
-	CreateSphere(btVector3(0, 10, 0), 5, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)), 0);
-	//CreateSphere(btVector3(0, 5, 0), 5, Material(DIFF, btVector3(0.5, 0.5, 0)), 0);
-	//CreateObject(new btBoxShape(btVector3(0.01, 50, 50)), 0, btVector3(0.2f, 0.6f, 0.6f), btVector3(0.0f, -1.0f, 0.0f));
+	CreateSphere(btVector3(0, -1010, 0), 1000, Material(DIFF, btVector3(0.0, 1.0, 0.0)), 0);
+	CreateSphere(btVector3(-1010, 0, 0), 1000, Material(DIFF, btVector3(1.0, 0.0, 0.0)), 0);
+	CreateSphere(btVector3(1010, 0, 0), 1000, Material(DIFF, btVector3(0.0, 0.0, 1.0)), 0);
+	CreateSphere(btVector3(0, 0, -1010), 1000, Material(DIFF, btVector3(1.0, 1.0, 1.0)), 0);
 
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f * i, 0.0f));
-	//}
-
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	CreateObject(new btSphereShape(1), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(3.0f, 10.0f * i, 3.0f));
-	//}
-
-	//CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(1.0f, 0.2f, 0.2f), btVector3(0.0f, 10.0f, 0.0f));
-
-	//CreateObject(new btBoxShape(btVector3(1, 1, 1)), 1.0, btVector3(0.0f, 0.2f, 0.8f), btVector3(1.25f, 20.0f, 0.0f));
+	CreateSphere(btVector3(0, 1, 0), 4, Material(DIFF, btVector3(0.9, 0.9, 0.9)), 1.0);
+	CreateSphere(btVector3(1, 1, 0), 4, Material(SPEC, btVector3(0.9, 0.9, 0.9)), 1.0);
+	CreateSphere(btVector3(1, 10, 1), 5, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(3.2, 3.2, 3.2)), 0);
 }
-
-//Object* Scene::CreateObject(btCollisionShape* pShape, const float &mass, const btVector3 &color /*= btVector3(1.0f, 1.0f, 1.0f)*/, const btVector3 &initialPosition /*= btVector3(0.0f, 0.0f, 0.0f)*/, const btQuaternion &initialRotation /*= btQuaternion(0, 0, 1, 1)*/)
-//{
-//	Object* pObject = new Object(pShape, mass, color, initialPosition, initialRotation);
-//
-//	objects.push_back(pObject);
-//
-//	if (world)
-//	{
-//		world->addRigidBody(pObject->GetRigidBody());
-//	}
-//	return pObject;
-//}
 
 void Scene::CheckForCollisionEvents()
 {
@@ -578,15 +534,20 @@ void Scene::SaveImage(const char *file_path)
 	buffer.clear();
 }
 
-void Scene::CreateSphere(const btVector3& position, const float& radius, const Material& material, const float &mass)
+void Scene::AddObject(Object* object)
 {
-	Object * object = dynamic_cast<Object*>(new Sphere(position, radius, mass, material));
 	objects.push_back(object);
 	if (world)
 	{
 		world->addRigidBody(object->GetRigidBody());
 	}
 }
+
+void Scene::CreateSphere(const btVector3& position, const float& radius, const Material& material, const float &mass)
+{
+	AddObject(dynamic_cast<Object*>(new Sphere(position, radius, mass, material)));
+}
+
 
 void Scene::DrawAxis(int size)
 {
@@ -816,6 +777,7 @@ void Scene::DrawShape(btScalar* transform, const btCollisionShape* pShape, const
 	}
 	glPopMatrix();
 }
+
 
 Scene::ShapeCache* Scene::cache(btConvexShape* shape)
 {

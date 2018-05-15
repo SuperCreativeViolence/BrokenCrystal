@@ -102,21 +102,17 @@ Ray Camera::GetPathRay(int x, int y, bool jitter, unsigned short *Xi)
 	btVector3 dHor = hor * 1.f / float(screenWidth);
 	btVector3 dVert = ver * 1.f / float(screenHeight);
 	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
-	rayTo += btScalar(x) * dHor;
-	rayTo -= btScalar(y) * dVert;
-
-	/*
 	
-	Todo : Jitter
-	
-	*/
-
-	double xSpacing = 
+	btVector3 xJitter, yJitter;
 
 	if (jitter)
 	{
-
+		xJitter = (erand48(Xi) * dHor) - dHor * 0.5;
+		yJitter = (erand48(Xi) * dVert) - dVert * 0.5;
 	}
+
+	rayTo += btScalar(x) * dHor + xJitter;
+	rayTo -= btScalar(y) * dVert + yJitter;
 
 	return Ray(cameraPosition, rayTo.normalize());
 }

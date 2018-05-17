@@ -61,6 +61,7 @@ public:
 	// path tracing
 	void RenderPath(int samples);
 	btVector3 TraceRay(const Ray &ray, int depth, unsigned short *Xi);
+	void TraceDebugRay();
 	ObjectIntersection Intersect(const Ray &ray);
 	void SaveImage(const char *filePath);
 

@@ -94,7 +94,7 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 	//}
 
 	//btVector3 pixel = position + direction * 2;
-	//pixel = pixel - xDirection * aspectRatio + xDirection * ((x * 2 * aspectRatio)*(1.0 / width)) + btVector3(xJitter,0,0);
+	//pixel = pixel - xDirection * aspectRatio + xDirection * ((x * 2 * aspectRatio)*(1.0 / width)) + btVector3(xJitter, 0, 0);
 	//pixel = pixel + yDirection - yDirection * ((y * 2.0)*(1.0 / height) + yJitter);
 
 	//return Ray(position, (pixel - position).normalize());
@@ -133,8 +133,8 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 	btVector3 dVert = ver * 1.f / float(height);
 	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
 
-	rayTo += btScalar(x+xJitter) * dHor;
-	rayTo -= btScalar(y+yJitter) * dVert;
+	rayTo += btScalar(x + xJitter) * dHor;
+	rayTo -= btScalar(y + yJitter) * dVert;
 
 	return Ray(position, rayTo.normalize());
 }

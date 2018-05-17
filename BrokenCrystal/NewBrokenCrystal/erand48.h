@@ -2,6 +2,7 @@
 #define ERAND48_H
 #include <math.h>
 #include <stdlib.h>
+#include <random>
 
 #define RAND48_SEED_0   (0x330e)
 #define RAND48_SEED_1   (0xabcd)

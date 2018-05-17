@@ -57,7 +57,7 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
+	//CreateBox(btVector3(0, -500, 0), btVector3(500, 500, 500), 0, Material(DIFF,  btVector3(0.8, 0.8, 0.8)));
 	//CreateBox(btVector3(0, 50, 0), btVector3(1, 500, 500), 0, Material());
 	//CreateBox(btVector3(25, 0, 0), btVector3(500, 1, 500), 0, Material());
 	//CreateBox(btVector3(-25, 0, 0), btVector3(500, 1, 500), 0, Material());
@@ -66,17 +66,22 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
 
-	//CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
+	CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
 	CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
 	CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.9, 0.8, 0.8)));
+	CreateSphere(btVector3(0, -1000, 0), 1000, 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
 
 	CreateSphere(btVector3(10, 10, 0), 3, 1, Material(SPEC, btVector3(0.3, 0.6, 0.1)));
-	CreateSphere(btVector3(0, 4, 0), 1, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
-	CreateBox(btVector3(0, 3, 3), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
-	CreateBox(btVector3(0, 2, -4), btVector3(2,2,2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
-	CreateBox(btVector3(2, 4, 0), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
-	CreateSphere(btVector3(0, 110, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
+	CreateSphere(btVector3(0, 4, 0), 4, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+	CreateSphere(btVector3(0, 10, 10), 5, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateSphere(btVector3(-3, 4, 4), 7, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+
+	//CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
+	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
+	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
+
+	CreateSphere(btVector3(0, 150, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
 }
 
 void Scene::AddObject(Object* object)
@@ -141,10 +146,11 @@ void Scene::Idle()
 
 	float dt = clock.getTimeMilliseconds();
 	clock.reset();
-	UpdateScene(dt / 1000.0f);
 
 	camera->UpdateCamera();
 	RenderScene();
+
+	UpdateScene(dt / 1000.0f);
 
 	glutSwapBuffers();
 }
@@ -202,16 +208,20 @@ void Scene::UpdateScene(float dt)
 
 	if (IsKeyDown('w'))
 	{
-		camera->Zoom(.5);
+		camera->Zoom(.1);
 	}
 	if (IsKeyDown('s'))
 	{
-		camera->Zoom(-.5);
+		camera->Zoom(-.1);
 	}
 	if (IsKeyDown('r'))
 	{
 		RenderPath(samples);
 		SaveImage("Render.png");
+	}
+	if (IsKeyDown('d'))
+	{
+		TraceDebugRay();
 	}
 
 	world->stepSimulation(dt);
@@ -387,6 +397,46 @@ btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
 	btVector3 pos = ray.origin + ray.direction * intersection.u;
 	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, Xi);
 	return color * TraceRay(reflected, depth, Xi);
+}
+
+void Scene::TraceDebugRay()
+{
+	unsigned short Xi[3] = { 0, 0, mousePos[1] * mousePos[1] * mousePos[1] };
+	Ray ray = camera->GetRay(mousePos[0], mousePos[1], true, Xi);
+	ObjectIntersection intersection = Intersect(ray);
+	if (!intersection.hit)
+	{
+		printf("No Hit\n");
+		return;
+	}
+	if (intersection.material.GetType() == EMIT)
+	{
+		printf("Emit\n");
+		return;
+	}
+
+	glPushMatrix();
+
+	btTransform transform = btTransform::getIdentity();
+	transform.setOrigin(ray.origin + ray.direction * intersection.u);
+	btScalar trans[16];
+	transform.getOpenGLMatrix(trans);
+
+	glDisable(GL_LIGHTING);
+	glMultMatrixf(trans);
+	glBegin(GL_LINES);
+
+	glVertex3f(0,0,0);
+	glVertex3fv(intersection.normal);
+
+	glEnd();
+
+	DrawSphere(30);
+
+	glEnable(GL_LIGHTING);
+	glPopMatrix();
+
+	printf("Hit : %f | %.1f %.1f %.1f\n", intersection.u, intersection.normal[0], intersection.normal[1], intersection.normal[2]);
 }
 
 ObjectIntersection Scene::Intersect(const Ray &ray)

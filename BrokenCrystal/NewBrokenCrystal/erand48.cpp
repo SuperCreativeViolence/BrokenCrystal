@@ -1,5 +1,8 @@
 #include "erand48.h"
 
+std::default_random_engine generator;
+std::uniform_real_distribution<double> distr(0.0, 1.0);
+
 void _dorand48(unsigned short xseed[3])
 {
 	unsigned long accu;
@@ -21,8 +24,9 @@ void _dorand48(unsigned short xseed[3])
 
 double erand48(unsigned short xseed[3])
 {
-	_dorand48(xseed);
-	return ldexp((double) xseed[0], -48) +
-		ldexp((double) xseed[1], -32) +
-		ldexp((double) xseed[2], -16);
+	//_dorand48(xseed);
+	//return ldexp((double) xseed[0], -48) +
+	//	ldexp((double) xseed[1], -32) +
+	//	ldexp((double) xseed[2], -16);
+	return distr(generator);
 }

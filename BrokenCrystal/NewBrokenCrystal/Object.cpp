@@ -48,8 +48,8 @@ ObjectIntersection Box::GetIntersection(const Ray& ray)
 	int tmaxIndex = 0;
 	btVector3 position = GetPosition();
 	btQuaternion rotation = GetRotation();
-	btVector3 min = halfExtents - position;
-	btVector3 max = halfExtents + position;
+	btVector3 min = position - halfExtents;
+	btVector3 max = position + halfExtents;
 	
 	tmin = (min[0] - ray.origin[0]) / ray.direction[0];
 	tmax = (max[0] - ray.origin[0]) / ray.direction[0];

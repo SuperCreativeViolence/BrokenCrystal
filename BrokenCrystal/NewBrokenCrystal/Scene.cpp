@@ -58,12 +58,25 @@ void Scene::Initialize()
 	camera = new Camera();
 
 	CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
-	CreateSphere(btVector3(10, 10, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.6, 0.1)));
+	//CreateBox(btVector3(0, 50, 0), btVector3(1, 500, 500), 0, Material());
+	//CreateBox(btVector3(25, 0, 0), btVector3(500, 1, 500), 0, Material());
+	//CreateBox(btVector3(-25, 0, 0), btVector3(500, 1, 500), 0, Material());
+	//CreateBox(btVector3(0, 0, -25), btVector3(500, 500, 1), 0, Material());
+	//CreateBox(btVector3(0, 0, 25), btVector3(500, 500, 1), 0, Material());
+
+	//CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
+
+	//CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
+	CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.9, 0.8, 0.8)));
+
+	CreateSphere(btVector3(10, 10, 0), 3, 1, Material(SPEC, btVector3(0.3, 0.6, 0.1)));
 	CreateSphere(btVector3(0, 4, 0), 1, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
 	CreateBox(btVector3(0, 3, 3), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
-	CreateBox(btVector3(0, 2, 4), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.6, 0.6, 0.1)));
-	CreateBox(btVector3(2, 4, 0), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.4, 0.9, 0.1)));
-	CreateSphere(btVector3(0, 20, 0), 3, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
+	CreateBox(btVector3(0, 2, -4), btVector3(2,2,2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
+	CreateBox(btVector3(2, 4, 0), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
+	CreateSphere(btVector3(0, 110, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
 }
 
 void Scene::AddObject(Object* object)
@@ -195,6 +208,11 @@ void Scene::UpdateScene(float dt)
 	{
 		camera->Zoom(-.5);
 	}
+	if (IsKeyDown('r'))
+	{
+		RenderPath(samples);
+		SaveImage("Render.png");
+	}
 
 	world->stepSimulation(dt);
 }
@@ -313,4 +331,102 @@ void Scene::DrawSphere(float radius)
 		}
 		glEnd();
 	}
+}
+
+void Scene::RenderPath(int samples)
+{
+	int width = camera->GetWidht();
+	int height = camera->GetHeight();
+	double samplesP = 1.0 / samples;
+	pixelBuffer = new btVector3[width * height];
+
+#pragma omp parallel for schedule(dynamic, 1)
+	for (int y = 0; y < height; y++)
+	{
+		unsigned short Xi[3] = { 0, 0, y*y*y };
+		fprintf(stderr, "\rRendering (%i samples): %.2f%% ", samples, (double)y / height * 100);
+
+		for (int x = 0; x < width; x++)
+		{
+			btVector3 color = btVector3(0, 0, 0);
+
+			for (int s = 0; s < samples; s++)
+			{
+				Ray ray = camera->GetRay(x, y, s > 0, Xi);
+				color = color + TraceRay(ray, 0, Xi);
+			}
+
+			pixelBuffer[(y)* width + x] = color * samplesP;
+		}
+	}
+}
+
+btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
+{
+	ObjectIntersection intersection = Intersect(ray);
+	if (!intersection.hit) return btVector3(0.3, 0.3, 0.3);
+	if (intersection.material.GetType() == EMIT)
+		return intersection.material.GetEmission();
+
+	btVector3 color = intersection.material.GetColor();
+	double maxReflection = color.x()>color.y() && color.x()>color.z() ? color.x() : color.y()>color.z() ? color.y() : color.z();
+	double random = erand48(Xi);
+
+	if (++depth > 5)
+	{
+		if (random < maxReflection * 0.9)
+		{
+			color = color * (0.9 / maxReflection);
+		}
+		else
+		{
+			return intersection.material.GetEmission();
+		}
+	}
+
+	btVector3 pos = ray.origin + ray.direction * intersection.u;
+	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, Xi);
+	return color * TraceRay(reflected, depth, Xi);
+}
+
+ObjectIntersection Scene::Intersect(const Ray &ray)
+{
+	ObjectIntersection intersection = ObjectIntersection();
+	ObjectIntersection temp;
+	long size = objects.size();
+
+	for (int i = 0; i < size; i++)
+	{
+		temp = objects.at((unsigned)i)->GetIntersection(ray);
+
+		if (temp.hit)
+		{
+			if (intersection.u == 0 || temp.u < intersection.u)
+				intersection = temp;
+		}
+	}
+
+	return intersection;
+}
+
+void Scene::SaveImage(const char *filePath)
+{
+	int width = camera->GetWidht();
+	int height = camera->GetHeight();
+
+	std::vector<unsigned char> buffer;
+	int pixelCount = width * height;
+
+	for (int i = 0; i < pixelCount; i++)
+	{
+		buffer.push_back(toInt(pixelBuffer[i].x()));
+		buffer.push_back(toInt(pixelBuffer[i].y()));
+		buffer.push_back(toInt(pixelBuffer[i].z()));
+		buffer.push_back(255);
+	}
+
+	unsigned error = lodepng::encode(filePath, buffer, width, height);
+	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+
+	buffer.clear();
 }

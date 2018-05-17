@@ -64,7 +64,6 @@ public:
 		return material;
 	}
 
-protected:
 	virtual ObjectIntersection GetIntersection(const Ray& ray) = 0;
 
 	btCollisionShape* shape;
@@ -77,8 +76,6 @@ class Box : public Object
 {
 public:
 	Box(const btVector3 &position_, const btVector3 &halfExtents_, float mass_, Material material_);
-
-protected:
 	virtual ObjectIntersection GetIntersection(const Ray& ray) override;
 
 private:
@@ -89,8 +86,6 @@ class Sphere : public Object
 {
 public:
 	Sphere(const btVector3 &position_, double radius_, float mass_, Material material_);
-
-protected:
 	virtual ObjectIntersection GetIntersection(const Ray& ray) override;
 
 private:

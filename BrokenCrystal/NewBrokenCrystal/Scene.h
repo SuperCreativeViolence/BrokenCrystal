@@ -8,8 +8,15 @@
 
 #include "Camera.h"
 #include "Object.h"
+#include "lodepng.h"
 
+#include <iostream>
 #include <vector>
+
+// Clamp double to min/max of 0/1
+inline double clamp(double x) { return x < 0 ? 0 : x>1 ? 1 : x; }
+// Clamp to between 0-255
+inline int toInt(double x) { return int(clamp(x) * 255 + .5); }
 
 typedef std::vector<Object*> Objects;
 
@@ -51,6 +58,12 @@ public:
 	void DrawBox(const btVector3& halfSize);
 	void DrawSphere(float radius);
 
+	// path tracing
+	void RenderPath(int samples);
+	btVector3 TraceRay(const Ray &ray, int depth, unsigned short *Xi);
+	ObjectIntersection Intersect(const Ray &ray);
+	void SaveImage(const char *filePath);
+
 private:
 	Objects objects;
 
@@ -74,6 +87,10 @@ private:
 
 	// Ä«¸Þ¶ó
 	Camera* camera;
+
+	// path tracing
+	int samples = 4;
+	btVector3* pixelBuffer;
 
 };
 

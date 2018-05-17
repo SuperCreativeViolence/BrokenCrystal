@@ -120,6 +120,7 @@
       <ConformanceMode>true</ConformanceMode>
       <DisableSpecificWarnings>4305;4819;4244</DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -148,6 +149,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="erand48.cpp" />
+    <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Object.cpp" />
@@ -157,6 +159,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="erand48.h" />
     <ClInclude Include="GLUTCallBack.h" />
+    <ClInclude Include="lodepng.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="OpenglMotionState.h" />

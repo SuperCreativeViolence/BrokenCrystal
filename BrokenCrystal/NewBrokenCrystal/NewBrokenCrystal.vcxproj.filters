@@ -33,6 +33,9 @@
     <ClCompile Include="erand48.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="lodepng.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GLUTCallBack.h">
@@ -57,6 +60,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="erand48.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="lodepng.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -23,7 +23,7 @@ public:
 
 	// object
 	void AddObject(Object* object);
-	void CreateBox();
+	void CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
 	void CreateSphere(const btVector3 &position, double radius, float mass, Material material);
 
 	// input

@@ -8,7 +8,7 @@ ObjectIntersection::ObjectIntersection(bool hit_, double u_, const btVector3& no
 	material = material_;
 }
 
-Object::Object(btCollisionShape* pShape, const btVector3 &position /*= btVector3(0,0,0)*/, const btQuaternion &rotation /*= btQuaternion(0,0,1,1)*/, Material material_ /*= Material()*/, float mass /*= 0*/)
+Object::Object(btCollisionShape* pShape, const btVector3 &position, const btQuaternion &rotation, Material material_, float mass)
 {
 	shape = pShape;
 
@@ -31,6 +31,100 @@ Object::~Object()
 	delete body;
 	delete motionState;
 	delete shape;
+}
+
+Box::Box(const btVector3 &position_, const btVector3 &halfExtents_, float mass_, Material material_) : Object(new btBoxShape(halfExtents_), position_, btQuaternion(0, 0, 1, 1), material_, mass_)
+{
+	halfExtents = halfExtents_;
+}
+
+ObjectIntersection Box::GetIntersection(const Ray& ray)
+{
+	bool hit = false;
+	double u = 0;
+	btVector3 normal = btVector3(0, 0, 0);
+	double tmin, tmax, tymin, tymax, tzmin, tzmax;
+	int tminIndex = 0;
+	int tmaxIndex = 0;
+	btVector3 position = GetPosition();
+	btQuaternion rotation = GetRotation();
+	btVector3 min = halfExtents - position;
+	btVector3 max = halfExtents + position;
+	
+	tmin = (min[0] - ray.origin[0]) / ray.direction[0];
+	tmax = (max[0] - ray.origin[0]) / ray.direction[0];
+
+	if (tmin > tmax)
+		btSwap(tmin, tmax);
+
+	tymin = (min[1] - ray.origin[1]) / ray.direction[1];
+	tymax = (max[1] - ray.origin[1]) / ray.direction[1];
+
+	if (tymin > tymax)
+		btSwap(tymin, tymax);
+
+	if ((tmin > tymax) || (tymin > tmax))
+		return ObjectIntersection(hit, u, normal, material);
+
+	if (tymin > tmin)
+	{
+		tminIndex = 1;
+		tmin = tymin;
+	}
+
+	if (tymax < tmax)
+	{
+		tmaxIndex = 1;
+		tmax = tymax;
+	}
+
+	tzmin = (min[2] - ray.origin[2]) / ray.direction[2];
+	tzmax = (max[2] - ray.origin[2]) / ray.direction[2];
+
+	if (tzmin > tzmax)
+		btSwap(tzmin, tzmax);
+
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return ObjectIntersection(hit, u, normal, material);
+
+	if (tzmin > tmin)
+	{
+		tminIndex = 2;
+		tmin = tzmin;
+	}
+
+	if (tzmax < tmax)
+	{
+		tmaxIndex = 2;
+		tmax = tzmax;
+	}
+
+	hit = true;
+	static btVector3 normals[3] = { btVector3(1,0,0), btVector3(0,1,0), btVector3(0,0,1) };
+
+	if (tmin <= 0)
+	{
+		u = tmax;
+		normal = normals[tmaxIndex];
+	}
+	else
+	{
+		u = tmin;
+		normal = normals[tminIndex];
+	}
+
+	btTransform transform = btTransform::getIdentity();
+	transform.setRotation(rotation);
+	transform.setOrigin(position);
+
+	normal = transform * normal;
+
+	if (normal.dot(ray.direction) > 0)
+		normal = normal * -1;
+
+	normal = normal.normalize();
+
+	return ObjectIntersection(hit, u, normal, material);
 }
 
 Sphere::Sphere(const btVector3 &position_, double radius_, float mass_, Material material_) : Object(new btSphereShape(radius_), position_, btQuaternion(0,0,1,1), material_, mass_)

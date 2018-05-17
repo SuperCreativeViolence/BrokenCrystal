@@ -5,6 +5,7 @@
 #include "OpenglMotionState.h"
 #include <btBulletDynamicsCommon.h>
 #include <btBulletCollisionCommon.h>
+#include <LinearMath/btQuaternion.h>
 
 #include <assert.h>
 
@@ -52,6 +53,17 @@ public:
 		return motionState->GetWorldPosition();
 	}
 
+	btQuaternion GetRotation()
+	{
+		assert(motionState);
+		return motionState->GetWorldRotation();
+	}
+
+	Material GetMaterial()
+	{
+		return material;
+	}
+
 protected:
 	virtual ObjectIntersection GetIntersection(const Ray& ray) = 0;
 
@@ -64,10 +76,13 @@ protected:
 class Box : public Object
 {
 public:
+	Box(const btVector3 &position_, const btVector3 &halfExtents_, float mass_, Material material_);
 
+protected:
+	virtual ObjectIntersection GetIntersection(const Ray& ray) override;
 
 private:
-
+	btVector3 halfExtents;
 };
 
 class Sphere : public Object

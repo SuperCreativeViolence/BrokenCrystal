@@ -57,9 +57,13 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	CreateSphere(btVector3(0, -1001, 0), 1000, 0, Material());
-	CreateSphere(btVector3(0, 0, 0), 3, 1, Material());
-	CreateSphere(btVector3(0, 4, 0), 1, 1, Material());
+	CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
+	CreateSphere(btVector3(10, 10, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.6, 0.1)));
+	CreateSphere(btVector3(0, 4, 0), 1, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+	CreateBox(btVector3(0, 3, 3), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
+	CreateBox(btVector3(0, 2, 4), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.6, 0.6, 0.1)));
+	CreateBox(btVector3(2, 4, 0), btVector3(2,2,2), 1, Material(DIFF, btVector3(0.4, 0.9, 0.1)));
+	CreateSphere(btVector3(0, 20, 0), 3, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
 }
 
 void Scene::AddObject(Object* object)
@@ -69,9 +73,9 @@ void Scene::AddObject(Object* object)
 	world->addRigidBody(object->GetRigidBody());
 }
 
-void Scene::CreateBox()
+void Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material)
 {
-	//AddObject(static_cast<Object*>(new Box()));
+	AddObject(static_cast<Object*>(new Box(position, halfExtents, mass, material)));
 }
 
 void Scene::CreateSphere(const btVector3 &position, double radius, float mass, Material material)
@@ -211,6 +215,7 @@ void Scene::DrawShape(Object* object)
 
 	glPushMatrix();
 	glMultMatrixf(transform);
+	glColor3fv(object->GetMaterial().GetColor());
 
 	switch (pShape->getShapeType())
 	{

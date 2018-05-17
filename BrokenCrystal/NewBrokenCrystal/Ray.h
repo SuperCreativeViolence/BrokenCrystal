@@ -16,7 +16,7 @@ struct Ray
 			1.0 / direction.getY(),
 			1.0 / direction.getZ()
 		);
-	}
+ 	}
 };
 
 #endif

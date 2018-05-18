@@ -1,6 +1,5 @@
 #include "Scene.h"
 
-
 Scene::Scene() :
 	world(nullptr),
 	broadphase(nullptr),
@@ -66,22 +65,56 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
 
-	CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
-	CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.9, 0.8, 0.8)));
-	CreateSphere(btVector3(0, -1000, 0), 1000, 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
+	//CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.55, 0.0, 0.0)));
+	//CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.55)));
+	//CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	CreateSphere(btVector3(10, 10, 0), 3, 1, Material(SPEC, btVector3(0.3, 0.6, 0.1)));
-	CreateSphere(btVector3(0, 4, 0), 4, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
-	CreateSphere(btVector3(0, 10, 10), 5, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	CreateSphere(btVector3(-3, 4, 4), 7, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+	//CreateSphere(btVector3(10, 10, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(0, 4, 0), 4, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+	//CreateSphere(btVector3(0, 10, 10), 5, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(-3, 4, 4), 7, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
 
 	//CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	CreateSphere(btVector3(0, 150, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
+	//CreateSphere(btVector3(0, 130, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
+
+	float halfWidth = 1.0f;
+	float halfHeight = 1.0f;
+	float halfDepth = 1.0f;
+
+	btVector3 vertices[8] =
+	{
+		btVector3(halfWidth, halfHeight, halfDepth),
+		btVector3(-halfWidth, halfHeight, halfDepth),
+		btVector3(halfWidth, -halfHeight, halfDepth),
+		btVector3(-halfWidth, -halfHeight, halfDepth),
+		btVector3(halfWidth, halfHeight, -halfDepth),
+		btVector3(-halfWidth, halfHeight, -halfDepth),
+		btVector3(halfWidth, -halfHeight, -halfDepth),
+		btVector3(-halfWidth, -halfHeight, -halfDepth)
+	};
+
+	static int indices[36] =
+	{
+		0, 1, 2, 3, 2, 1, 4, 0, 6,
+		6, 0, 2, 5, 1, 4, 4, 1, 0,
+		7, 3, 1, 7, 1, 5, 5, 4, 7,
+		7, 4, 6, 7, 2, 3, 7, 6, 2
+	};
+
+	std::vector<Triangle*> triangles;
+
+	for (int i = 0; i < 36; i += 3)
+	{
+		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], Material()));
+	}
+
+
+	AddObject(static_cast<Object*>(new Mesh(btVector3(0, 0, 0), triangles, 1, Material())));
+
 }
 
 void Scene::AddObject(Object* object)
@@ -262,6 +295,13 @@ void Scene::DrawShape(Object* object)
 			DrawSphere(radius);
 			break;
 		}
+
+		case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
+		{
+			const Mesh* mesh = static_cast<const Mesh*>(object);
+			DrawMesh(mesh->GetTriangles());
+			break;
+		}
 	}
 	glPopMatrix();
 }
@@ -343,6 +383,26 @@ void Scene::DrawSphere(float radius)
 	}
 }
 
+void Scene::DrawTriangle(const btVector3 &p0, const btVector3 &p1, const btVector3 &p2)
+{
+	btVector3 normal = (p2 - p0).cross(p1 - p0);
+	normal = normal.normalize();
+	glBegin(GL_TRIANGLE_STRIP);
+	glNormal3fv(normal);
+	glVertex3fv(p0);
+	glVertex3fv(p1);
+	glVertex3fv(p2);
+	glEnd();
+}
+
+void Scene::DrawMesh(std::vector<Triangle*> triangles)
+{
+	for (auto & triangle : triangles)
+	{
+		DrawTriangle(triangle->pos[0], triangle->pos[1], triangle->pos[2]);
+	}
+}
+
 void Scene::RenderPath(int samples)
 {
 	int width = camera->GetWidht();
@@ -364,12 +424,15 @@ void Scene::RenderPath(int samples)
 			{
 				Ray ray = camera->GetRay(x, y, s > 0, Xi);
 				color = color + TraceRay(ray, 0, Xi);
+				//printf("%f %f %f\n", color[0], color[1], color[2]);
+				//Sleep(1000);
 			}
-
+			//printf("final : %f %f %f\n", color[0] * samplesP, color[1] * samplesP, color[2] * samplesP);
 			pixelBuffer[(y)* width + x] = color * samplesP;
 		}
 	}
 }
+
 
 btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
 {

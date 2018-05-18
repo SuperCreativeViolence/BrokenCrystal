@@ -338,3 +338,48 @@ ObjectIntersection Sphere::GetIntersection(const Ray& ray)
 	}
 	return ObjectIntersection(hit, distance, normal, material);
 }
+
+Triangle::Triangle(const btVector3 &pos1_, const btVector3 &pos2_, const btVector3 &pos3_, Material material_)
+{
+	pos[0] = pos1_;
+	pos[1] = pos2_;
+	pos[2] = pos3_;
+	material = material_;
+}
+
+ObjectIntersection Triangle::GetIntersection(const Ray& ray)
+{
+	return ObjectIntersection();
+}
+
+Material Triangle::GetMaterial()
+{
+	return material;
+}
+
+Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float mass, Material material_) : Object(new btEmptyShape(), position_, btQuaternion(0,0,1,1), material_, mass)
+{
+	triangles = triangles_;
+	btTriangleMesh* triangleMesh = new btTriangleMesh();
+	for (auto & triangle : triangles)
+	{
+		triangleMesh->addTriangle(triangle->pos[0], triangle->pos[1], triangle->pos[2]);
+	}
+
+	btConvexShape* tempShape = new btConvexTriangleMeshShape(triangleMesh);
+	btShapeHull* hull = new btShapeHull(tempShape);
+	btScalar margin = tempShape->getMargin();
+	hull->buildHull(margin);
+	tempShape->setUserPointer(hull);
+	shape = tempShape;
+}
+
+ObjectIntersection Mesh::GetIntersection(const Ray& ray)
+{
+	return ObjectIntersection();
+}
+
+std::vector<Triangle*> Mesh::GetTriangles() const
+{
+	return triangles;
+}

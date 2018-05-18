@@ -57,6 +57,8 @@ public:
 	void DrawShape(Object* object);
 	void DrawBox(const btVector3& halfSize);
 	void DrawSphere(float radius);
+	void DrawTriangle(const btVector3 &p0, const btVector3 &p1, const btVector3 &p2);
+	void DrawMesh(std::vector<Triangle*> triangles);
 
 	// path tracing
 	void RenderPath(int samples);
@@ -90,7 +92,7 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 4;
+	int samples = 1000;
 	btVector3* pixelBuffer;
 
 };

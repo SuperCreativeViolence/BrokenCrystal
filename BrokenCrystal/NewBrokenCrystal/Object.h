@@ -4,6 +4,7 @@
 #include "Material.h"
 #include "OpenglMotionState.h"
 #include <btBulletDynamicsCommon.h>
+#include <BulletCollision\CollisionShapes\btShapeHull.h>
 #include <btBulletCollisionCommon.h>
 #include <LinearMath/btQuaternion.h>
 
@@ -18,6 +19,22 @@ struct ObjectIntersection
 	btVector3 normal;
 	Material material;
 	ObjectIntersection(bool hit_ = false, double u_ = 0, const btVector3& normal_ = btVector3(0, 0, 0), Material material_ = Material());
+};
+
+
+struct Triangle
+{
+public:
+	Triangle(const btVector3 &pos1_, const btVector3 &pos2_, const btVector3 &pos3_, Material material_);
+	ObjectIntersection GetIntersection(const Ray& ray);
+	Material GetMaterial();
+	btVector3 pos[3];
+
+private:
+	Material material;
+
+	btVector3 normal;
+	double d;
 };
 
 class Object
@@ -90,7 +107,17 @@ public:
 
 private:
 	double radius;
+};
 
+class Mesh : public Object
+{
+public:
+	Mesh(const btVector3& position_, std::vector<Triangle*> triangles_, float mass, Material material_);
+	virtual ObjectIntersection GetIntersection(const Ray& ray) override;
+	std::vector<Triangle*> GetTriangles() const;
+
+private:
+	std::vector<Triangle*> triangles;
 };
 
 #endif

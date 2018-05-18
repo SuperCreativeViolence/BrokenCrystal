@@ -22,6 +22,7 @@ void Camera::UpdateScreen(int w, int h)
 {
 	width = w;
 	height = h;
+	aspectRatio = w / (float)h * 1.5;
 }
 
 void Camera::UpdateCamera()
@@ -31,7 +32,6 @@ void Camera::UpdateCamera()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glViewport(0, 0, width, height);
-	aspectRatio = width / (float) height;
 	glFrustum(-aspectRatio * nearPlane, aspectRatio * nearPlane, -nearPlane, nearPlane, nearPlane, farPlane);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -78,6 +78,25 @@ void Camera::Zoom(float delta)
 
 Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 {
+	//GLint viewport[4];
+	//GLdouble modelview[16];
+	//GLdouble projection[16];
+	//GLfloat winX, winY, winZ;
+	//GLdouble posX, posY, posZ;
+
+	//glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	//glGetDoublev(GL_PROJECTION_MATRIX, projection);
+	//glGetIntegerv(GL_VIEWPORT, viewport);
+
+	//winX = (float)x;
+	//winY = (float)viewport[3] - (float)y;  // Subtract The Current Mouse Y Coordinate 
+
+	//glReadPixels(x, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);//Reads the depth buffer
+
+	//gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
+	//return Ray(position, (btVector3(posX, posY, posZ) - position).normalized());
+
+
 	//double xJitter = 0;
 	//double yJitter = 0;
 
@@ -101,7 +120,6 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 
 	float tanFov = 1.0f / nearPlane;
 	float fov = btScalar(2.0) * btAtan(tanFov);
-
 	double xJitter = 0;
 	double yJitter = 0;
 
@@ -123,8 +141,10 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 
 	if (jitter)
 	{
-		xJitter = (erand48(Xi) * xSpacing) - xSpacing * 0.5;
-		yJitter = (erand48(Xi) * ySpacing) - ySpacing * 0.5;
+		//xJitter = (erand48(Xi) * xSpacing) - xSpacing * 0.5;
+		//yJitter = (erand48(Xi) * ySpacing) - ySpacing * 0.5;
+		xJitter = erand48(Xi);
+		yJitter = erand48(Xi);
 	}
 
 	hor *= aspectRatio;

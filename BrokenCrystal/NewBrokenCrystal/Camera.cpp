@@ -22,7 +22,7 @@ void Camera::UpdateScreen(int w, int h)
 {
 	width = w;
 	height = h;
-	aspectRatio = w / (float)h * 1.5;
+	aspectRatio = w / (float)h;
 }
 
 void Camera::UpdateCamera()
@@ -119,7 +119,7 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 	//return Ray(position, (pixel - position).normalize());
 
 	float tanFov = 1.0f / nearPlane;
-	float fov = btScalar(2.0) * btAtan(tanFov);
+	float fov = btScalar(1.3) * btAtan(tanFov);
 	double xJitter = 0;
 	double yJitter = 0;
 
@@ -133,16 +133,14 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 
 	btVector3 ver = upVector;
 	btVector3 hor = rayForward.cross(ver);
-	hor.normalize();
+	hor = hor.normalize();
 	ver = hor.cross(rayForward);
-	ver.normalize();
+	ver = ver.normalize();
 	hor *= 2.f * farPlane * fov;
 	ver *= 2.f * farPlane * fov;
 
 	if (jitter)
 	{
-		//xJitter = (erand48(Xi) * xSpacing) - xSpacing * 0.5;
-		//yJitter = (erand48(Xi) * ySpacing) - ySpacing * 0.5;
 		xJitter = erand48(Xi);
 		yJitter = erand48(Xi);
 	}

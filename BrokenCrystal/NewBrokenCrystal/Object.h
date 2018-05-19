@@ -30,10 +30,10 @@ public:
 	ObjectIntersection GetIntersection(const Ray& ray, btTransform transform);
 	Material GetMaterial();
 	btVector3 pos[3];
-	Material material;
-
 private:
 	double d;
+	Material material;
+
 };
 
 class Object
@@ -86,16 +86,6 @@ public:
 	btRigidBody* body;
 	OpenglMotionState* motionState;
 	Material material;
-};
-
-class Box : public Object
-{
-public:
-	Box(const btVector3 &position_, const btVector3 &halfExtents_, float mass_, Material material_);
-	virtual ObjectIntersection GetIntersection(const Ray& ray) override;
-
-private:
-	btVector3 halfExtents;
 };
 
 class Sphere : public Object

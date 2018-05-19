@@ -56,19 +56,12 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	//CreateBox(btVector3(0, -500, 0), btVector3(500, 500, 500), 0, Material(DIFF,  btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 50, 0), btVector3(1, 500, 500), 0, Material());
-	//CreateBox(btVector3(25, 0, 0), btVector3(500, 1, 500), 0, Material());
-	//CreateBox(btVector3(-25, 0, 0), btVector3(500, 1, 500), 0, Material());
-	//CreateBox(btVector3(0, 0, -25), btVector3(500, 500, 1), 0, Material());
-	//CreateBox(btVector3(0, 0, 25), btVector3(500, 500, 1), 0, Material());
-
-	//CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
-
-	CreateSphere(btVector3(0, -1001, 0), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.55, 0.0, 0.0)));
-	CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.55)));
-	CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 0, 0), btVector3(1, 30, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 30, 0), btVector3(1, 30, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(30, 15, 0), btVector3(15, 1, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(15, 1, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	CreateBox(btVector3(0, 15, 30), btVector3(15, 30, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 15, -30), btVector3(15, 30, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
 	CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	CreateSphere(btVector3(0, 4, 0), 2, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
@@ -76,10 +69,9 @@ void Scene::Initialize()
 	CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
 
 	CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
-	CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
+	CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	CreateSphere(btVector3(0, 130, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
 
 	float halfWidth = 2.0f;
 	float halfHeight = 1.0f;
@@ -124,7 +116,39 @@ void Scene::AddObject(Object* object)
 
 void Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material)
 {
-	AddObject(static_cast<Object*>(new Box(position, halfExtents, mass, material)));
+	float halfWidth = halfExtents[0];
+	float halfHeight = halfExtents[1];
+	float halfDepth = halfExtents[2];
+
+	btVector3 vertices[8] =
+	{
+		btVector3(halfWidth, halfHeight, halfDepth),
+		btVector3(-halfWidth, halfHeight, halfDepth),
+		btVector3(halfWidth, -halfHeight, halfDepth),
+		btVector3(-halfWidth, -halfHeight, halfDepth),
+		btVector3(halfWidth, halfHeight, -halfDepth),
+		btVector3(-halfWidth, halfHeight, -halfDepth),
+		btVector3(halfWidth, -halfHeight, -halfDepth),
+		btVector3(-halfWidth, -halfHeight, -halfDepth)
+	};
+
+	static int indices[36] =
+	{
+		0, 1, 2, 3, 2, 1, 4, 0, 6,
+		6, 0, 2, 5, 1, 4, 4, 1, 0,
+		7, 3, 1, 7, 1, 5, 5, 4, 7,
+		7, 4, 6, 7, 2, 3, 7, 6, 2
+	};
+
+	std::vector<Triangle*> triangles;
+
+	for (int i = 0; i < 36; i += 3)
+	{
+		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], material));
+	}
+
+
+	AddObject(static_cast<Object*>(new Mesh(position, triangles, mass, material)));
 }
 
 void Scene::CreateSphere(const btVector3 &position, double radius, float mass, Material material)
@@ -442,7 +466,7 @@ void Scene::RenderPath(int samples)
 btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
 {
 	ObjectIntersection intersection = Intersect(ray);
-	if (!intersection.hit) return btVector3(0.3, 0.3, 0.3);
+	if (!intersection.hit) return btVector3(0.0, 0.0, 0.0);
 	if (intersection.material.GetType() == EMIT)
 		return intersection.material.GetEmission();
 

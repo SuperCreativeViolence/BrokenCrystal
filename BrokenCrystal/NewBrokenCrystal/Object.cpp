@@ -372,6 +372,12 @@ Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float
 	hull->buildHull(margin);
 	tempShape->setUserPointer(hull);
 	shape = tempShape;
+	btVector3 localInteria(0, 0, 0);
+	if (mass != 0.0f)
+		shape->calculateLocalInertia(mass, localInteria);
+
+	btRigidBody::btRigidBodyConstructionInfo cInfo(mass, motionState, shape, localInteria);
+	body = new btRigidBody(cInfo);
 }
 
 ObjectIntersection Mesh::GetIntersection(const Ray& ray)

@@ -65,7 +65,7 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
 
-	//CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.55, 0.0, 0.0)));
 	//CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.55)));
 	//CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
@@ -79,7 +79,7 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	//CreateSphere(btVector3(0, 130, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
+	CreateSphere(btVector3(0, 130, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
 
 	float halfWidth = 1.0f;
 	float halfHeight = 1.0f;
@@ -112,9 +112,7 @@ void Scene::Initialize()
 		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], Material()));
 	}
 
-
-	AddObject(static_cast<Object*>(new Mesh(btVector3(0, 0, 0), triangles, 1, Material())));
-
+	AddObject(static_cast<Object*>(new Mesh(btVector3(0, 3, 0), triangles, 1, Material())));
 }
 
 void Scene::AddObject(Object* object)

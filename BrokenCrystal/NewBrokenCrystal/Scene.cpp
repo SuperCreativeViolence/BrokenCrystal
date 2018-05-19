@@ -65,23 +65,23 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(1, 500, 500), 0, Material());
 
-	CreateSphere(btVector3(0, -1010, 0), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.55, 0.0, 0.0)));
-	//CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.55)));
-	//CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateSphere(btVector3(0, -1001, 0), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateSphere(btVector3(-1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.55, 0.0, 0.0)));
+	CreateSphere(btVector3(1010, 0, 0), 1000, 0, Material(DIFF, btVector3(0.0, 0.0, 0.55)));
+	CreateSphere(btVector3(0, 0, 1010), 1000, 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	//CreateSphere(btVector3(10, 10, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(0, 4, 0), 4, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
-	//CreateSphere(btVector3(0, 10, 10), 5, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(-3, 4, 4), 7, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
+	CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateSphere(btVector3(0, 4, 0), 2, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+	CreateSphere(btVector3(0, 10, 10), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
 
-	//CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
-	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
-	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
+	CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
+	CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(0.6, 0.6, 0.1)));
+	CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
 	CreateSphere(btVector3(0, 130, 0), 100, 0, Material(EMIT, btVector3(1, 1, 1), btVector3(3.3, 3.3, 3.3)));
 
-	float halfWidth = 1.0f;
+	float halfWidth = 2.0f;
 	float halfHeight = 1.0f;
 	float halfDepth = 1.0f;
 
@@ -91,10 +91,10 @@ void Scene::Initialize()
 		btVector3(-halfWidth, halfHeight, halfDepth),
 		btVector3(halfWidth, -halfHeight, halfDepth),
 		btVector3(-halfWidth, -halfHeight, halfDepth),
-		btVector3(halfWidth, halfHeight, -halfDepth),
+		btVector3(halfWidth * 2, halfHeight *2, -halfDepth),
 		btVector3(-halfWidth, halfHeight, -halfDepth),
 		btVector3(halfWidth, -halfHeight, -halfDepth),
-		btVector3(-halfWidth, -halfHeight, -halfDepth)
+		btVector3(-halfWidth * 3, -halfHeight, -halfDepth)
 	};
 
 	static int indices[36] =
@@ -109,10 +109,10 @@ void Scene::Initialize()
 
 	for (int i = 0; i < 36; i += 3)
 	{
-		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], Material()));
+		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], Material(DIFF, btVector3(0.5, 0.3, 0.6))));
 	}
 
-	AddObject(static_cast<Object*>(new Mesh(btVector3(0, 3, 0), triangles, 1, Material())));
+	AddObject(static_cast<Object*>(new Mesh(btVector3(0, 8, 0), triangles, 1, Material())));
 }
 
 void Scene::AddObject(Object* object)
@@ -252,7 +252,14 @@ void Scene::UpdateScene(float dt)
 	}
 	if (IsKeyDown('d'))
 	{
-		TraceDebugRay();
+		DebugTraceRay();
+	}
+	if (IsKeyDown('f'))
+	{
+		Ray ray = camera->GetRay(mousePos[0], mousePos[1], true, nullptr);
+		system("cls");
+		btVector3 color = DebugPathTest(ray, 0, ray.origin);
+		printf("%.1f %.1f %.1f\n", color[0], color[1], color[2]);
 	}
 
 	world->stepSimulation(dt);
@@ -260,9 +267,9 @@ void Scene::UpdateScene(float dt)
 
 void Scene::RenderScene()
 {
-	for (Objects::iterator i = objects.begin(); i != objects.end(); i++)
+	for (auto & object : objects)
 	{
-		DrawShape(*i);
+		DrawShape(object);
 	}
 }
 
@@ -460,7 +467,7 @@ btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
 	return color * TraceRay(reflected, depth, Xi);
 }
 
-void Scene::TraceDebugRay()
+void Scene::DebugTraceRay()
 {
 	unsigned short Xi[3] = { 0, 0, mousePos[1] * mousePos[1] * mousePos[1] };
 	Ray ray = camera->GetRay(mousePos[0], mousePos[1], true, Xi);
@@ -470,16 +477,86 @@ void Scene::TraceDebugRay()
 		printf("No Hit\n");
 		return;
 	}
+
+	btVector3 color = intersection.material.GetColor();
+
 	if (intersection.material.GetType() == EMIT)
 	{
 		printf("Emit\n");
 		return;
 	}
 
+	btVector3 pos = ray.origin + ray.direction * intersection.u;
+	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, Xi);
+	ObjectIntersection intersection2 = Intersect(reflected);
+	btVector3 pos2 = reflected.origin + reflected.direction * intersection2.u;
 	glPushMatrix();
 
 	btTransform transform = btTransform::getIdentity();
-	transform.setOrigin(ray.origin + ray.direction * intersection.u);
+	transform.setOrigin(pos);
+	btScalar trans[16];
+	transform.getOpenGLMatrix(trans);	
+	glMultMatrixf(trans);
+
+	glDisable(GL_LIGHTING);
+	glBegin(GL_LINES);
+
+	glVertex3f(0,0,0);
+	glVertex3fv(intersection.normal);
+
+	glVertex3f(0, 0, 0);
+	glVertex3fv(pos2);
+
+	glEnd();
+
+	DrawSphere(0.1);
+
+	glEnable(GL_LIGHTING);
+	glPopMatrix();
+
+	printf("Hit : %f | normal :  %.1f %.1f %.1f | color : %.1f %.1f %.1f\n", intersection.u, intersection.normal[0], intersection.normal[1], intersection.normal[2], color[0], color[1], color[2]);
+}
+
+btVector3 Scene::DebugPathTest(const Ray &ray, int depth, btVector3 hitPos)
+{
+	ObjectIntersection intersection = Intersect(ray);
+	if (!intersection.hit)
+	{
+		printf("0.3 0.3 0.3 -> \n");
+		return btVector3(0.3, 0.3, 0.3);
+	}
+
+	btVector3 color = intersection.material.GetColor();
+
+	if (intersection.material.GetType() == EMIT)
+	{
+		printf("3.3 3.3 3.3 ->\n");
+		return intersection.material.GetEmission();
+	}
+
+	btVector3 pos = ray.origin + ray.direction * intersection.u;
+
+	double maxReflection = color.x() > color.y() && color.x() > color.z() ? color.x() : color.y() > color.z() ? color.y() : color.z();
+	double random = erand48();
+
+	if (++depth > 5)
+	{
+		if (random < maxReflection * 0.9)
+		{
+			color = color * (0.9 / maxReflection);
+		}
+		else
+		{
+			return intersection.material.GetEmission();
+		}
+	}
+	printf("%.1f %.1f %.1f -> ", color[0], color[1], color[2]);
+	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, nullptr);
+
+	glPushMatrix();
+
+	btTransform transform = btTransform::getIdentity();
+	transform.setOrigin(pos);
 	btScalar trans[16];
 	transform.getOpenGLMatrix(trans);
 
@@ -487,17 +564,18 @@ void Scene::TraceDebugRay()
 	glMultMatrixf(trans);
 	glBegin(GL_LINES);
 
-	glVertex3f(0,0,0);
+	glVertex3f(0, 0, 0);
+	glVertex3fv(reflected.direction * 100);
+	glVertex3f(0, 0, 0);
 	glVertex3fv(intersection.normal);
-
 	glEnd();
 
-	DrawSphere(30);
+	DrawSphere(0.1);
 
 	glEnable(GL_LIGHTING);
 	glPopMatrix();
 
-	printf("Hit : %f | %.1f %.1f %.1f\n", intersection.u, intersection.normal[0], intersection.normal[1], intersection.normal[2]);
+	return color * DebugPathTest(reflected, depth, pos);
 }
 
 ObjectIntersection Scene::Intersect(const Ray &ray)

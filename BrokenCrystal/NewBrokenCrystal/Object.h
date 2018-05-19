@@ -9,6 +9,7 @@
 #include <LinearMath/btQuaternion.h>
 
 #include <assert.h>
+#include <limits>
 
 #define EPSILON 1e-4
 
@@ -26,14 +27,12 @@ struct Triangle
 {
 public:
 	Triangle(const btVector3 &pos1_, const btVector3 &pos2_, const btVector3 &pos3_, Material material_);
-	ObjectIntersection GetIntersection(const Ray& ray);
+	ObjectIntersection GetIntersection(const Ray& ray, btTransform transform);
 	Material GetMaterial();
 	btVector3 pos[3];
-
-private:
 	Material material;
 
-	btVector3 normal;
+private:
 	double d;
 };
 

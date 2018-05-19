@@ -347,9 +347,36 @@ Triangle::Triangle(const btVector3 &pos1_, const btVector3 &pos2_, const btVecto
 	material = material_;
 }
 
-ObjectIntersection Triangle::GetIntersection(const Ray& ray)
+ObjectIntersection Triangle::GetIntersection(const Ray& ray, btTransform transform)
 {
-	return ObjectIntersection();
+	bool hit = false;
+	float u, v, t = 0;
+
+	btVector3 pos0 = transform * pos[0];
+	btVector3 pos1 = transform * pos[1];
+	btVector3 pos2 = transform * pos[2];
+	btVector3 normal = (pos1 - pos0).cross(pos2 - pos0).normalize();
+
+	btVector3 v0v1 = pos1 - pos0;
+	btVector3 v0v2 = pos2 - pos0;
+	btVector3 pvec = ray.direction.cross(v0v2);
+	float det = v0v1.dot(pvec);
+	if (det < EPSILON) return ObjectIntersection(hit, t, normal, material);
+
+	btVector3 tvec = ray.origin - pos0;
+	u = tvec.dot(pvec);
+	if (u < 0 || u > det) return ObjectIntersection(hit, t, normal, material);
+
+	btVector3 qvec = tvec.cross(v0v1);
+	v = ray.direction.dot(qvec);
+	if (v < 0 || u + v > det) return ObjectIntersection(hit, t, normal, material);
+
+	t = v0v2.dot(qvec) / det;
+
+	if (t < 0) return ObjectIntersection(hit, t, normal, material);
+
+	hit = true;
+	return ObjectIntersection(hit, t, normal, material);
 }
 
 Material Triangle::GetMaterial()
@@ -382,7 +409,20 @@ Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float
 
 ObjectIntersection Mesh::GetIntersection(const Ray& ray)
 {
-	return ObjectIntersection();
+	float tNear = std::numeric_limits<float>::max();
+	btTransform transform = body->getWorldTransform();
+	ObjectIntersection intersection = ObjectIntersection();
+	for (auto & triangle : triangles)
+	{
+		float u, v;
+		ObjectIntersection temp = triangle->GetIntersection(ray, transform);
+		if (temp.hit && temp.u < tNear)
+		{
+			tNear = temp.u;
+			intersection = temp;
+		}
+	}
+	return intersection;
 }
 
 std::vector<Triangle*> Mesh::GetTriangles() const

@@ -63,7 +63,8 @@ public:
 	// path tracing
 	void RenderPath(int samples);
 	btVector3 TraceRay(const Ray &ray, int depth, unsigned short *Xi);
-	void TraceDebugRay();
+	void DebugTraceRay();
+	btVector3 DebugPathTest(const Ray &ray, int depth, btVector3 hitPos);
 	ObjectIntersection Intersect(const Ray &ray);
 	void SaveImage(const char *filePath);
 
@@ -92,7 +93,7 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 1000;
+	int samples = 10;
 	btVector3* pixelBuffer;
 
 };

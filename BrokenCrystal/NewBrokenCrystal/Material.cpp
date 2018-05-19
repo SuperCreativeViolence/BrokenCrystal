@@ -22,16 +22,16 @@ btVector3 Material::GetEmission() const
 	return emission;
 }
 
-Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const btVector3 & normal, unsigned short * Xi) const
+Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const btVector3 & normal, unsigned short * Xi = nullptr) const
 {
 	if (type == SPEC)
 	{
 		double roughness = 0.8;
 		btVector3 reflected = ray.direction - normal * 2 * normal.dot(ray.direction);
 		reflected = btVector3(
-			reflected[0] + (erand48(Xi) - 0.5) * roughness,
-			reflected[1] + (erand48(Xi) - 0.5) * roughness,
-			reflected[2] + (erand48(Xi) - 0.5) * roughness
+			reflected[0] + (erand48() - 0.5) * roughness,
+			reflected[1] + (erand48() - 0.5) * roughness,
+			reflected[2] + (erand48() - 0.5) * roughness
 		).normalize();
 
 		return Ray(position, reflected);
@@ -39,8 +39,8 @@ Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const
 	else
 	{
 		btVector3 nl = normal.dot(ray.direction) < 0 ? normal : normal * -1;
-		double r1 = 2 * M_PI * erand48(Xi);
-		double r2 = erand48(Xi);
+		double r1 = 2 * M_PI * erand48();
+		double r2 = erand48();
 		double r2s = sqrt(r2);
 
 		btVector3 w = nl;

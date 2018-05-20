@@ -14,10 +14,10 @@ public:
 	Material GetMaterial();
 
 	// KDTree
-	AABBox get_bounding_box();
+	AABBox GetBoundingBox();
 	bool Intersect(Ray ray, double &t, double tmin, btVector3 &norma, btTransform transform) const;
 
-	btVector3 get_midpoint();
+	btVector3 GetMidPoint();
 	btVector3 GetBarycentric(btVector3 pos);
 	btVector3 GetColorAt(btVector3 pos);
 

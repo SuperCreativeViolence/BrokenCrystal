@@ -14,7 +14,7 @@ struct AABBox
 		max = max_;
 	}
 
-	void expand(const AABBox &box)
+	void Expand(const AABBox &box)
 	{
 		if (box.min.x() < min.x()) min[0] = box.min.x();
 		if (box.min.y() < min.y()) min[1] = box.min.y();
@@ -26,7 +26,7 @@ struct AABBox
 	}
 
 	// Expand to fit point
-	void expand(const btVector3 &vec)
+	void Expand(const btVector3 &vec)
 	{
 		if (vec.x() < min.x()) min[0] = vec.x();
 		if (vec.y() < min.y()) min[1] = vec.y();
@@ -34,7 +34,7 @@ struct AABBox
 	}
 
 	// Returns longest axis: 0, 1, 2 for x, y, z respectively
-	int get_longest_axis()
+	int GetLongestAxis()
 	{
 		btVector3 diff = max - min;
 		if (diff.x() > diff.y() && diff.x() > diff.z()) return 0;
@@ -43,7 +43,7 @@ struct AABBox
 	}
 
 	// Check if ray intersects with box. Returns true/false and stores distance in t
-	bool intersection(const Ray &r, double &t, btTransform transform)
+	bool Intersection(const Ray &r, double &t, btTransform transform)
 	{
 		btVector3 transMin = transform * min;
 		btVector3 transMax = transform * max;

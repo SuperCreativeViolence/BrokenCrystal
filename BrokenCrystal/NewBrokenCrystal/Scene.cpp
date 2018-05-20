@@ -75,7 +75,7 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 }
 
 void Scene::AddObject(Object* object)
@@ -410,6 +410,7 @@ void Scene::DrawMesh(std::vector<Triangle*> triangles)
 
 void Scene::RenderPath(int samples)
 {
+	int time = clock.getTimeMilliseconds();
 	int width = camera->GetWidht();
 	int height = camera->GetHeight();
 	double samplesP = 1.0 / samples;
@@ -433,7 +434,7 @@ void Scene::RenderPath(int samples)
 					for (int s = 0; s < samples; s++)
 					{
 						//Ray ray = camera->GetRay(x, y, s > 0, Xi);
-						Ray ray = camera->GetRay(x, y, sx, sy);
+						Ray ray = camera->GetRay(x, y, sx, sy, false); // dof 효과 미완성
 						color = color + TraceRay(ray, 0, Xi);
 						//printf("%f %f %f\n", color[0], color[1], color[2]);
 						//Sleep(1000);
@@ -445,7 +446,7 @@ void Scene::RenderPath(int samples)
 			pixelBuffer[(y) * width + x] = resultColor * 0.25;
 		}
 	}
-	fprintf(stderr, "\rRendering (%i samples): done", samples);
+	fprintf(stderr, "\rRendering (%i samples): done %0.4fs\n", samples, (float)(clock.getTimeMilliseconds() - time) / 1000);
 }
 
 

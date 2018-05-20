@@ -16,11 +16,11 @@ KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 	{
 		node->triangles = triangles_;
 		node->leaf = true;
-		node->box = triangles_[0]->get_bounding_box();
+		node->box = triangles_[0]->GetBoundingBox();
 
 		for (long i = 1; i < triangles_.size(); i++)
 		{
-			node->box.expand(triangles_[i]->get_bounding_box());
+			node->box.Expand(triangles_[i]->GetBoundingBox());
 		}
 
 		node->left = new KDNode();
@@ -31,32 +31,32 @@ KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 		return node;
 	}
 
-	node->box = triangles_[0]->get_bounding_box();
+	node->box = triangles_[0]->GetBoundingBox();
 	btVector3 midpt = btVector3(0, 0, 0);
 	double tris_recp = 1.0 / triangles_.size();
 
 	for (long i = 1; i < triangles_.size(); i++)
 	{
-		node->box.expand(triangles_[i]->get_bounding_box());
-		midpt = midpt + (triangles_[i]->get_midpoint() * tris_recp);
+		node->box.Expand(triangles_[i]->GetBoundingBox());
+		midpt = midpt + (triangles_[i]->GetMidPoint() * tris_recp);
 	}
 
 	std::vector<Triangle*> left_tris;
 	std::vector<Triangle*> right_tris;
-	int axis = node->box.get_longest_axis();
+	int axis = node->box.GetLongestAxis();
 
 	for (long i = 0; i < triangles_.size(); i++)
 	{
 		switch (axis)
 		{
 			case 0:
-				midpt[0] >= triangles_[i]->get_midpoint()[0] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
+				midpt[0] >= triangles_[i]->GetMidPoint()[0] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
 				break;
 			case 1:
-				midpt[1] >= triangles_[i]->get_midpoint()[1] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
+				midpt[1] >= triangles_[i]->GetMidPoint()[1] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
 				break;
 			case 2:
-				midpt[2] >= triangles_[i]->get_midpoint()[2] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
+				midpt[2] >= triangles_[i]->GetMidPoint()[2] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
 				break;
 		}
 	}
@@ -65,11 +65,11 @@ KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 	{
 		node->triangles = triangles_;
 		node->leaf = true;
-		node->box = triangles_[0]->get_bounding_box();
+		node->box = triangles_[0]->GetBoundingBox();
 
 		for (long i = 1; i < triangles_.size(); i++)
 		{
-			node->box.expand(triangles_[i]->get_bounding_box());
+			node->box.Expand(triangles_[i]->GetBoundingBox());
 		}
 
 		node->left = new KDNode();
@@ -90,7 +90,7 @@ bool KDNode::Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector
 {
 	double dist;
 	assert(node->box);
-	if (node->box.intersection(ray, dist, transform))
+	if (node->box.Intersection(ray, dist, transform))
 	{
 		if (dist > tmin) return false;
 

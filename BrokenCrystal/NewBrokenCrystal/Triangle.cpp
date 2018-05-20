@@ -54,7 +54,7 @@ Material Triangle::GetMaterial()
 	return material;
 }
 
-AABBox Triangle::get_bounding_box()
+AABBox Triangle::GetBoundingBox()
 {
 	btVector3 min = btVector3(
 		std::min(std::min(pos[0].x(), pos[1].x()), pos[2].x()),
@@ -103,7 +103,7 @@ bool Triangle::Intersect(Ray ray, double &t, double tmin, btVector3 &normal, btT
 	return true;
 }
 
-btVector3 Triangle::get_midpoint()
+btVector3 Triangle::GetMidPoint()
 {
 	return (pos[0] + pos[1] + pos[2]) / 3;
 }

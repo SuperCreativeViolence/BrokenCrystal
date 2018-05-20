@@ -8,7 +8,9 @@ Camera::Camera() :
 	yaw(0.0),
 	upVector(0.0, 1.0, 0.0),
 	nearPlane(1.0),
-	farPlane(1000.0)
+	farPlane(1000.0),
+	aperture(4),
+	focalLength(16)
 {
 
 }
@@ -117,7 +119,7 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 	return Ray(position, rayTo.normalize());
 }
 
-Ray Camera::GetRay(int x, int y, int sx, int sy)
+Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
 {
 	const double r1 = 2.0 * erand48();
 	const double r2 = 2.0 * erand48();
@@ -159,7 +161,22 @@ Ray Camera::GetRay(int x, int y, int sx, int sy)
 	rayTo += btScalar(x+dx) * dHor;
 	rayTo -= btScalar(y+dy) * dVert;
 
-	return Ray(position, rayTo.normalize());
+	Ray result = Ray(position, rayTo.normalize());
+
+	if (dof)
+	{
+		double u1 = (erand48() * 2.0) - 1.0;
+		double u2 = (erand48() * 2.0) - 1.0;
+
+		double fac = (double) (2 * 3.14159265358979323846 * u2);
+
+		btVector3 offset = aperture * btVector3(u1 * cos(fac), u1 * sin(fac), 0.0);
+		btVector3 focalPlaneIntersection = result.origin + result.direction * (focalLength / direction.dot(result.direction));
+		result.origin = result.origin + offset;
+		result.direction = (focalPlaneIntersection - result.origin).normalize();
+	}
+
+	return result;
 }
 
 int Camera::GetWidht()

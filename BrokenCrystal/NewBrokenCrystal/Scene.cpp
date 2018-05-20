@@ -63,16 +63,16 @@ void Scene::Initialize()
 	CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	CreateSphere(btVector3(0, 4, 0), 2, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
-	CreateSphere(btVector3(0, 10, 10), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
+	//CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(0, 4, 0), 2, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+	//CreateSphere(btVector3(0, 10, 10), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
 
-	CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
-	CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
+	//CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
+	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	CreateMesh(btVector3(0, 5, 0), "dragon2.obj", 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateMesh(btVector3(0, 5, 5), "dragon.obj", 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 }
 
 void Scene::AddObject(Object* object)

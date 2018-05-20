@@ -33,7 +33,7 @@ Object::~Object()
 	delete shape;
 }
 
-Sphere::Sphere(const btVector3 &position_, double radius_, float mass_, Material material_) : Object(new btSphereShape(radius_), position_, btQuaternion(1, 0, 0, 0), material_, mass_)
+Sphere::Sphere(const btVector3 &position_, double radius_, float mass_, Material material_) : Object(new btSphereShape(radius_), position_, btQuaternion(0, 0, 0, 1), material_, mass_)
 {
 	radius = radius_;
 }
@@ -62,7 +62,7 @@ ObjectIntersection Sphere::GetIntersection(const Ray& ray)
 	return ObjectIntersection(hit, distance, normal, material);
 }
 
-Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float mass, Material material_) : Object(new btEmptyShape(), position_, btQuaternion(1, 0, 0, 0), material_, mass)
+Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float mass, Material material_) : Object(new btEmptyShape(), position_, btQuaternion(0, 0, 0, 1), material_, mass)
 {
 	triangles = triangles_;
 	btTriangleMesh* triangleMesh = new btTriangleMesh();
@@ -88,7 +88,7 @@ Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float
 	body = new btRigidBody(cInfo);
 }
 
-Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Material material_) : Object(new btEmptyShape(), position_, btQuaternion(1, 0, 0, 0))
+Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Material material_) : Object(new btEmptyShape(), position_, btQuaternion(0, 0, 0, 1))
 {
 	std::string mtlBasePath;
 	std::string inputFile = filePath;

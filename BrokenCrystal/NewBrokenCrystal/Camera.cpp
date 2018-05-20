@@ -2,7 +2,7 @@
 
 Camera::Camera() :
 	position(10.0, 5.0, 0.0),
-	target(0.0, 0.0, 0.0),
+	target(0.0, 5.0, 0.0),
 	distance(16.0),
 	pitch(20.0),
 	yaw(0.0),

@@ -53,10 +53,13 @@ Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const
 		double r2s = sqrt(r2);
 
 		btVector3 w = nl;
-		btVector3 u = (fabs(w[0]) > 0.1 ? btVector3(0, 1, 0) : btVector3(1, 0, 0)).cross(w).normalize();
+		btVector3 u;
+		if (fabs(w[0]) > 0.1)
+			u = (btVector3(0.0, 1.0, 0.0).cross(w)).normalize();
+		else
+			u = (btVector3(1.0, 0.0, 0.0).cross(w)).normalize();
 		btVector3 v = w.cross(u);
-		btVector3 d = (u*cos(r1)*r2s + v * sin(r1)*r2s + w * sqrt(1 - r2)).normalize();
-
+		btVector3 d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).normalize();
 		return Ray(position, d);
 	}
 }

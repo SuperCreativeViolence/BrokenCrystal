@@ -78,46 +78,6 @@ void Camera::Zoom(float delta)
 
 Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 {
-	//GLint viewport[4];
-	//GLdouble modelview[16];
-	//GLdouble projection[16];
-	//GLfloat winX, winY, winZ;
-	//GLdouble posX, posY, posZ;
-
-	//glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	//glGetDoublev(GL_PROJECTION_MATRIX, projection);
-	//glGetIntegerv(GL_VIEWPORT, viewport);
-
-	//winX = (float)x;
-	//winY = (float)viewport[3] - (float)y;  // Subtract The Current Mouse Y Coordinate 
-
-	//glReadPixels(x, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);//Reads the depth buffer
-
-	//gluUnProject(winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-	//return Ray(position, (btVector3(posX, posY, posZ) - position).normalized());
-
-
-	//double xJitter = 0;
-	//double yJitter = 0;
-
-	//double xSpacing = (2.0 * aspectRatio) / (double)width;
-	//double ySpacing = (double)2. / height;
-
-	//btVector3 xDirection = btVector3(0, 0, 1).cross(direction * -1).normalize();
-	//btVector3 yDirection = xDirection.cross(direction).normalize();
-
-	//if (jitter)
-	//{
-	//	xJitter = (erand48(Xi) * xSpacing) - xSpacing * 0.5;
-	//	yJitter = (erand48(Xi) * ySpacing) - ySpacing * 0.5;
-	//}
-
-	//btVector3 pixel = position + direction * 2;
-	//pixel = pixel - xDirection * aspectRatio + xDirection * ((x * 2 * aspectRatio)*(1.0 / width)) + btVector3(xJitter, 0, 0);
-	//pixel = pixel + yDirection - yDirection * ((y * 2.0)*(1.0 / height) + yJitter);
-
-	//return Ray(position, (pixel - position).normalize());
-
 	float tanFov = 1.0f / nearPlane;
 	float fov = btScalar(1.3) * btAtan(tanFov);
 	double xJitter = 0;
@@ -153,6 +113,51 @@ Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 
 	rayTo += btScalar(x + xJitter) * dHor;
 	rayTo -= btScalar(y + yJitter) * dVert;
+
+	return Ray(position, rayTo.normalize());
+}
+
+Ray Camera::GetRay(int x, int y, int sx, int sy)
+{
+	const double r1 = 2.0 * erand48();
+	const double r2 = 2.0 * erand48();
+
+	double dx;
+	if (r1 < 1.0)
+		dx = sqrt(r1) - 1.0;
+	else
+		dx = 1.0 - sqrt(2.0 - r1);
+
+	double dy;
+	if (r2 < 1.0)
+		dy = sqrt(r2) - 1.0;
+	else
+		dy = 1.0 - sqrt(2.0 - r2);
+
+	float tanFov = 1.0f / nearPlane;
+	float fov = btScalar(1.3) * btAtan(tanFov);
+
+	btVector3 rayFrom = position;
+	btVector3 rayForward = (target - position);
+	rayForward.normalize();
+	rayForward *= farPlane;
+
+	btVector3 ver = upVector;
+	btVector3 hor = rayForward.cross(ver);
+	hor = hor.normalize();
+	ver = hor.cross(rayForward);
+	ver = ver.normalize();
+	hor *= 2.f * farPlane * fov;
+	ver *= 2.f * farPlane * fov;
+
+	hor *= aspectRatio;
+	btVector3 rayToCenter = rayFrom + rayForward;
+	btVector3 dHor = hor * 1.f / float(width);
+	btVector3 dVert = ver * 1.f / float(height);
+	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
+
+	rayTo += btScalar(x+dx) * dHor;
+	rayTo -= btScalar(y+dy) * dVert;
 
 	return Ray(position, rayTo.normalize());
 }

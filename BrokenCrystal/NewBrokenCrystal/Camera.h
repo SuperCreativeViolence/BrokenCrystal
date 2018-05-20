@@ -19,6 +19,7 @@ public:
 	void Zoom(float delta);
 	btVector3 GetScreenPosition(int x, int y);
 	Ray GetRay(int x, int y, bool jitter, unsigned short *Xi);
+	Ray GetRay(int x, int y, int sx, int sy);
 	int GetWidht();
 	int GetHeight();
 

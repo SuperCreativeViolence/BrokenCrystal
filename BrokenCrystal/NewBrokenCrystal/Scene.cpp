@@ -56,6 +56,9 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
+	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+
+
 	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
@@ -72,7 +75,7 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	CreateMesh(btVector3(0, 5, 5), "dragon.obj", 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 }
 
 void Scene::AddObject(Object* object)
@@ -420,19 +423,29 @@ void Scene::RenderPath(int samples)
 
 		for (int x = 0; x < width; x++)
 		{
-			btVector3 color = btVector3(0, 0, 0);
+			btVector3 resultColor = btVector3(0, 0, 0);
 
-			for (int s = 0; s < samples; s++)
+			for (int sy = 0; sy < 2; sy++)
 			{
-				Ray ray = camera->GetRay(x, y, s > 0, Xi);
-				color = color + TraceRay(ray, 0, Xi);
-				//printf("%f %f %f\n", color[0], color[1], color[2]);
-				//Sleep(1000);
+				for (int sx = 0; sx < 2; sx++)
+				{
+					btVector3 color = btVector3(0,0,0);
+					for (int s = 0; s < samples; s++)
+					{
+						//Ray ray = camera->GetRay(x, y, s > 0, Xi);
+						Ray ray = camera->GetRay(x, y, sx, sy);
+						color = color + TraceRay(ray, 0, Xi);
+						//printf("%f %f %f\n", color[0], color[1], color[2]);
+						//Sleep(1000);
+					}
+					resultColor = resultColor + color * samplesP;
+					//printf("final : %f %f %f\n", color[0] * samplesP, color[1] * samplesP, color[2] * samplesP);
+				}
 			}
-			//printf("final : %f %f %f\n", color[0] * samplesP, color[1] * samplesP, color[2] * samplesP);
-			pixelBuffer[(y)* width + x] = color * samplesP;
+			pixelBuffer[(y) * width + x] = resultColor * 0.25;
 		}
 	}
+	fprintf(stderr, "\rRendering (%i samples): done", samples);
 }
 
 

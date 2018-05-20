@@ -32,6 +32,7 @@ public:
 	void AddObject(Object* object);
 	void CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
 	void CreateSphere(const btVector3 &position, double radius, float mass, Material material);
+	void CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
 
 	// input
 	bool IsKeyDown(unsigned char key);
@@ -93,7 +94,7 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 10;
+	int samples = 4;
 	btVector3* pixelBuffer;
 
 };

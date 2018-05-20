@@ -1,10 +1,11 @@
 #include "Material.h"
 
-Material::Material(MaterialType type_, btVector3 color_, btVector3 emission_)
+Material::Material(MaterialType type_, btVector3 color_, btVector3 emission_, Texture texture_)
 {
 	type = type_;
 	color = color_;
 	emission = emission_;
+	texture = texture_;
 }
 
 MaterialType Material::GetType() const
@@ -14,6 +15,14 @@ MaterialType Material::GetType() const
 
 btVector3 Material::GetColor() const
 {
+	return color;
+}
+
+btVector3 Material::GetColorAt(double u, double v) const
+{
+	if (texture.IsLoaded())
+		return texture.GetPixel(u, v);
+
 	return color;
 }
 

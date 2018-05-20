@@ -3,38 +3,16 @@
 
 #include "Material.h"
 #include "OpenglMotionState.h"
-#include <btBulletDynamicsCommon.h>
 #include <BulletCollision\CollisionShapes\btShapeHull.h>
 #include <btBulletCollisionCommon.h>
 #include <LinearMath/btQuaternion.h>
+#include "KDTree.h"
 
+#include <iostream>
 #include <assert.h>
 #include <limits>
 
-#define EPSILON 1e-4
-
-struct ObjectIntersection
-{
-	bool hit;
-	double u;
-	btVector3 normal;
-	Material material;
-	ObjectIntersection(bool hit_ = false, double u_ = 0, const btVector3& normal_ = btVector3(0, 0, 0), Material material_ = Material());
-};
-
-
-struct Triangle
-{
-public:
-	Triangle(const btVector3 &pos1_, const btVector3 &pos2_, const btVector3 &pos3_, Material material_);
-	ObjectIntersection GetIntersection(const Ray& ray, btTransform transform);
-	Material GetMaterial();
-	btVector3 pos[3];
-private:
-	double d;
-	Material material;
-
-};
+#define USE_KDTREE
 
 class Object
 {
@@ -102,11 +80,13 @@ class Mesh : public Object
 {
 public:
 	Mesh(const btVector3& position_, std::vector<Triangle*> triangles_, float mass, Material material_);
+	Mesh(const btVector3& position_, const char* filePath, float mass, Material material_);
 	virtual ObjectIntersection GetIntersection(const Ray& ray) override;
 	std::vector<Triangle*> GetTriangles() const;
 
 private:
 	std::vector<Triangle*> triangles;
+	KDNode *node;
 };
 
 #endif

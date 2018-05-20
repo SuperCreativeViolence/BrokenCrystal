@@ -1,6 +1,7 @@
-#include <LinearMath\btVector3.h>
 #ifndef RAY_H
 #define RAY_H
+
+#include <LinearMath\btVector3.h>
 
 struct Ray
 {

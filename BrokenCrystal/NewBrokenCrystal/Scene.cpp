@@ -56,12 +56,12 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	CreateBox(btVector3(0, 0, 0), btVector3(1, 30, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 30, 0), btVector3(1, 30, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	CreateBox(btVector3(30, 15, 0), btVector3(15, 1, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	CreateBox(btVector3(-30, 15, 0), btVector3(15, 1, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	CreateBox(btVector3(0, 15, 30), btVector3(15, 30, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 15, -30), btVector3(15, 30, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
 	CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	CreateSphere(btVector3(0, 4, 0), 2, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
@@ -70,41 +70,9 @@ void Scene::Initialize()
 
 	CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
 	CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
+	CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-
-	float halfWidth = 2.0f;
-	float halfHeight = 1.0f;
-	float halfDepth = 1.0f;
-
-	btVector3 vertices[8] =
-	{
-		btVector3(halfWidth, halfHeight, halfDepth),
-		btVector3(-halfWidth, halfHeight, halfDepth),
-		btVector3(halfWidth, -halfHeight, halfDepth),
-		btVector3(-halfWidth, -halfHeight, halfDepth),
-		btVector3(halfWidth * 2, halfHeight *2, -halfDepth),
-		btVector3(-halfWidth, halfHeight, -halfDepth),
-		btVector3(halfWidth, -halfHeight, -halfDepth),
-		btVector3(-halfWidth * 3, -halfHeight, -halfDepth)
-	};
-
-	static int indices[36] =
-	{
-		0, 1, 2, 3, 2, 1, 4, 0, 6,
-		6, 0, 2, 5, 1, 4, 4, 1, 0,
-		7, 3, 1, 7, 1, 5, 5, 4, 7,
-		7, 4, 6, 7, 2, 3, 7, 6, 2
-	};
-
-	std::vector<Triangle*> triangles;
-
-	for (int i = 0; i < 36; i += 3)
-	{
-		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], Material(DIFF, btVector3(0.5, 0.3, 0.6))));
-	}
-
-	AddObject(static_cast<Object*>(new Mesh(btVector3(0, 8, 0), triangles, 1, Material())));
+	CreateMesh(btVector3(0, 5, 0), "dragon2.obj", 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 }
 
 void Scene::AddObject(Object* object)
@@ -154,6 +122,11 @@ void Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, f
 void Scene::CreateSphere(const btVector3 &position, double radius, float mass, Material material)
 {
 	AddObject(static_cast<Object*>(new Sphere(position, radius, mass, material)));
+}
+
+void Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
+{
+	AddObject(static_cast<Object*>(new Mesh(position, fileName, mass, material)));
 }
 
 bool Scene::IsKeyDown(unsigned char key)
@@ -283,7 +256,7 @@ void Scene::UpdateScene(float dt)
 		Ray ray = camera->GetRay(mousePos[0], mousePos[1], true, nullptr);
 		system("cls");
 		btVector3 color = DebugPathTest(ray, 0, ray.origin);
-		printf("%.1f %.1f %.1f\n", color[0], color[1], color[2]);
+		printf("\nresult = %.1f %.1f %.1f\n", color[0], color[1], color[2]);
 	}
 
 	world->stepSimulation(dt);

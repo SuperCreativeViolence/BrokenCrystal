@@ -4,6 +4,7 @@ Camera::Camera() :
 	position(10.0, 5.0, 0.0),
 	target(0.0, 5.0, 0.0),
 	distance(16.0),
+	fov(100),
 	pitch(20.0),
 	yaw(0.0),
 	upVector(0.0, 1.0, 0.0),
@@ -33,7 +34,8 @@ void Camera::UpdateCamera()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glViewport(0, 0, width, height);
-	glFrustum(-aspectRatio * nearPlane, aspectRatio * nearPlane, -nearPlane, nearPlane, nearPlane, farPlane);
+	//glFrustum(-aspectRatio * nearPlane, aspectRatio * nearPlane, -nearPlane, nearPlane, nearPlane, farPlane);
+	gluPerspective(fov, aspectRatio, nearPlane, farPlane);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	float p = btRadians(pitch);
@@ -79,43 +81,34 @@ void Camera::Zoom(float delta)
 
 Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
 {
-	float tanFov = 1.0f / nearPlane;
-	float fov = btScalar(1.3) * btAtan(tanFov);
-	double xJitter = 0;
-	double yJitter = 0;
+	const double r1 = 2.0 * erand48();
+	const double r2 = 2.0 * erand48();
 
-	double xSpacing = (2.0 * aspectRatio) / (double)width;
-	double ySpacing = (double)2. / height;
+	double dx;
+	if (r1 < 1.0)
+		dx = sqrt(r1) - 1.0;
+	else
+		dx = 1.0 - sqrt(2.0 - r1);
 
-	btVector3 rayFrom = position;
-	btVector3 rayForward = (target - position);
-	rayForward.normalize();
-	rayForward *= farPlane;
+	double dy;
+	if (r2 < 1.0)
+		dy = sqrt(r2) - 1.0;
+	else
+		dy = 1.0 - sqrt(2.0 - r2);
 
-	btVector3 ver = upVector;
-	btVector3 hor = rayForward.cross(ver);
-	hor = hor.normalize();
-	ver = hor.cross(rayForward);
-	ver = ver.normalize();
-	hor *= 2.f * farPlane * fov;
-	ver *= 2.f * farPlane * fov;
+	btVector3 wDir = btVector3(-direction).normalize();
+	btVector3 uDir = upVector.cross(wDir).normalize();
+	btVector3 vDir = wDir.cross(-uDir);
 
-	if (jitter)
-	{
-		xJitter = erand48(Xi);
-		yJitter = erand48(Xi);
-	}
+	float top = tan(btRadians(fov * 0.5));
+	float right = aspectRatio * top;
+	float bottom = -top;
+	float left = -right;
 
-	hor *= aspectRatio;
-	btVector3 rayToCenter = rayFrom + rayForward;
-	btVector3 dHor = hor * 1.f / float(width);
-	btVector3 dVert = ver * 1.f / float(height);
-	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
+	float imPlaneUPos = left + (right - left)*(((float)x + dx + 0.5f) / (float)width);
+	float imPlaneVPos = bottom + (top - bottom)*(((float)y + dy + 0.5f) / (float)height);
 
-	rayTo += btScalar(x + xJitter) * dHor;
-	rayTo -= btScalar(y + yJitter) * dVert;
-
-	return Ray(position, rayTo.normalize());
+	return Ray(position, (imPlaneUPos*uDir + imPlaneVPos * vDir - wDir).normalize());
 }
 
 Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
@@ -135,39 +128,26 @@ Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
 	else
 		dy = 1.0 - sqrt(2.0 - r2);
 
-	float tanFov = 1.0f / nearPlane;
-	float fov = btScalar(1.3) * btAtan(tanFov);
+	btVector3 wDir = btVector3(-direction).normalize();
+	btVector3 uDir = upVector.cross(wDir).normalize();
+	btVector3 vDir = wDir.cross(-uDir);
 
-	btVector3 rayFrom = position;
-	btVector3 rayForward = (target - position);
-	rayForward.normalize();
-	rayForward *= farPlane;
+	float top = tan(btRadians(fov * 0.5));
+	float right = aspectRatio * top;
+	float bottom = -top;
+	float left = -right;
 
-	btVector3 ver = upVector;
-	btVector3 hor = rayForward.cross(ver);
-	hor = hor.normalize();
-	ver = hor.cross(rayForward);
-	ver = ver.normalize();
-	hor *= 2.f * farPlane * fov;
-	ver *= 2.f * farPlane * fov;
+	float imPlaneUPos = left + (right - left)*(((float)x + sx + dx + 0.5f) / (float)width);
+	float imPlaneVPos = bottom + (top - bottom)*(((float)y + sy + dy + 0.5f) / (float)height);
 
-	hor *= aspectRatio;
-	btVector3 rayToCenter = rayFrom + rayForward;
-	btVector3 dHor = hor * 1.f / float(width);
-	btVector3 dVert = ver * 1.f / float(height);
-	btVector3 rayTo = rayToCenter - 0.5f * hor + 0.5f * ver;
-
-	rayTo += btScalar(x+dx) * dHor;
-	rayTo -= btScalar(y+dy) * dVert;
-
-	Ray result = Ray(position, rayTo.normalize());
+	Ray result = Ray(position, (imPlaneUPos*uDir + imPlaneVPos * vDir - wDir).normalize());
 
 	if (dof)
 	{
 		double u1 = (erand48() * 2.0) - 1.0;
 		double u2 = (erand48() * 2.0) - 1.0;
 
-		double fac = (double) (2 * 3.14159265358979323846 * u2);
+		double fac = (double)(2 * 3.14159265358979323846 * u2);
 
 		btVector3 offset = aperture * btVector3(u1 * cos(fac), u1 * sin(fac), 0.0);
 		btVector3 focalPlaneIntersection = result.origin + result.direction * (focalLength / direction.dot(result.direction));
@@ -176,6 +156,7 @@ Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
 	}
 
 	return result;
+
 }
 
 int Camera::GetWidht()

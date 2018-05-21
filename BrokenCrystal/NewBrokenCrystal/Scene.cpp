@@ -58,7 +58,6 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-
 	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
@@ -75,7 +74,22 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	//CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+
+
+
+	// material test
+	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateSphere(btVector3(-7, 1, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
+	CreateSphere(btVector3(-3, 1, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateSphere(btVector3(3, 1, 0), 3, 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
+	CreateSphere(btVector3(7, 1, 0), 3, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
+
 }
 
 void Scene::AddObject(Object* object)
@@ -422,7 +436,7 @@ void Scene::RenderPath(int samples)
 	for (int y = 0; y < height; y++)
 	{
 		unsigned short Xi[3] = { 0, 0, y*y*y };
-		fprintf(stderr, "\rRendering (%i samples): %.2f%% | Estimated time : %0.4fs", samples, (double)y / height * 100, ((float) (clock.getTimeMilliseconds() - time) / 1000) * (height / (float)y)  );
+		fprintf(stderr, "\rRendering (%i samples): %.2f%% | Time remaining : %0.4fs", samples, (double)y / height * 100, ((float)(clock.getTimeMilliseconds() - time) / 1000) * ((height / (float)y) - 1));
 
 		for (int x = 0; x < width; x++)
 		{
@@ -476,7 +490,7 @@ btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
 	}
 
 	btVector3 pos = ray.origin + ray.direction * intersection.u;
-	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, Xi);
+	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, color);
 	return color * TraceRay(reflected, depth, Xi);
 }
 
@@ -500,7 +514,7 @@ void Scene::DebugTraceRay()
 	}
 
 	btVector3 pos = ray.origin + ray.direction * intersection.u;
-	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, Xi);
+	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, color);
 	ObjectIntersection intersection2 = Intersect(reflected);
 	btVector3 pos2 = reflected.origin + reflected.direction * intersection2.u;
 	glPushMatrix();
@@ -564,7 +578,7 @@ btVector3 Scene::DebugPathTest(const Ray &ray, int depth, btVector3 hitPos)
 		}
 	}
 	printf("%.1f %.1f %.1f -> ", color[0], color[1], color[2]);
-	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, nullptr);
+	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, color);
 
 	glPushMatrix();
 
@@ -626,7 +640,8 @@ void Scene::SaveImage(const char *filePath)
 		buffer.push_back(toInt(pixelBuffer[i].z()));
 		buffer.push_back(255);
 	}
-
+	ImageDenoiser denoiser;
+	buffer = denoiser.gray_median_news(width, height, buffer);
 	unsigned error = lodepng::encode(filePath, buffer, width, height);
 	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 

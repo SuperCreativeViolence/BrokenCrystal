@@ -52,6 +52,6 @@ btVector3 Texture::GetPixel(double u, double v) const
 
 bool Texture::IsLoaded() const
 {
-	return IsLoaded();
+	return loaded;
 }
 

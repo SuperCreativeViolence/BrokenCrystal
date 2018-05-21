@@ -11,7 +11,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-enum MaterialType { DIFF, SPEC, EMIT };
+enum MaterialType { DIFF, GLOSS, TRANS, SPEC, EMIT };
 
 class Material
 {
@@ -21,7 +21,7 @@ public:
 	btVector3 GetColor() const;
 	btVector3 GetColorAt(double u, double v) const;
 	btVector3 GetEmission() const;
-	Ray GetReflectedRay(const Ray &ray, const btVector3 &position, const btVector3 &normal, unsigned short *Xi) const;
+	Ray GetReflectedRay(const Ray &ray, const btVector3 &position, const btVector3 &normal, btVector3 &color) const;
 
 
 private:

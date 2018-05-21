@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ImageDenoiser.cpp" />
     <ClCompile Include="KDTree.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="erand48.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="erand48.h" />
     <ClInclude Include="GLUTCallBack.h" />
+    <ClInclude Include="ImageDenoiser.h" />
     <ClInclude Include="Intersection.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="Material.h" />

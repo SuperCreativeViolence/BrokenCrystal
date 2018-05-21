@@ -34,7 +34,7 @@ private:
 	float distance;
 	float pitch;
 	float yaw;
-
+	float fov;
 	float aspectRatio;
 
 	int width;

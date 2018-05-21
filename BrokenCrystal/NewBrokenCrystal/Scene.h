@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Object.h"
 #include "lodepng.h"
+#include "ImageDenoiser.h"
 
 #include <iostream>
 #include <vector>
@@ -94,7 +95,7 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 1000;
+	int samples = 1;
 	btVector3* pixelBuffer;
 
 };

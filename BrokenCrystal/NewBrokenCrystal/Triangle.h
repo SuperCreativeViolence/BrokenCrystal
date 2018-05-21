@@ -19,7 +19,7 @@ public:
 
 	btVector3 GetMidPoint();
 	btVector3 GetBarycentric(btVector3 pos);
-	btVector3 GetColorAt(btVector3 pos);
+	btVector3 GetColorAt(btVector3 pos = btVector3(0,0,0));
 
 
 	btVector3 pos[3];

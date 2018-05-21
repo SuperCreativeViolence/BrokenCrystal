@@ -22,6 +22,7 @@ public:
 	Ray GetRay(int x, int y, int sx, int sy, bool dof = false);
 	int GetWidht();
 	int GetHeight();
+	btVector3 GetPosition();
 
 private:
 	btVector3 position;

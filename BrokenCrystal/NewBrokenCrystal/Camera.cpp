@@ -15,7 +15,6 @@ Camera::Camera() :
 
 }
 
-
 Camera::~Camera()
 {
 }
@@ -187,4 +186,9 @@ int Camera::GetWidht()
 int Camera::GetHeight()
 {
 	return height;
+}
+
+btVector3 Camera::GetPosition()
+{
+	return position;
 }

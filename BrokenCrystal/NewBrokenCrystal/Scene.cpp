@@ -304,7 +304,7 @@ void Scene::DrawShape(Object* object)
 		case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
 		{
 			const Mesh* mesh = static_cast<const Mesh*>(object);
-			DrawMesh(mesh->GetTriangles());
+			DrawMesh(mesh);
 			break;
 		}
 	}
@@ -400,10 +400,12 @@ void Scene::DrawTriangle(const btVector3 &p0, const btVector3 &p1, const btVecto
 	glEnd();
 }
 
-void Scene::DrawMesh(std::vector<Triangle*> triangles)
+void Scene::DrawMesh(const Mesh* mesh)
 {
+	std::vector<Triangle*> triangles = mesh->GetTriangles();
 	for (auto & triangle : triangles)
 	{
+		glColor3fv(triangle->GetColorAt());
 		DrawTriangle(triangle->pos[0], triangle->pos[1], triangle->pos[2]);
 	}
 }
@@ -420,7 +422,7 @@ void Scene::RenderPath(int samples)
 	for (int y = 0; y < height; y++)
 	{
 		unsigned short Xi[3] = { 0, 0, y*y*y };
-		fprintf(stderr, "\rRendering (%i samples): %.2f%% ", samples, (double)y / height * 100);
+		fprintf(stderr, "\rRendering (%i samples): %.2f%% | Estimated time : %0.4fs", samples, (double)y / height * 100, ((float) (clock.getTimeMilliseconds() - time) / 1000) * (height / (float)y)  );
 
 		for (int x = 0; x < width; x++)
 		{

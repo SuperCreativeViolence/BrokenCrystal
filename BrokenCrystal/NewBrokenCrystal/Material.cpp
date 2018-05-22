@@ -20,7 +20,7 @@ btVector3 Material::GetColor() const
 
 btVector3 Material::GetColorAt(double u, double v) const
 {
-	if (texture->IsLoaded())
+	if (texture != nullptr && texture->IsLoaded())
 		return texture->GetPixel(u, v);
 
 	return color;

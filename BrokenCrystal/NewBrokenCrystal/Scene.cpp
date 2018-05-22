@@ -22,6 +22,7 @@ Scene::~Scene()
 
 void Scene::Initialize()
 {
+
 	// opengl Light ÃÊ±âÈ­
 	GLfloat ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f }; // dark grey
 	GLfloat diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // white
@@ -64,7 +65,7 @@ void Scene::Initialize()
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateMesh(btVector3(0, 5, 0), "obj/table.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	CreateMesh(btVector3(0, 5, 0), "table.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 
 
 	//CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
@@ -96,7 +97,6 @@ void Scene::Initialize()
 
 void Scene::AddObject(Object* object)
 {
-	assert(world);
 	objects.push_back(object);
 	world->addRigidBody(object->GetRigidBody());
 }
@@ -251,8 +251,6 @@ void Scene::Display()
 
 void Scene::UpdateScene(float dt)
 {
-	assert(world);
-
 	if (IsKeyDown('w'))
 	{
 		camera->Zoom(.1);
@@ -646,5 +644,9 @@ void Scene::SaveImage(const char *filePath)
 	unsigned error = lodepng::encode(filePath, buffer, width, height);
 	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 
+	std::vector<unsigned char> vclear;
+	buffer.swap(vclear);
+	vclear.clear();
 	buffer.clear();
+	buffer.shrink_to_fit();
 }

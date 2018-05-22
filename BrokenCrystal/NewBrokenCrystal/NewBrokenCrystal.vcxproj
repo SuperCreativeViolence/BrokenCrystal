@@ -73,6 +73,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)include;$(SolutionDir)include\gl;$(SolutionDir)include\BulletPhysics;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <ExecutablePath>$(SolutionDir)dll;$(ExecutablePath)</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -92,10 +95,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>App_BulletExampleBrowser.lib;App_PhysicsServerSharedMemoryBridgeTCP.lib;App_PhysicsServerSharedMemoryBridgeUDP.lib;App_PhysicsServerTCP.lib;App_PhysicsServerUDP.lib;App_PhysicsServer_SharedMemory.lib;App_PhysicsServer_SharedMemory_GUI.lib;App_RobotSimulator.lib;Bullet2FileLoader.lib;Bullet3Collision.lib;Bullet3Common.lib;Bullet3Dynamics.lib;Bullet3Geometry.lib;Bullet3OpenCL_clew.lib;BulletCollision.lib;BulletDynamics.lib;BulletExampleBrowserLib.lib;BulletFileLoader.lib;BulletInverseDynamics.lib;BulletInverseDynamicsUtils.lib;BulletSoftBody.lib;BulletWorldImporter.lib;BulletXmlWorldImporter.lib;BussIK.lib;clsocket.lib;ConvexDecomposition.lib;enet.lib;freeglut.lib;GLAUX.LIB;GLU32.LIB;glut32.lib;gtest.lib;gwen.lib;HACD.lib;LinearMath.lib;OPENGL32.LIB;OpenGL_Window.lib;pybullet_testplugin.lib;pybullet_tinyRendererPlugin.lib;pybullet_vrSyncPlugin.lib;Test_PhysicsClientTCP.lib;Test_PhysicsClientUDP.lib;Test_PhysicsServerDirect.lib;Test_PhysicsServerInProcessExampleBrowser.lib;Test_PhysicsServerLoopBack.lib;Test_SharedMemoryPhysicsClient.lib;vhacd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

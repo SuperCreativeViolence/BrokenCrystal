@@ -9,7 +9,6 @@
 #include "Camera.h"
 #include "Object.h"
 #include "lodepng.h"
-#include "ImageDenoiser.h"
 
 #include <iostream>
 #include <vector>

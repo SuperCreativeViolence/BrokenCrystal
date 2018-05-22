@@ -97,8 +97,7 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 
 	std::vector<tinyobj::shape_t> obj_shapes;
 	std::vector<tinyobj::material_t> obj_materials;
-
-	//std::vector<Material> materials;
+	std::vector<Material> materials;
 
 	printf("Loading %s...\n", filePath);
 	std::string err = tinyobj::LoadObj(obj_shapes, obj_materials, inputFile.c_str(), mtlBasePath.c_str());
@@ -108,21 +107,26 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 		std::cerr << err << std::endl;
 	}
 
-	//for (int i = 0; i < obj_materials.size(); i++)
-	//{
-	//	std::string texturePath = "";
+	for (int i = 0; i < obj_materials.size(); i++)
+	{
+		std::string texturePath = "";
 
-	//	if (!obj_materials[i].diffuse_texname.empty())
-	//	{
-	//		if (obj_materials[i].diffuse_texname[0] == '/') texturePath= obj_materials[i].diffuse_texname;
-	//		texturePath = mtlBasePath + obj_materials[i].diffuse_texname;
-	//		materials.push_back(Material(DIFF, btVector3(1, 1, 1), btVector3(), texturePath.c_str()));
-	//	}
-	//	else
-	//	{
-	//		materials.push_back(Material(DIFF, btVector3(1, 1, 1), btVector3()));
-	//	}
-	//}
+		btVector3 diffuseColor = btVector3(obj_materials[i].diffuse[0], obj_materials[i].diffuse[1], obj_materials[i].diffuse[2]);
+		btVector3 emissionColor = btVector3(obj_materials[i].emission[0], obj_materials[i].emission[1], obj_materials[i].emission[2]);
+
+		if (!obj_materials[i].diffuse_texname.empty())
+		{
+			if (obj_materials[i].diffuse_texname[0] == '/') texturePath = obj_materials[i].diffuse_texname;
+			texturePath = mtlBasePath + obj_materials[i].diffuse_texname;
+			materials.push_back(Material(material.GetType(), diffuseColor, emissionColor, new Texture(texturePath.c_str())));
+		}
+		else
+		{
+			materials.push_back(Material(material.GetType(), diffuseColor, emissionColor));
+		}
+	}
+
+	btTriangleMesh* triangleMesh = new btTriangleMesh();
 
 	long shapeSize, indicesSize;
 	shapeSize = obj_shapes.size();
@@ -133,7 +137,6 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 		for (size_t f = 0; f < indicesSize; f++)
 		{
 
-			// Triangle vertex coordinates
 			btVector3 v0_ = btVector3(
 				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f] * 3],
 				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f] * 3 + 1],
@@ -154,7 +157,6 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 
 			btVector3 t0_, t1_, t2_;
 
-			//Attempt to load triangle texture coordinates
 			if (obj_shapes[i].mesh.indices[3 * f + 2] * 2 + 1 < obj_shapes[i].mesh.texcoords.size())
 			{
 				t0_ = btVector3(
@@ -177,26 +179,27 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 			}
 			else
 			{
-				t0_ = btVector3();
-				t1_ = btVector3();
-				t2_ = btVector3();
+				t0_ = btVector3(0,0,0);
+				t1_ = btVector3(0,0,0);
+				t2_ = btVector3(0,0,0);
 			}
 
-			//if (obj_shapes[i].mesh.material_ids[f] < materials.size())
-			//	triangles.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, materials[obj_shapes[i].mesh.material_ids[f]]));
-			//else
-			//	triangles.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, material));
-			triangles.push_back(new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, material_));
+			Triangle* triangle;
+			if (obj_shapes[i].mesh.material_ids[f] < materials.size())
+			{
+				triangle = new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, materials[obj_shapes[i].mesh.material_ids[f]]);
+			}
+			else
+			{
+				triangle = new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, Material());
+			}
+			triangles.push_back(triangle);
+			triangleMesh->addTriangle(triangle->pos[0], triangle->pos[1], triangle->pos[2]);
 		}
 	}
 
-	btTriangleMesh* triangleMesh = new btTriangleMesh();
-	for (auto & triangle : triangles)
-	{
-		triangleMesh->addTriangle(triangle->pos[0], triangle->pos[1], triangle->pos[2]);
-	}
-
 	// KDTree
+	printf("Build KD-Tree\n");
 	node = KDNode().Build(triangles, 0);
 
 	btConvexShape* tempShape = new btConvexTriangleMeshShape(triangleMesh);
@@ -214,6 +217,7 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 
 	obj_shapes.clear();
 	obj_materials.clear();
+	materials.clear();
 }
 
 ObjectIntersection Mesh::GetIntersection(const Ray& ray)

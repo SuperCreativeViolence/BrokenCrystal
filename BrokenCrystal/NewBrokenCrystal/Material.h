@@ -16,7 +16,7 @@ enum MaterialType { DIFF, GLOSS, TRANS, SPEC, EMIT };
 class Material
 {
 public:
-	Material(MaterialType type_ = DIFF, btVector3 color_ = btVector3(1, 1, 1), btVector3 emission_ = btVector3(0, 0, 0), Texture texture_ = Texture());
+	Material(MaterialType type_ = DIFF, btVector3 color_ = btVector3(1, 1, 1), btVector3 emission_ = btVector3(0, 0, 0), Texture* texture_ = new Texture());
 	MaterialType GetType() const;
 	btVector3 GetColor() const;
 	btVector3 GetColorAt(double u, double v) const;
@@ -28,7 +28,7 @@ private:
 	MaterialType type;
 	btVector3 color;
 	btVector3 emission;
-	Texture texture;
+	Texture* texture;
 };
 
 #endif

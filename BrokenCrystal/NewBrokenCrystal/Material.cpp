@@ -1,6 +1,6 @@
 #include "Material.h"
 
-Material::Material(MaterialType type_, btVector3 color_, btVector3 emission_, Texture texture_)
+Material::Material(MaterialType type_, btVector3 color_, btVector3 emission_, Texture* texture_)
 {
 	type = type_;
 	color = color_;
@@ -20,8 +20,8 @@ btVector3 Material::GetColor() const
 
 btVector3 Material::GetColorAt(double u, double v) const
 {
-	if (texture.IsLoaded())
-		return texture.GetPixel(u, v);
+	if (texture->IsLoaded())
+		return texture->GetPixel(u, v);
 
 	return color;
 }
@@ -36,7 +36,12 @@ Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const
 	
 	if (type == SPEC)
 	{
-		double roughness = 0.8;
+		btVector3 reflected = ray.direction - normal * 2 * normal.dot(ray.direction);
+		return Ray(position, reflected);
+	}
+	else if (type == GLOSS)
+	{
+		double roughness = 2.0;
 		btVector3 reflected = ray.direction - normal * 2 * normal.dot(ray.direction);
 		reflected = btVector3(
 			reflected[0] + (erand48() - 0.5) * roughness,
@@ -45,29 +50,6 @@ Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const
 		).normalize();
 
 		return Ray(position, reflected);
-	}
-	else if (type == GLOSS)
-	{
-		btVector3 nl = normal.dot(ray.direction) < 0 ? normal : normal * -1;
-		double r1 = 2 * M_PI * erand48();
-		double r2 = pow(erand48(), 1.0) / (100.0 + 1.0);
-		double r2s = sqrt(1.0 - r2 * r2);
-
-		btVector3 w = (ray.direction - nl * 2.0 * nl.dot(ray.direction)).normalize();
-		btVector3 u;
-		if (fabs(w[0]) > 0.1)
-			u = (btVector3(0.0, 1.0, 0.0).cross(w)).normalize();
-		else
-			u = (btVector3(1.0, 0.0, 0.0).cross(w)).normalize();
-		btVector3 v = w.cross(u);
-		btVector3 d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * r2).normalize();
-
-		double orientation = nl.dot(d);
-
-		if (orientation < 0)
-			d = d - w * 2.0 * w.dot(d);
-
-		return Ray(position, d);
 	}
 	else if (type == DIFF)
 	{

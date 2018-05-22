@@ -128,14 +128,14 @@ btVector3 Triangle::GetBarycentric(btVector3 position)
 
 btVector3 Triangle::GetColorAt(btVector3 pos)
 {
-	//btVector3 b = GetBarycentric(pos);
-	//btVector3 c = btVector3();
-	//c = c + (t0 * b[0]);
-	//c = c + (t1 * b[1]);
-	//c = c + (t2 * b[z]);
+	btVector3 b = GetBarycentric(pos);
+	btVector3 c = btVector3(0,0,0);
+	c = c + (tex[0] * b[0]);
+	c = c + (tex[1] * b[1]);
+	c = c + (tex[2] * b[2]);
 
-	//return m->get_colour_at(c.[0], c.[1]);
-	if (material.GetType() == EMIT)
-		return material.GetEmission();
-	return material.GetColor();
+	return material.GetColorAt(c[0], c[1]);
+	//if (material.GetType() == EMIT)
+	//	return material.GetEmission();
+	//return material.GetColor();
 }

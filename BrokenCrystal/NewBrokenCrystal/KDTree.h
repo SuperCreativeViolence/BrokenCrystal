@@ -12,7 +12,7 @@ class KDNode
 public:
 	KDNode() {};
 	KDNode* Build(std::vector<Triangle*> &triangles_, int depth);
-	bool Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector3 &normal, Material &m, btTransform transform);
+	bool Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector3 &normal, Material &material, btTransform transform);
 
 	AABBox box;
 	KDNode* left;

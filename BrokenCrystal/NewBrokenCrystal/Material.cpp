@@ -127,3 +127,8 @@ Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const
 		exit(0);
 	}
 }
+
+void Material::SetColor(const btVector3& color)
+{
+	this->color = color;
+}

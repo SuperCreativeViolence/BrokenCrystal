@@ -22,7 +22,7 @@ public:
 	btVector3 GetColorAt(double u, double v) const;
 	btVector3 GetEmission() const;
 	Ray GetReflectedRay(const Ray &ray, const btVector3 &position, const btVector3 &normal, btVector3 &color) const;
-
+	void SetColor(const btVector3& color);
 
 private:
 	MaterialType type;

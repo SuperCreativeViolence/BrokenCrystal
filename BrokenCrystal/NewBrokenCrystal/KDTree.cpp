@@ -86,7 +86,7 @@ KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 	return node;
 }
 
-bool KDNode::Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector3 &normal, Material &m, btTransform transform)
+bool KDNode::Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector3 &normal, Material& material, btTransform transform)
 {
 	double dist;
 	assert(node->box);
@@ -102,10 +102,10 @@ bool KDNode::Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector
 		if (!node->leaf)
 		{
 			//if ( node->left->triangles.size() > 0 )
-			hit_left = Hit(node->left, ray, t, tmin, normal, m, transform);
+			hit_left = Hit(node->left, ray, t, tmin, normal, material, transform);
 
 			//if ( node->right->triangles.size() > 0 )
-			hit_right = Hit(node->right, ray, t, tmin, normal, m, transform);
+			hit_right = Hit(node->right, ray, t, tmin, normal, material, transform);
 
 			return hit_left || hit_right;
 		}
@@ -124,8 +124,9 @@ bool KDNode::Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector
 			if (hit_tri)
 			{
 				btVector3 p = ray.origin + ray.direction * tmin;
-				//c = node->triangles[tri_idx]->GetColorAt(p);
-				m = node->triangles[tri_idx]->GetMaterial();
+				btVector3 color = node->triangles[tri_idx]->GetColorAt(p);
+				material = node->triangles[tri_idx]->GetMaterial();
+				material.SetColor(color);
 				return true;
 			}
 		}

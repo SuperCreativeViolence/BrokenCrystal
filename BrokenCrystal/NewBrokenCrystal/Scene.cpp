@@ -100,9 +100,19 @@ void Scene::Initialize()
 	//CreateSphere(btVector3(7, 1, 0), 3, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
 	// island
-	CreateMesh(btVector3(0, 5, 0), "island.obj", 0, Material());
-	CreateMesh(btVector3(0, 5, 0), "water.obj", 0, Material());
-	CreateSphere(btVector3(100, 100, 100), 100, 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(6, 6, 6)));
+	//CreateMesh(btVector3(0, 5, 0), "island.obj", 0, Material());
+	//CreateMesh(btVector3(0, 5, 0), "water.obj", 0, Material());
+	//CreateSphere(btVector3(100, 100, 100), 100, 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(6, 6, 6)));
+
+	// dof test
+	CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateSphere(btVector3(0, 3, -9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	CreateSphere(btVector3(0, 3, -6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	CreateSphere(btVector3(0, 3, -3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	CreateSphere(btVector3(0, 3, 0), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	CreateSphere(btVector3(0, 3, 3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	CreateSphere(btVector3(0, 3, 6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	CreateSphere(btVector3(0, 3, 9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
 
 }
 
@@ -146,11 +156,6 @@ void Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, f
 	}
 
 	AddObject(static_cast<Object*>(new Mesh(position, triangles, mass, material)));
-
-	for (auto& triangle : triangles)
-	{
-		delete triangle;
-	}
 	triangles.clear();
 	triangles.shrink_to_fit();
 }

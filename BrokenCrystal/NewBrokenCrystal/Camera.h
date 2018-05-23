@@ -1,7 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <freeglut.h>
+#include <GL/freeglut.h>
 #include <btBulletDynamicsCommon.h>
 #include <assert.h>
 #include "Ray.h"

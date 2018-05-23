@@ -3,6 +3,7 @@
 
 #define EPSILON 1e-10
 
+#include <windows.h>
 
 struct AABBox
 {
@@ -51,20 +52,20 @@ struct AABBox
 		double tx1 = (transMin.x() - r.origin.x())*r.direction_inv.x();
 		double tx2 = (transMax.x() - r.origin.x())*r.direction_inv.x();
 
-		double tmin = std::min(tx1, tx2);
-		double tmax = std::max(tx1, tx2);
+		double tmin = min(tx1, tx2);
+		double tmax = max(tx1, tx2);
 
 		double ty1 = (transMin.y() - r.origin.y())*r.direction_inv.y();
 		double ty2 = (transMax.y() - r.origin.y())*r.direction_inv.y();
 
-		tmin = std::max(tmin, std::min(ty1, ty2));
-		tmax = std::min(tmax, std::max(ty1, ty2));
+		tmin = max(tmin, min(ty1, ty2));
+		tmax = min(tmax, max(ty1, ty2));
 
 		double tz1 = (transMin.z() - r.origin.z())*r.direction_inv.z();
 		double tz2 = (transMax.z() - r.origin.z())*r.direction_inv.z();
 
-		tmin = std::max(tmin, std::min(tz1, tz2));
-		tmax = std::min(tmax, std::max(tz1, tz2));
+		tmin = max(tmin, min(tz1, tz2));
+		tmax = min(tmax, max(tz1, tz2));
 		t = tmin;
 
 		return tmax >= tmin;

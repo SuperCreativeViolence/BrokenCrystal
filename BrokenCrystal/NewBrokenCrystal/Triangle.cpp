@@ -57,14 +57,14 @@ Material Triangle::GetMaterial()
 AABBox Triangle::GetBoundingBox()
 {
 	btVector3 min = btVector3(
-		std::min(std::min(pos[0].x(), pos[1].x()), pos[2].x()),
-		std::min(std::min(pos[0].y(), pos[1].y()), pos[2].y()),
-		std::min(std::min(pos[0].z(), pos[1].z()), pos[2].z())
+		min(min(pos[0].x(), pos[1].x()), pos[2].x()),
+		min(min(pos[0].y(), pos[1].y()), pos[2].y()),
+		min(min(pos[0].z(), pos[1].z()), pos[2].z())
 	);
 	btVector3 max = btVector3(
-		std::max(std::max(pos[0].x(), pos[1].x()), pos[2].x()),
-		std::max(std::max(pos[0].y(), pos[1].y()), pos[2].y()),
-		std::max(std::max(pos[0].z(), pos[1].z()), pos[2].z())
+		max(max(pos[0].x(), pos[1].x()), pos[2].x()),
+		max(max(pos[0].y(), pos[1].y()), pos[2].y()),
+		max(max(pos[0].z(), pos[1].z()), pos[2].z())
 	);
 
 	return AABBox(min, max);

@@ -106,13 +106,13 @@ void Scene::Initialize()
 
 	// dof test
 	CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateSphere(btVector3(0, 3, -9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, -6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, -3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 0), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//CreateSphere(btVector3(0, 3, -9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//CreateSphere(btVector3(0, 3, -6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//CreateSphere(btVector3(0, 3, -3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//CreateSphere(btVector3(0, 3, 0), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//CreateSphere(btVector3(0, 3, 3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//CreateSphere(btVector3(0, 3, 6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//CreateSphere(btVector3(0, 3, 9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
 
 }
 

@@ -1,7 +1,7 @@
 #ifndef AABBOX_H
 #define AABBOX_H
 
-#define EPSILON 1e-4
+#define EPSILON 1e-10
 
 
 struct AABBox

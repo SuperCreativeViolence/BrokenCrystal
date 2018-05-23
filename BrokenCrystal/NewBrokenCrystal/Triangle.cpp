@@ -31,7 +31,7 @@ ObjectIntersection Triangle::GetIntersection(const Ray& ray, btTransform transfo
 	btVector3 v0v2 = pos2 - pos0;
 	btVector3 pvec = ray.direction.cross(v0v2);
 	float det = v0v1.dot(pvec);
-	if (det < EPSILON) return ObjectIntersection(hit, t, normal, material);
+	if (btFabs(det) < EPSILON) return ObjectIntersection(hit, t, normal, material);
 
 	btVector3 tvec = ray.origin - pos0;
 	u = tvec.dot(pvec);

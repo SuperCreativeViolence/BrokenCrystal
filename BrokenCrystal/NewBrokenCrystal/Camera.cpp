@@ -4,7 +4,7 @@ Camera::Camera() :
 	position(10.0, 5.0, 0.0),
 	target(0.0, 5.0, 0.0),
 	distance(16.0),
-	fov(100),
+	fov(90),
 	pitch(20.0),
 	yaw(0.0),
 	upVector(0.0, 1.0, 0.0),
@@ -76,6 +76,12 @@ void Camera::Zoom(float delta)
 {
 	distance -= delta;
 	distance = fmax(distance, 1.0f);
+	UpdateCamera();
+}
+
+void Camera::Fov(float delta)
+{
+	fov += delta;
 	UpdateCamera();
 }
 

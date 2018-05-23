@@ -220,6 +220,17 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 	materials.clear();
 }
 
+Mesh::~Mesh()
+{
+	delete node;
+	for (auto& triangle : triangles)
+	{
+		delete triangle;
+	}
+	triangles.clear();
+	triangles.shrink_to_fit();
+}
+
 ObjectIntersection Mesh::GetIntersection(const Ray& ray)
 {
 #ifdef USE_KDTREE

@@ -85,7 +85,7 @@ void Camera::Fov(float delta)
 	UpdateCamera();
 }
 
-Ray Camera::GetRay(int x, int y, bool jitter, unsigned short *Xi)
+Ray Camera::GetRay(int x, int y, bool jitter)
 {
 	const double r1 = 2.0 * erand48();
 	const double r2 = 2.0 * erand48();

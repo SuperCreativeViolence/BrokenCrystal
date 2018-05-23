@@ -9,6 +9,7 @@ class Texture
 public:
 	Texture(const char* fileName);
 	Texture() {};
+	~Texture();
 	btVector3 GetPixel(unsigned x, unsigned y) const;
 	btVector3 GetPixel(double u, double v) const;
 	bool IsLoaded() const;

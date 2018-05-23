@@ -153,9 +153,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="erand48.cpp" />
     <ClCompile Include="KDTree.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="erand48.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />

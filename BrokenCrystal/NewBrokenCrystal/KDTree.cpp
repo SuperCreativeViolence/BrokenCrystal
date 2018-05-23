@@ -1,6 +1,5 @@
 #include "KDTree.h"
 
-
 KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 {
 	KDNode* node = new KDNode();
@@ -33,16 +32,16 @@ KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 
 	node->box = triangles_[0]->GetBoundingBox();
 	btVector3 midpt = btVector3(0, 0, 0);
-	double tris_recp = 1.0 / triangles_.size();
+	double trianglesP = 1.0 / triangles_.size();
 
 	for (long i = 1; i < triangles_.size(); i++)
 	{
 		node->box.Expand(triangles_[i]->GetBoundingBox());
-		midpt = midpt + (triangles_[i]->GetMidPoint() * tris_recp);
+		midpt = midpt + (triangles_[i]->GetMidPoint() * trianglesP);
 	}
 
-	std::vector<Triangle*> left_tris;
-	std::vector<Triangle*> right_tris;
+	std::vector<Triangle*> leftTriangles;
+	std::vector<Triangle*> rightTriangles;
 	int axis = node->box.GetLongestAxis();
 
 	for (long i = 0; i < triangles_.size(); i++)
@@ -50,18 +49,18 @@ KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 		switch (axis)
 		{
 			case 0:
-				midpt[0] >= triangles_[i]->GetMidPoint()[0] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
+				midpt[0] >= triangles_[i]->GetMidPoint()[0] ? rightTriangles.push_back(triangles_[i]) : leftTriangles.push_back(triangles_[i]);
 				break;
 			case 1:
-				midpt[1] >= triangles_[i]->GetMidPoint()[1] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
+				midpt[1] >= triangles_[i]->GetMidPoint()[1] ? rightTriangles.push_back(triangles_[i]) : leftTriangles.push_back(triangles_[i]);
 				break;
 			case 2:
-				midpt[2] >= triangles_[i]->GetMidPoint()[2] ? right_tris.push_back(triangles_[i]) : left_tris.push_back(triangles_[i]);
+				midpt[2] >= triangles_[i]->GetMidPoint()[2] ? rightTriangles.push_back(triangles_[i]) : leftTriangles.push_back(triangles_[i]);
 				break;
 		}
 	}
 
-	if (triangles_.size() == left_tris.size() || triangles_.size() == right_tris.size())
+	if (triangles_.size() == leftTriangles.size() || triangles_.size() == rightTriangles.size())
 	{
 		node->triangles = triangles_;
 		node->leaf = true;
@@ -80,8 +79,8 @@ KDNode* KDNode::Build(std::vector<Triangle*> &triangles_, int depth)
 		return node;
 	}
 
-	node->left = Build(left_tris, depth + 1);
-	node->right = Build(right_tris, depth + 1);
+	node->left = Build(leftTriangles, depth + 1);
+	node->right = Build(rightTriangles, depth + 1);
 
 	return node;
 }
@@ -94,20 +93,16 @@ bool KDNode::Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector
 	{
 		if (dist > tmin) return false;
 
-		bool hit_tri = false;
-		bool hit_left = false;
-		bool hit_right = false;
-		long tri_idx;
+		bool hitTriangle = false;
+		bool hitLeft = false;
+		bool hitRight = false;
+		long triangleIndex;
 
 		if (!node->leaf)
 		{
-			//if ( node->left->triangles.size() > 0 )
-			hit_left = Hit(node->left, ray, t, tmin, normal, material, transform);
-
-			//if ( node->right->triangles.size() > 0 )
-			hit_right = Hit(node->right, ray, t, tmin, normal, material, transform);
-
-			return hit_left || hit_right;
+			hitLeft = Hit(node->left, ray, t, tmin, normal, material, transform);
+			hitRight = Hit(node->right, ray, t, tmin, normal, material, transform);
+			return hitLeft || hitRight;
 		}
 		else
 		{
@@ -116,16 +111,16 @@ bool KDNode::Hit(KDNode* node, const Ray &ray, double &t, double &tmin, btVector
 			{
 				if (node->triangles[i]->Intersect(ray, t, tmin, normal, transform))
 				{
-					hit_tri = true;
+					hitTriangle = true;
 					tmin = t;
-					tri_idx = i;
+					triangleIndex = i;
 				}
 			}
-			if (hit_tri)
+			if (hitTriangle)
 			{
 				btVector3 p = ray.origin + ray.direction * tmin;
-				btVector3 color = node->triangles[tri_idx]->GetColorAt(p);
-				material = node->triangles[tri_idx]->GetMaterial();
+				btVector3 color = node->triangles[triangleIndex]->GetColorAt(p);
+				material = node->triangles[triangleIndex]->GetMaterial();
 				material.SetColor(color);
 				return true;
 			}

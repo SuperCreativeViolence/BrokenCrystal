@@ -7,8 +7,3 @@ double erand48()
 {
 	return distr(generator);
 }
-
-double erand48(unsigned short xseed[3])
-{
-	return distr(generator);
-}

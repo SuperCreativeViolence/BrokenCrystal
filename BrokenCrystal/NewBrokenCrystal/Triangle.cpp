@@ -135,7 +135,4 @@ btVector3 Triangle::GetColorAt(btVector3 pos)
 	c = c + (tex[2] * b[2]);
 
 	return material.GetColorAt(c[0], c[1]);
-	//if (material.GetType() == EMIT)
-	//	return material.GetEmission();
-	//return material.GetColor();
 }

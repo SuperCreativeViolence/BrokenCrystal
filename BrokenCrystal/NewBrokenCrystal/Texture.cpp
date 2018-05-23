@@ -15,6 +15,12 @@ Texture::Texture(const char* fileName)
 	loaded = true;
 }
 
+Texture::~Texture()
+{
+	image.clear();
+	image.shrink_to_fit();
+}
+
 btVector3 Texture::GetPixel(unsigned x, unsigned y) const
 {
 	if (!loaded)

@@ -12,6 +12,12 @@ Scene::Scene() :
 
 Scene::~Scene()
 {
+	for (auto& object : objects)
+	{
+		delete object;
+	}
+	objects.clear();
+	objects.shrink_to_fit();
 	delete camera;
 	delete world;
 	delete solver;
@@ -139,8 +145,14 @@ void Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, f
 		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], material));
 	}
 
-
 	AddObject(static_cast<Object*>(new Mesh(position, triangles, mass, material)));
+
+	for (auto& triangle : triangles)
+	{
+		delete triangle;
+	}
+	triangles.clear();
+	triangles.shrink_to_fit();
 }
 
 void Scene::CreateSphere(const btVector3 &position, double radius, float mass, Material material)
@@ -283,7 +295,7 @@ void Scene::UpdateScene(float dt)
 	}
 	if (IsKeyDown('f'))
 	{
-		Ray ray = camera->GetRay(mousePos[0], mousePos[1], true, nullptr);
+		Ray ray = camera->GetRay(mousePos[0], mousePos[1], true);
 		system("cls");
 		btVector3 color = DebugPathTest(ray, 0, ray.origin);
 		printf("\nresult = %.1f %.1f %.1f\n", color[0], color[1], color[2]);
@@ -448,7 +460,6 @@ void Scene::RenderPath(int samples)
 #pragma omp parallel for schedule(dynamic, 1)
 	for (int y = 0; y < height; y++)
 	{
-		unsigned short Xi[3] = { 0, 0, y*y*y };
 		fprintf(stderr, "\rRendering (%i samples): %.2f%% | Time remaining : %0.4fs", samples, (double)y / height * 100, ((float)(clock.getTimeMilliseconds() - time) / 1000) * ((height / (float)y) - 1));
 
 		for (int x = 0; x < width; x++)
@@ -462,9 +473,9 @@ void Scene::RenderPath(int samples)
 					btVector3 color = btVector3(0,0,0);
 					for (int s = 0; s < samples; s++)
 					{
-						//Ray ray = camera->GetRay(x, y, s > 0, Xi);
+						//Ray ray = camera->GetRay(x, y, s > 0);
 						Ray ray = camera->GetRay(x, y, sx, sy, false); // dof 효과 미완성
-						color = color + TraceRay(ray, 0, Xi);
+						color = color + TraceRay(ray, 0);
 						//printf("%f %f %f\n", color[0], color[1], color[2]);
 						//Sleep(1000);
 					}
@@ -479,7 +490,7 @@ void Scene::RenderPath(int samples)
 }
 
 
-btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
+btVector3 Scene::TraceRay(const Ray &ray, int depth)
 {
 	ObjectIntersection intersection = Intersect(ray);
 	if (!intersection.hit) return btVector3(0.0, 0.0, 0.0);
@@ -488,7 +499,7 @@ btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
 
 	btVector3 color = intersection.material.GetColor();
 	double maxReflection = color.x()>color.y() && color.x()>color.z() ? color.x() : color.y()>color.z() ? color.y() : color.z();
-	double random = erand48(Xi);
+	double random = erand48();
 
 	if (++depth > 5)
 	{
@@ -504,13 +515,12 @@ btVector3 Scene::TraceRay(const Ray &ray, int depth, unsigned short *Xi)
 
 	btVector3 pos = ray.origin + ray.direction * intersection.u;
 	Ray reflected = intersection.material.GetReflectedRay(ray, pos, intersection.normal, color);
-	return color * TraceRay(reflected, depth, Xi);
+	return color * TraceRay(reflected, depth);
 }
 
 void Scene::DebugTraceRay()
 {
-	unsigned short Xi[3] = { 0, 0, mousePos[1] * mousePos[1] * mousePos[1] };
-	Ray ray = camera->GetRay(mousePos[0], mousePos[1], true, Xi);
+	Ray ray = camera->GetRay(mousePos[0], mousePos[1], true);
 	ObjectIntersection intersection = Intersect(ray);
 	if (!intersection.hit)
 	{
@@ -662,4 +672,5 @@ void Scene::SaveImage(const char *filePath)
 	vclear.clear();
 	buffer.clear();
 	buffer.shrink_to_fit();
+	delete pixelBuffer;
 }

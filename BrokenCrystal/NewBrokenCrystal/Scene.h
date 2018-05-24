@@ -5,6 +5,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <LinearMath/btQuickprof.h>
 #include <LinearMath\btScalar.h>
+#include <imgui_impl_glut.h>
 
 #include "Camera.h"
 #include "Object.h"
@@ -53,6 +54,9 @@ public:
 	// physics
 	void UpdateScene(float dt);
 
+	// gui
+	void RenderGUI();
+
 	// opengl
 	void RenderScene();
 	void DrawShape(Object* object);
@@ -94,8 +98,11 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 10;
+	int samples = 4;
 	btVector3* pixelBuffer;
+
+	// gui
+	bool showDebugPanel;
 
 };
 

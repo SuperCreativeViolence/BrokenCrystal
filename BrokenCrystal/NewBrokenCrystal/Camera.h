@@ -4,6 +4,7 @@
 #include <freeglut.h>
 #include <btBulletDynamicsCommon.h>
 #include <assert.h>
+#include <array>
 #include "Ray.h"
 #include "erand48.h"
 
@@ -24,6 +25,14 @@ public:
 	int GetWidht();
 	int GetHeight();
 	btVector3 GetPosition();
+
+	// gui
+	float& GetFovPointer();
+	float* GetTargetPointer();
+	float* GetPositionPointer();
+	float& GetPitchPointer();
+	float& GetYawPointer();
+	float& GetDistancePointer();
 
 private:
 	btVector3 position;

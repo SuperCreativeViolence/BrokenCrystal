@@ -14,9 +14,7 @@
 #include <iostream>
 #include <vector>
 
-// Clamp double to min/max of 0/1
 inline double clamp(double x) { return x < 0 ? 0 : x>1 ? 1 : x; }
-// Clamp to between 0-255
 inline int toInt(double x) { return int(clamp(x) * 255 + .5); }
 
 typedef std::vector<Object*> Objects;
@@ -45,11 +43,11 @@ public:
 	void Special(int key, int x, int y);
 	void SpecialUp(int key, int x, int y);
 	void Reshape(int w, int h);
-	void Idle();
 	void Mouse(int button, int state, int x, int y);
 	void PassiveMotion(int x, int y);
 	void Motion(int x, int y);
 	void Display();
+	void Idle();
 
 	// physics
 	void UpdateScene(float dt);
@@ -102,7 +100,10 @@ private:
 	btVector3* pixelBuffer;
 
 	// gui
-	bool showDebugPanel;
+	bool showDebugPanel = true;
+	bool isTracing = false;
+	float completion;
+	int remaining;
 
 };
 

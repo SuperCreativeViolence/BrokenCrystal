@@ -68,7 +68,7 @@ void Camera::Rotate(float deltaX, float deltaY)
 	pitch -= deltaX;
 	yaw -= deltaY;
 	yaw = btFmod(yaw, 360.0f);
-	btClamp(pitch, 10.0f, 89.0f);
+	btClamp(pitch, 1.0f, 89.0f);
 	UpdateCamera();
 }
 
@@ -150,8 +150,8 @@ Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
 
 	if (dof)
 	{
-		double u1 = (erand48() * 2.0) - 1.0;
-		double u2 = (erand48() * 2.0) - 1.0;
+		double u1 = r1 - 1.0;
+		double u2 = r2 - 1.0;
 
 		double fac = (double)(2 * 3.14159265358979323846 * u2);
 
@@ -162,7 +162,6 @@ Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
 	}
 
 	return result;
-
 }
 
 int Camera::GetWidht()

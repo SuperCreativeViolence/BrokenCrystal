@@ -65,13 +65,14 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	////CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
 	//CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
@@ -83,7 +84,7 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	//CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 
 
 
@@ -105,15 +106,12 @@ void Scene::Initialize()
 	//CreateSphere(btVector3(100, 100, 100), 100, 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(6, 6, 6)));
 
 	// dof test
-	CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateSphere(btVector3(0, 3, -9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, -6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, -3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 0), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-	CreateSphere(btVector3(0, 3, 9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
-
+	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//for (int i = -10; i < 50; i += 3)
+	//{
+	//	CreateSphere(btVector3(3, 5, i), 2, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
+	//}
+	//CreateBox(btVector3(0, 50, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 }
 
 void Scene::AddObject(Object* object)
@@ -305,6 +303,10 @@ void Scene::UpdateScene(float dt)
 		btVector3 color = DebugPathTest(ray, 0, ray.origin);
 		printf("\nresult = %.1f %.1f %.1f\n", color[0], color[1], color[2]);
 	}
+	if (IsKeyDown('g'))
+	{
+		DebugTraceRay(true);
+	}
 
 	world->stepSimulation(dt);
 }
@@ -479,7 +481,7 @@ void Scene::RenderPath(int samples)
 					for (int s = 0; s < samples; s++)
 					{
 						//Ray ray = camera->GetRay(x, y, s > 0);
-						Ray ray = camera->GetRay(x, y, sx, sy, false); // dof 효과 미완성
+						Ray ray = camera->GetRay(x, y, sx, sy, true); // dof 효과 미완성
 						color = color + TraceRay(ray, 0);
 						//printf("%f %f %f\n", color[0], color[1], color[2]);
 						//Sleep(1000);
@@ -523,9 +525,9 @@ btVector3 Scene::TraceRay(const Ray &ray, int depth)
 	return color * TraceRay(reflected, depth);
 }
 
-void Scene::DebugTraceRay()
+void Scene::DebugTraceRay(bool dof)
 {
-	Ray ray = camera->GetRay(mousePos[0], mousePos[1], true);
+	Ray ray = camera->GetRay(mousePos[0], mousePos[1], 0, 0, true);
 	ObjectIntersection intersection = Intersect(ray);
 	if (!intersection.hit)
 	{

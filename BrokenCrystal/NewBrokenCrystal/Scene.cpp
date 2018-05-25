@@ -67,13 +67,21 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	////CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+
+	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	std::vector<Mesh*> meshes = break_into_pieces(crystal, 10);
+	for (auto& mesh : meshes)
+	{
+		AddObject(static_cast<Object*>(mesh));
+	}
+	DeleteObject(crystal);
 	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
@@ -86,21 +94,18 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
-	//CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
-
-
 
 	// material test
-	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
-	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateSphere(btVector3(-7, 1, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
-	CreateSphere(btVector3(-3, 1, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	CreateSphere(btVector3(3, 1, 0), 3, 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
-	CreateSphere(btVector3(7, 1, 0), 3, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
+	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateSphere(btVector3(-7, 1, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
+	//CreateSphere(btVector3(-3, 1, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(3, 1, 0), 3, 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(7, 1, 0), 3, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
 	// island
 	//CreateMesh(btVector3(0, 5, 0), "island.obj", 0, Material());
@@ -165,9 +170,18 @@ void Scene::CreateSphere(const btVector3 &position, double radius, float mass, M
 	AddObject(static_cast<Object*>(new Sphere(position, radius, mass, material)));
 }
 
-void Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
+Mesh* Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
 {
-	AddObject(static_cast<Object*>(new Mesh(position, fileName, mass, material)));
+	Mesh* mesh = new Mesh(position, fileName, mass, material);
+	AddObject(static_cast<Object*>(mesh));
+	return mesh;
+}
+
+void Scene::DeleteObject(Object* object)
+{
+	objects.erase(std::remove(objects.begin(), objects.end(), object), objects.end());
+	world->removeRigidBody(object->GetRigidBody());
+	delete object;
 }
 
 bool Scene::IsKeyDown(unsigned char key)

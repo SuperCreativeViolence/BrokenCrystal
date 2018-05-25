@@ -80,6 +80,7 @@ class Mesh : public Object
 {
 public:
 	Mesh(const btVector3& position_, std::vector<Triangle*> triangles_, float mass, Material material_);
+	Mesh(const btVector3& position_, const char* filePath, float mass);
 	Mesh(const btVector3& position_, const char* filePath, float mass, Material material_);
 	~Mesh();
 	virtual ObjectIntersection GetIntersection(const Ray& ray) override;

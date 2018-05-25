@@ -169,6 +169,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
     <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="voronoi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABBox.h" />
@@ -186,6 +187,7 @@
     <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="KDTree.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="voronoi.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

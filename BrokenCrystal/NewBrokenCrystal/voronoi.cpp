@@ -1,18 +1,10 @@
-#include <math.h>
-#include <time.h>
-#include <vector>
-#include "Triangle.h"
-#include "Object.h"
-
+#include "voronoi.h"
 
 typedef struct Line {
 
 	btVector3 point[2];
 
 }Line;
-
-std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces);
-std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> triangles);
 
 //voronoi 를 반복적으로 호출하는 함수, Object 와 쪼갤 갯수를 받아서 쪼개진 Object 들의 배열을 반환함
 std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
@@ -34,7 +26,8 @@ std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 
 	std::vector<Mesh*> meshes;
 	Mesh *m;
-	btVector3 *position;
+	btVector3 position;
+	btTransform transform = mesh->GetRigidBody()->getWorldTransform();
 
 	float x, y, z;
 	for (int i = 0; i < size(*triangles_sets); i++)
@@ -51,18 +44,15 @@ std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 		x /= (size(triangles) * 3);
 		y /= (size(triangles) * 3);
 		z /= (size(triangles) * 3);
-		position = new btVector3(x, y, z);
-		m = new Mesh(*position, triangles, 1, SPEC);
+		position = btVector3(x, y, z);
+		position = transform * position;
+		m = new Mesh(position, triangles, 1, Material());
 		meshes.push_back(m);
 	}
 
 
 	return meshes;
 }
-
-
-
-
 
 
 // Object, 즉 다면체 내에 랜덤한 2개의 점을 찍고 그 점을 기준으로 2개의 다면체로 분할함
@@ -145,14 +135,14 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 	std::vector<Triangle*>* obj_2_triangles = new(std::vector<Triangle*>);
 	Line *line;
 	std::vector<Line*> lines;
-	Material material = SPEC;
+	Material material = Material();
 
 
 
 
 	// 모든 삼각형에 대해
 	for (auto & triangle : triangles) {
-
+		material = triangle->GetMaterial();
 		// 해당 삼각형을 평면이 나눈다면 d_factor = 2, 꼭지점을 관통해서 나누면 = 1, 나누지 않으면  = 0
 		division_factor = 0;
 
@@ -278,7 +268,7 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 	// 새로이 생성된 단면을 trianglize 하여 양쪽 object 에 모두 할당
 
 	float avg[3] = { 0, 0, 0 };
-	btVector3 *avg_p, a, b, c;
+	btVector3 avg_p, a, b, c;
 
 	for (auto & line : lines)
 		for (int i = 0; i < 3; i++) 
@@ -287,12 +277,12 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 	for (int i = 0; i < 3; i++)
 		avg[i] /= (size(lines) * 2);
 
-	avg_p = new btVector3(avg[0], avg[1], avg[2]);
+	avg_p = btVector3(avg[0], avg[1], avg[2]);
 
 	for (auto & line : lines) {
 		a = line->point[0];
 		b = line->point[1];
-		c = *avg_p;
+		c = avg_p;
 
 		normal = (b - a).cross(c - a).normalize();
 		point_normal = (a - p[0]).normalize();

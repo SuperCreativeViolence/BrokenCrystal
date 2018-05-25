@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "Object.h"
 #include "lodepng.h"
+#include "voronoi.h"
 
 #include <iostream>
 #include <vector>
@@ -31,7 +32,8 @@ public:
 	void AddObject(Object* object);
 	void CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
 	void CreateSphere(const btVector3 &position, double radius, float mass, Material material);
-	void CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
+	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
+	void DeleteObject(Object* object);
 
 	// input
 	bool IsKeyDown(unsigned char key);
@@ -96,7 +98,7 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 4;
+	int samples = 10;
 	btVector3* pixelBuffer;
 
 	// gui

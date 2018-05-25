@@ -88,7 +88,7 @@ Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float
 	body = new btRigidBody(cInfo);
 }
 
-Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Material material_) : Object(new btEmptyShape(), position_, btQuaternion(0, 0, 0, 1))
+Mesh::Mesh(const btVector3& position_, const char* filePath, float mass) : Object(new btEmptyShape(), position_, btQuaternion(0, 0, 0, 1))
 {
 	std::string mtlBasePath;
 	std::string inputFile = filePath;
@@ -218,6 +218,109 @@ Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Materia
 	obj_shapes.clear();
 	obj_materials.clear();
 	materials.clear();
+}
+
+Mesh::Mesh(const btVector3& position_, const char* filePath, float mass, Material material_) : Object(new btEmptyShape(), position_, btQuaternion(0, 0, 0, 1))
+{
+	std::string mtlBasePath;
+	std::string inputFile = filePath;
+	unsigned long pos = inputFile.find_last_of("/");
+	mtlBasePath = inputFile.substr(0, pos + 1);
+
+	std::vector<tinyobj::shape_t> obj_shapes;
+	std::vector<tinyobj::material_t> obj_materials;
+
+	printf("Loading %s...\n", filePath);
+	std::string err = tinyobj::LoadObj(obj_shapes, obj_materials, inputFile.c_str(), mtlBasePath.c_str());
+
+	if (!err.empty())
+	{
+		std::cerr << err << std::endl;
+	}
+
+	btTriangleMesh* triangleMesh = new btTriangleMesh();
+
+	long shapeSize, indicesSize;
+	shapeSize = obj_shapes.size();
+
+	for (int i = 0; i < shapeSize; i++)
+	{
+		indicesSize = obj_shapes[i].mesh.indices.size() / 3;
+		for (size_t f = 0; f < indicesSize; f++)
+		{
+
+			btVector3 v0_ = btVector3(
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f] * 3],
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f] * 3 + 1],
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f] * 3 + 2]
+			);
+
+			btVector3 v1_ = btVector3(
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f + 1] * 3],
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f + 1] * 3 + 1],
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f + 1] * 3 + 2]
+			);
+
+			btVector3 v2_ = btVector3(
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f + 2] * 3],
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f + 2] * 3 + 1],
+				obj_shapes[i].mesh.positions[obj_shapes[i].mesh.indices[3 * f + 2] * 3 + 2]
+			);
+
+			btVector3 t0_, t1_, t2_;
+
+			if (obj_shapes[i].mesh.indices[3 * f + 2] * 2 + 1 < obj_shapes[i].mesh.texcoords.size())
+			{
+				t0_ = btVector3(
+					obj_shapes[i].mesh.texcoords[obj_shapes[i].mesh.indices[3 * f] * 2],
+					obj_shapes[i].mesh.texcoords[obj_shapes[i].mesh.indices[3 * f] * 2 + 1],
+					0
+				);
+
+				t1_ = btVector3(
+					obj_shapes[i].mesh.texcoords[obj_shapes[i].mesh.indices[3 * f + 1] * 2],
+					obj_shapes[i].mesh.texcoords[obj_shapes[i].mesh.indices[3 * f + 1] * 2 + 1],
+					0
+				);
+
+				t2_ = btVector3(
+					obj_shapes[i].mesh.texcoords[obj_shapes[i].mesh.indices[3 * f + 2] * 2],
+					obj_shapes[i].mesh.texcoords[obj_shapes[i].mesh.indices[3 * f + 2] * 2 + 1],
+					0
+				);
+			}
+			else
+			{
+				t0_ = btVector3(0, 0, 0);
+				t1_ = btVector3(0, 0, 0);
+				t2_ = btVector3(0, 0, 0);
+			}
+
+			Triangle* triangle = new Triangle(v0_, v1_, v2_, t0_, t1_, t2_, material_);
+			triangles.push_back(triangle);
+			triangleMesh->addTriangle(triangle->pos[0], triangle->pos[1], triangle->pos[2]);
+		}
+	}
+
+	// KDTree
+	printf("Build KD-Tree\n");
+	node = KDNode().Build(triangles, 0);
+
+	btConvexShape* tempShape = new btConvexTriangleMeshShape(triangleMesh);
+	btShapeHull* hull = new btShapeHull(tempShape);
+	btScalar margin = tempShape->getMargin();
+	hull->buildHull(margin);
+	tempShape->setUserPointer(hull);
+	shape = tempShape;
+	btVector3 localInteria(0, 0, 0);
+	if (mass != 0.0f)
+		shape->calculateLocalInertia(mass, localInteria);
+
+	btRigidBody::btRigidBodyConstructionInfo cInfo(mass, motionState, shape, localInteria);
+	body = new btRigidBody(cInfo);
+
+	obj_shapes.clear();
+	obj_materials.clear();
 }
 
 Mesh::~Mesh()

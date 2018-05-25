@@ -10,17 +10,17 @@ typedef struct Line {
 std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 {
 	std::vector<Triangle*> triangles = mesh->GetTriangles();
-	std::vector<std::vector<Triangle*>*>* triangles_sets = voronoi_Fracture(triangles);
-	std::vector<std::vector<Triangle*>*>* two_triangles;
+	std::vector<std::vector<Triangle*>> triangles_sets = voronoi_Fracture(triangles);
+	std::vector<std::vector<Triangle*>> two_triangles;
 	srand(time(NULL));
 	int random;
 	for (int i = 2; i < pieces; i++) {
-		random = rand() % size(*triangles_sets);
-		triangles = *((*triangles_sets)[random]);
+		random = rand() % triangles_sets.size();
+		triangles = triangles_sets[random];
 		two_triangles = voronoi_Fracture(triangles);
-		(*triangles_sets).push_back((*two_triangles)[0]);
-		(*triangles_sets).push_back((*two_triangles)[1]);
-		(*triangles_sets).erase((*triangles_sets).begin() + random);
+		triangles_sets.push_back(two_triangles[0]);
+		triangles_sets.push_back(two_triangles[1]);
+		triangles_sets.erase(triangles_sets.begin() + random);
 	}
 
 
@@ -30,10 +30,10 @@ std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 	btTransform transform = mesh->GetRigidBody()->getWorldTransform();
 
 	float x, y, z;
-	for (int i = 0; i < size(*triangles_sets); i++)
+	for (int i = 0; i < triangles_sets.size(); i++)
 	{
 
-		triangles = *((*triangles_sets)[i]);
+		triangles = triangles_sets[i];
 		x = 0, y = 0, z = 0;
 		for (int j = 0; j < size(triangles); j++)
 		{
@@ -56,7 +56,7 @@ std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 
 
 // Object, 즉 다면체 내에 랜덤한 2개의 점을 찍고 그 점을 기준으로 2개의 다면체로 분할함
-std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> triangles)
+std::vector<std::vector<Triangle*>> voronoi_Fracture(std::vector<Triangle*> triangles)
 {
 
 	// 1. bounding volume 생성
@@ -116,8 +116,7 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 
 		//다면체 밖이면 다시 생성
 		if (!isInObj)
-			i--;
-		
+			i--;	
 	}
 
 
@@ -131,8 +130,8 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 	int division_point;
 	int line_num = 0;
 	Triangle *newTriangle, *newTriangle_1, *newTriangle_2;
-	std::vector<Triangle*>* obj_1_triangles = new(std::vector<Triangle*>);
-	std::vector<Triangle*>* obj_2_triangles = new(std::vector<Triangle*>);
+	std::vector<Triangle*> obj_1_triangles;
+	std::vector<Triangle*> obj_2_triangles;
 	Line *line;
 	std::vector<Line*> lines;
 	Material material = Material();
@@ -192,9 +191,9 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 					newTriangle_2 = new Triangle(triangle->pos[1], p_division[0], p_division[1], material);
 				}
 
-				(*obj_1_triangles).push_back(newTriangle);
-				(*obj_2_triangles).push_back(newTriangle_1);
-				(*obj_2_triangles).push_back(newTriangle_2);
+				obj_1_triangles.push_back(newTriangle);
+				obj_2_triangles.push_back(newTriangle_1);
+				obj_2_triangles.push_back(newTriangle_2);
 				line = new Line();
 				line->point[0] = p_division[0];
 				line->point[1] = p_division[1];
@@ -222,9 +221,9 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 					newTriangle_2 = new Triangle(triangle->pos[1], p_division[0], p_division[1], material);
 				}
 
-				(*obj_2_triangles).push_back(newTriangle);
-				(*obj_1_triangles).push_back(newTriangle_1);
-				(*obj_1_triangles).push_back(newTriangle_2);
+				obj_2_triangles.push_back(newTriangle);
+				obj_1_triangles.push_back(newTriangle_1);
+				obj_1_triangles.push_back(newTriangle_2);
 				line = new Line();
 				line->point[0] = p_division[0];
 				line->point[1] = p_division[1];
@@ -239,16 +238,16 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 			if ((p[0] - triangle->pos[divided_line[0]]).length() < (p[1] - triangle->pos[divided_line[0]]).length())
 			{
 				newTriangle_1 = new Triangle(triangle->pos[(divided_line[0] + 2) % 3], triangle->pos[divided_line[0]], p_division[0], material);
-				(*obj_1_triangles).push_back(newTriangle_1);
+				obj_1_triangles.push_back(newTriangle_1);
 				newTriangle_2 = new Triangle(triangle->pos[(divided_line[0] + 1) % 3], triangle->pos[(divided_line[0] + 2) % 3], p_division[0], material);
-				(*obj_2_triangles).push_back(newTriangle_2);
+				obj_2_triangles.push_back(newTriangle_2);
 			}
 			else
 			{
 				newTriangle_1 = new Triangle(triangle->pos[(divided_line[0] + 1) % 3], triangle->pos[(divided_line[0] + 2) % 3], p_division[0], material);
-				(*obj_1_triangles).push_back(newTriangle_1);
+				obj_1_triangles.push_back(newTriangle_1);
 				newTriangle_2 = new Triangle(triangle->pos[(divided_line[0] + 2) % 3], triangle->pos[divided_line[0]], p_division[0], material);
-				(*obj_2_triangles).push_back(newTriangle_2);
+				obj_2_triangles.push_back(newTriangle_2);
 			}
 
 			line = new Line();
@@ -259,9 +258,9 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 
 		else {
 			if ((triangle->pos[0] - p[0]).length() < (triangle->pos[0] - p[1]).length())
-				(*obj_1_triangles).push_back(triangle);
+				obj_1_triangles.push_back(triangle);
 			else
-				(*obj_2_triangles).push_back(triangle);
+				obj_2_triangles.push_back(triangle);
 		}
 	}
 
@@ -294,16 +293,14 @@ std::vector<std::vector<Triangle*>*>* voronoi_Fracture(std::vector<Triangle*> tr
 			newTriangle_1 = new Triangle(a, c, b, material);
 			newTriangle_2 = new Triangle(a, b, c, material);
 		}
-		(*obj_1_triangles).push_back(newTriangle_1);
-		(*obj_2_triangles).push_back(newTriangle_2);
+		obj_1_triangles.push_back(newTriangle_1);
+		obj_2_triangles.push_back(newTriangle_2);
 	}
 
 	//
 
-	std::vector<std::vector<Triangle*>*>* result = new(std::vector<std::vector<Triangle*>*>);
-	(*result).push_back(obj_1_triangles);
-	(*result).push_back(obj_2_triangles);
-
-
+	std::vector<std::vector<Triangle*>> result;
+	result.push_back(obj_1_triangles);
+	result.push_back(obj_2_triangles);
 	return result;
 }

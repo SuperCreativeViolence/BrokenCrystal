@@ -48,6 +48,9 @@ std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 			y += triangles[j]->pos[0].m_floats[1] + triangles[j]->pos[1].m_floats[1] + triangles[j]->pos[2].m_floats[1];
 			z += triangles[j]->pos[0].m_floats[2] + triangles[j]->pos[1].m_floats[2] + triangles[j]->pos[2].m_floats[2];
 		}
+		x /= size(triangles);
+		y /= size(triangles);
+		z /= size(triangles);
 		position = new btVector3(x, y, z);
 		m = new Mesh(*position, triangles, 1, SPEC);
 		meshes.push_back(m);

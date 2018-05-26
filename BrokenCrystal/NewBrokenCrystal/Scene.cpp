@@ -76,7 +76,7 @@ void Scene::Initialize()
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 
 	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	std::vector<Mesh*> meshes = break_into_pieces(crystal, 10);
+	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 100);
 	for (auto& mesh : meshes)
 	{
 		AddObject(static_cast<Object*>(mesh));

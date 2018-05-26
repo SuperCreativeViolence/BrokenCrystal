@@ -8,6 +8,7 @@
 #include "Object.h"
 
 std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces);
+std::vector<Mesh*> break_into_pieces2(Mesh* mesh, int pieces);
 std::vector<std::vector<Triangle*>> voronoi_Fracture(std::vector<Triangle*> triangles);
 
 #endif

@@ -3,7 +3,15 @@
 
 #define EPSILON 1e-10
 
-#include <windows.h>
+inline double dmin(double a, double b)
+{
+	return a <= b ? a : b;
+}
+
+inline double dmax(double a, double b)
+{
+	return a >= b ? a : b;
+}
 
 struct AABBox
 {
@@ -52,20 +60,20 @@ struct AABBox
 		double tx1 = (transMin.x() - r.origin.x())*r.direction_inv.x();
 		double tx2 = (transMax.x() - r.origin.x())*r.direction_inv.x();
 
-		double tmin = min(tx1, tx2);
-		double tmax = max(tx1, tx2);
+		double tmin = dmin(tx1, tx2);
+		double tmax = dmin(tx1, tx2);
 
 		double ty1 = (transMin.y() - r.origin.y())*r.direction_inv.y();
 		double ty2 = (transMax.y() - r.origin.y())*r.direction_inv.y();
 
-		tmin = max(tmin, min(ty1, ty2));
-		tmax = min(tmax, max(ty1, ty2));
+		tmin = dmin(tmin, dmin(ty1, ty2));
+		tmax = dmin(tmax, dmin(ty1, ty2));
 
 		double tz1 = (transMin.z() - r.origin.z())*r.direction_inv.z();
 		double tz2 = (transMax.z() - r.origin.z())*r.direction_inv.z();
 
-		tmin = max(tmin, min(tz1, tz2));
-		tmax = min(tmax, max(tz1, tz2));
+		tmin = dmin(tmin, dmin(tz1, tz2));
+		tmax = dmin(tmax, dmin(tz1, tz2));
 		t = tmin;
 
 		return tmax >= tmin;

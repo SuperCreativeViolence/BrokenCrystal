@@ -57,14 +57,14 @@ Material Triangle::GetMaterial()
 AABBox Triangle::GetBoundingBox()
 {
 	btVector3 min = btVector3(
-		min(min(pos[0].x(), pos[1].x()), pos[2].x()),
-		min(min(pos[0].y(), pos[1].y()), pos[2].y()),
-		min(min(pos[0].z(), pos[1].z()), pos[2].z())
+		dmin(dmin(pos[0].x(), pos[1].x()), pos[2].x()),
+		dmin(dmin(pos[0].y(), pos[1].y()), pos[2].y()),
+		dmin(dmin(pos[0].z(), pos[1].z()), pos[2].z())
 	);
 	btVector3 max = btVector3(
-		max(max(pos[0].x(), pos[1].x()), pos[2].x()),
-		max(max(pos[0].y(), pos[1].y()), pos[2].y()),
-		max(max(pos[0].z(), pos[1].z()), pos[2].z())
+		dmax(dmax(pos[0].x(), pos[1].x()), pos[2].x()),
+		dmax(dmax(pos[0].y(), pos[1].y()), pos[2].y()),
+		dmax(dmax(pos[0].z(), pos[1].z()), pos[2].z())
 	);
 
 	return AABBox(min, max);
@@ -135,4 +135,11 @@ btVector3 Triangle::GetColorAt(btVector3 pos)
 	c = c + (tex[2] * b[2]);
 
 	return material.GetColorAt(c[0], c[1]);
+}
+
+void Triangle::GetPosToFloat(float3* v0, float3* v1, float3* v2)
+{
+	v0->x = pos[0].getX(), v0->y = pos[0].getY(), v0->z = pos[0].getZ();
+	v1->x = pos[1].getX(), v1->y = pos[1].getY(), v1->z = pos[1].getZ();
+	v2->x = pos[2].getX(), v2->y = pos[2].getY(), v2->z = pos[2].getZ();
 }

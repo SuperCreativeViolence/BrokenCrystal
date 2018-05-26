@@ -179,3 +179,18 @@ btVector3 Camera::GetPosition()
 {
 	return position;
 }
+
+void Camera::CopyCamera(CameraCU *cam)
+{
+	cam->aperture = this->aperture;
+	cam->aspectRatio = this->aspectRatio;
+	cam->distance = this->distance;
+	cam->farPlane = this->farPlane;
+	cam->focalLength = this->focalLength;
+	cam->fov = this->fov;
+	cam->height = this->height;
+	cam->nearPlane = this->nearPlane;
+	cam->pitch = this->pitch;
+	cam->width = this->width;
+	cam->yaw = this->yaw;
+}

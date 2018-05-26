@@ -6,12 +6,13 @@
 #include "tiny_obj_loader.h"
 #include "Ray.h"
 #include <LinearMath\btVector3.h>
+#include "cutil_math.h"
+#include "MaterialType.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
-enum MaterialType { DIFF, GLOSS, TRANS, SPEC, EMIT };
 
 class Material
 {
@@ -23,6 +24,8 @@ public:
 	btVector3 GetEmission() const;
 	Ray GetReflectedRay(const Ray &ray, const btVector3 &position, const btVector3 &normal, btVector3 &color) const;
 	void SetColor(const btVector3& color);
+	float3 GetColorF();
+	float3 GetEmissionF();
 
 private:
 	MaterialType type;

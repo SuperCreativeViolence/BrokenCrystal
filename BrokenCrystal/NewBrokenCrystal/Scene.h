@@ -9,9 +9,11 @@
 #include "Camera.h"
 #include "Object.h"
 #include "lodepng.h"
+#include "TracePath.h"
 
 #include <iostream>
 #include <vector>
+
 
 // Clamp double to min/max of 0/1
 inline double clamp(double x) { return x < 0 ? 0 : x>1 ? 1 : x; }
@@ -19,6 +21,7 @@ inline double clamp(double x) { return x < 0 ? 0 : x>1 ? 1 : x; }
 inline int toInt(double x) { return int(clamp(x) * 255 + .5); }
 
 typedef std::vector<Object*> Objects;
+
 
 class Scene
 {
@@ -68,6 +71,11 @@ public:
 	btVector3 DebugPathTest(const Ray &ray, int depth, btVector3 hitPos);
 	ObjectIntersection Intersect(const Ray &ray);
 	void SaveImage(const char *filePath);
+
+	// CUDA
+	void CUMemInitialize();
+	ObjectCU* CULoadObj(Object* object);
+	void SaveImageCU(float3* pixels, const char *filePath);
 
 private:
 	Objects objects;

@@ -132,3 +132,13 @@ void Material::SetColor(const btVector3& color)
 {
 	this->color = color;
 }
+
+
+float3 Material::GetColorF()
+{
+	return make_float3(color.getX(), color.getY(), color.getZ());
+}
+float3 Material::GetEmissionF()
+{
+	return make_float3(emission.getX(), emission.getY(), emission.getZ());
+}

@@ -45,15 +45,15 @@ public:
 	{
 		btVector3 temp(0.0, 0.0, 0.0);
 		assert(motionState);
-//		return motionState->GetWorldPosition();
-		return temp;
+		return motionState->GetWorldPosition();
+		//return temp;
 	}
 
-//	btQuaternion GetRotation()
-//	{
-//		assert(motionState);
-//		return motionState->GetWorldRotation();
-//	}
+	btQuaternion GetRotation()
+	{
+		assert(motionState);
+		return motionState->GetWorldRotation();
+	}
 
 	Material GetMaterial()
 	{

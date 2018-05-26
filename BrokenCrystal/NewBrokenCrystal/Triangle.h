@@ -21,6 +21,8 @@ public:
 	btVector3 GetBarycentric(btVector3 pos);
 	btVector3 GetColorAt(btVector3 pos = btVector3(0,0,0));
 
+	void GetPosToFloat(float3* v0, float3* v1, float3* v2);
+
 
 	btVector3 pos[3];
 	btVector3 tex[3];

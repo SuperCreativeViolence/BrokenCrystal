@@ -63,14 +63,14 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	////CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
@@ -79,7 +79,7 @@ void Scene::Initialize()
 	//CreateSphere(btVector3(0, 10, 10), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
 
-	//CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
+	CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
 
@@ -89,7 +89,7 @@ void Scene::Initialize()
 
 	// material test
 	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
 	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
@@ -105,7 +105,7 @@ void Scene::Initialize()
 	//CreateSphere(btVector3(100, 100, 100), 100, 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(6, 6, 6)));
 
 	// dof test
-	CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateSphere(btVector3(0, 3, -9), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
 	//CreateSphere(btVector3(0, 3, -6), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
 	//CreateSphere(btVector3(0, 3, -3), 1, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
@@ -294,6 +294,10 @@ void Scene::UpdateScene(float dt)
 		RenderPath(samples);
 		SaveImage("Render.png");
 	}
+	if (IsKeyDown('m'))
+	{
+		CUMemInitialize();
+	}
 	if (IsKeyDown('d'))
 	{
 		DebugTraceRay();
@@ -316,6 +320,133 @@ void Scene::RenderScene()
 		DrawShape(object);
 	}
 }
+
+// CUDA
+
+void Scene::CUMemInitialize()
+{
+	// Camera
+	CameraCU cam_cuda = CameraCU();
+	camera->CopyCamera(&cam_cuda);
+	CameraCU* cam_p;
+
+	cudaMalloc((void**)&cam_p, sizeof(CameraCU));	//cam_p contains device memory address
+	cudaMemcpy(cam_p, &cam_cuda, sizeof(CameraCU), cudaMemcpyHostToDevice);
+
+	std::cout << "cam copy to device successed" << std::endl;
+	// Objects
+	std::vector<ObjectCU*> loaded_object;	//loaded_object contains array of device memory address of Object
+	for (auto & object : objects)
+	{
+		loaded_object.push_back(CULoadObj(object));
+	}
+
+	ObjectCU* objects_p;
+	cudaMalloc((void**)&objects_p, loaded_object.size() * sizeof(ObjectCU*));
+	cudaMemcpy(objects_p, &loaded_object[0], loaded_object.size() * sizeof(ObjectCU*), cudaMemcpyHostToDevice);
+	std::cout << "objects copy to device successed" << std::endl;
+
+	TracePath* tp = new TracePath;
+
+
+	float3* result = tp->RenderPathCU(objects_p, loaded_object.size(), cam_p, camera->GetWidht(), camera->GetHeight());
+	SaveImageCU(result, "RenderCU.png");
+	
+	delete(result);
+	// need to pass cam_p, objects_p, objects_p size
+}
+
+ObjectCU* Scene::CULoadObj(Object* object)
+{
+	float transform[16];
+	btCollisionShape* pShape = object->GetShape();
+	object->GetTransform(transform);
+
+	switch (pShape->getShapeType())
+	{
+		/*case BOX_SHAPE_PROXYTYPE:
+		{
+			const btBoxShape* box = static_cast<const btBoxShape*>(pShape);
+			btVector3 halfSize = box->getHalfExtentsWithMargin();
+			DrawBox(halfSize);
+			break;
+		}
+
+		case SPHERE_SHAPE_PROXYTYPE:
+		{
+			const btSphereShape* sphere = static_cast<const btSphereShape*>(pShape);
+			float radius = sphere->getMargin();
+			DrawSphere(radius);
+			break;
+		}*/
+
+		case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
+		{
+			const Mesh* mesh = static_cast<const Mesh*>(object);
+			Triangle* t;
+			std::vector<float3> triangles;
+			for (int i = 0; i < mesh->GetTriangles().size(); i++)
+			{
+				t = mesh->GetTriangles().at((unsigned)i);
+				triangles.push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
+				triangles.push_back(make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform);
+				triangles.push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);
+			}
+			float3* mesh_p;
+			unsigned int triangles_size = (unsigned int)(triangles.size() * sizeof(float3));
+			cudaMalloc((void**)&mesh_p, triangles_size);	//mesh_p contains device memory address for triangles
+			cudaMemcpy(mesh_p, &triangles[0], triangles_size, cudaMemcpyHostToDevice);
+
+			ObjectCU temp;
+			temp.triangles_size = triangles_size;
+			temp.triangles_p = mesh_p;
+			temp.material = object->GetMaterial().GetType();
+			temp.color = object->GetMaterial().GetColorF();
+			temp.emission = object->GetMaterial().GetEmissionF();
+			ObjectCU* object_p;
+			cudaMalloc((void**)&object_p, sizeof(ObjectCU));
+			cudaMemcpy(object_p, &temp, sizeof(ObjectCU), cudaMemcpyHostToDevice);
+
+
+			return object_p;
+		}
+		
+	}
+
+
+/*
+	glPushMatrix();
+	glMultMatrixf(transform);
+	glColor3fv(object->GetMaterial().GetColor());
+
+	switch (pShape->getShapeType())
+	{
+		case BOX_SHAPE_PROXYTYPE:
+		{
+			const btBoxShape* box = static_cast<const btBoxShape*>(pShape);
+			btVector3 halfSize = box->getHalfExtentsWithMargin();
+			DrawBox(halfSize);
+			break;
+		}
+
+		case SPHERE_SHAPE_PROXYTYPE:
+		{
+			const btSphereShape* sphere = static_cast<const btSphereShape*>(pShape);
+			float radius = sphere->getMargin();
+			DrawSphere(radius);
+			break;
+		}
+
+		case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
+		{
+			const Mesh* mesh = static_cast<const Mesh*>(object);
+			DrawMesh(mesh);
+			break;
+		}
+	}*/
+}
+
+
 
 void Scene::DrawShape(Object* object)
 {
@@ -666,6 +797,33 @@ void Scene::SaveImage(const char *filePath)
 		buffer.push_back(toInt(pixelBuffer[i].x()));
 		buffer.push_back(toInt(pixelBuffer[i].y()));
 		buffer.push_back(toInt(pixelBuffer[i].z()));
+		buffer.push_back(255);
+	}
+
+	unsigned error = lodepng::encode(filePath, buffer, width, height);
+	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
+
+	std::vector<unsigned char> vclear;
+	buffer.swap(vclear);
+	vclear.clear();
+	buffer.clear();
+	buffer.shrink_to_fit();
+	delete pixelBuffer;
+}
+
+void Scene::SaveImageCU(float3* pixels, const char *filePath)
+{
+	int width = camera->GetWidht();
+	int height = camera->GetHeight();
+
+	std::vector<unsigned char> buffer;
+	int pixelCount = width * height;
+
+	for (int i = 0; i < pixelCount; i++)
+	{
+		buffer.push_back(toInt(pixels[i].x));
+		buffer.push_back(toInt(pixels[i].y));
+		buffer.push_back(toInt(pixels[i].z));
 		buffer.push_back(255);
 	}
 

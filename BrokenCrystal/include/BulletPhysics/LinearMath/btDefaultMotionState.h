@@ -35,7 +35,17 @@ ATTRIBUTE_ALIGNED16(struct)	btDefaultMotionState : public btMotionState
 			m_graphicsWorldTrans = centerOfMassWorldTrans * m_centerOfMassOffset;
 	}
 
-	
+	virtual btVector3   GetWorldPosition()
+	{
+		return (m_graphicsWorldTrans * m_centerOfMassOffset.inverse()).getOrigin();
+	}
+
+	virtual btQuaternion GetWorldRotation()
+	{
+		return (m_graphicsWorldTrans * m_centerOfMassOffset.inverse()).getRotation();
+		btMatrix3x3 matrix = btMatrix3x3((m_graphicsWorldTrans * m_centerOfMassOffset.inverse()).getRotation());
+
+	}
 
 };
 

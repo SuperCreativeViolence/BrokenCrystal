@@ -6,6 +6,8 @@
 #include <assert.h>
 #include "Ray.h"
 #include "erand48.h"
+#include "CameraCU.h"
+
 
 class Camera
 {
@@ -24,6 +26,8 @@ public:
 	int GetWidht();
 	int GetHeight();
 	btVector3 GetPosition();
+
+	void CopyCamera(CameraCU *cam);
 
 private:
 	btVector3 position;

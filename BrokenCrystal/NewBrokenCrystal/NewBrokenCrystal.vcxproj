@@ -203,11 +203,14 @@
   <ItemGroup>
     <ClInclude Include="AABBox.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CameraCU.h" />
+    <ClInclude Include="cutil_math.h" />
     <ClInclude Include="erand48.h" />
     <ClInclude Include="GLUTCallBack.h" />
     <ClInclude Include="Intersection.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialType.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="OpenglMotionState.h" />
     <ClInclude Include="Ray.h" />
@@ -215,6 +218,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="KDTree.h" />
+    <ClInclude Include="TracePath.h" />
     <ClInclude Include="Triangle.h" />
   </ItemGroup>
   <ItemGroup>

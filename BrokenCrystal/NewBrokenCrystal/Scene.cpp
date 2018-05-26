@@ -28,6 +28,8 @@ Scene::~Scene()
 
 void Scene::Initialize()
 {
+	// gui 초기화
+	ImGui_ImplGLUT_Init();
 
 	// opengl Light 초기화
 	GLfloat ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f }; // dark grey
@@ -72,6 +74,7 @@ void Scene::Initialize()
 	CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
 	//CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
@@ -185,6 +188,10 @@ void Scene::Keyboard(unsigned char key, int x, int y)
 	keyState[key] = true;
 	mousePos[0] = x;
 	mousePos[1] = y;
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.AddInputCharacter(key);
+
 }
 
 void Scene::KeyboardUp(unsigned char key, int x, int y)
@@ -192,16 +199,19 @@ void Scene::KeyboardUp(unsigned char key, int x, int y)
 	keyState[key] = false;
 	mousePos[0] = x;
 	mousePos[1] = y;
+
+	if (key == 9)
+		showDebugPanel = !showDebugPanel;
 }
 
 void Scene::Special(int key, int x, int y)
 {
-
+	ImGuiIO& io = ImGui::GetIO();
+	io.AddInputCharacter(key);
 }
 
 void Scene::SpecialUp(int key, int x, int y)
 {
-
 }
 
 void Scene::Reshape(int w, int h)
@@ -218,6 +228,7 @@ void Scene::Idle()
 
 	camera->UpdateCamera();
 	RenderScene();
+	RenderGUI();
 
 	UpdateScene(dt / 1000.0f);
 
@@ -227,7 +238,7 @@ void Scene::Idle()
 void Scene::Mouse(int button, int state, int x, int y)
 {
 	mouseState[button] = state;
-	if (IsMouseDown(0))
+	if (IsMouseDown(2))
 	{
 		glutSetCursor(GLUT_CURSOR_NONE);
 		clickPos[0] = x;
@@ -239,6 +250,20 @@ void Scene::Mouse(int button, int state, int x, int y)
 	}
 	mousePos[0] = x;
 	mousePos[1] = y;
+
+	// gui
+	ImGuiIO& io = ImGui::GetIO();
+	io.MousePos = ImVec2(float(x), float(y));
+
+	if (state == GLUT_DOWN && (button == GLUT_LEFT_BUTTON))
+		io.MouseDown[0] = true;
+	else
+		io.MouseDown[0] = false;
+
+	if (state == GLUT_DOWN && (button == GLUT_RIGHT_BUTTON))
+		io.MouseDown[1] = true;
+	else
+		io.MouseDown[1] = false;
 }
 
 void Scene::PassiveMotion(int x, int y)
@@ -247,6 +272,8 @@ void Scene::PassiveMotion(int x, int y)
 	mousePos[1] = y;
 	deltaDrag[0] = 0;
 	deltaDrag[1] = 0;
+	ImGuiIO& io = ImGui::GetIO();
+	io.MousePos = ImVec2(float(x), float(y));
 }
 
 void Scene::Motion(int x, int y)
@@ -256,7 +283,7 @@ void Scene::Motion(int x, int y)
 	deltaDrag[0] = 0;
 	deltaDrag[1] = 0;
 	isMouseDrag = true;
-	if (IsMouseDown(0))
+	if (IsMouseDown(2))
 	{
 		deltaDrag[0] = (clickPos[0] - x);
 		deltaDrag[1] = (clickPos[1] - y);
@@ -264,6 +291,8 @@ void Scene::Motion(int x, int y)
 		glutWarpPointer(clickPos[0], clickPos[1]);
 		isMouseDrag = true;
 	}
+	ImGuiIO& io = ImGui::GetIO();
+	io.MousePos = ImVec2(float(x), float(y));
 }
 
 void Scene::Display()
@@ -309,8 +338,62 @@ void Scene::UpdateScene(float dt)
 		btVector3 color = DebugPathTest(ray, 0, ray.origin);
 		printf("\nresult = %.1f %.1f %.1f\n", color[0], color[1], color[2]);
 	}
+	if (IsKeyDown('g'))
+	{
+		DebugTraceRay(true);
+	}
 
 	world->stepSimulation(dt);
+}
+
+void Scene::RenderGUI()
+{
+	int width = camera->GetWidht();
+	int height = camera->GetHeight();
+	ImGui_ImplGLUT_NewFrame(width, height);
+
+	//// 1. Show a simple window
+	//// Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
+	//{
+	//	static float f = 0.0f;
+	//	ImGui::Text("Hello, world!");
+	//	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+	//	if (ImGui::Button("Test Window")) show_test_window ^= 1;
+	//	if (ImGui::Button("Another Window")) show_another_window ^= 1;
+	//	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+	//}
+
+	//// 2. Show another simple window, this time using an explicit Begin/End pair
+	//if (show_another_window)
+	//{
+	//	ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
+	//	ImGui::Begin("Another Window", &show_another_window);
+	//	ImGui::Text("Hello");
+	//	ImGui::End();
+	//}
+
+	//// 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
+	//if (show_test_window)
+	//{
+	//	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
+	//	ImGui::ShowTestWindow();
+	//}
+
+	if (showDebugPanel)
+	{
+		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(width / 3, height / 2), ImGuiSetCond_Appearing);
+		ImGui::Begin("Debug Panel", &showDebugPanel);
+		ImGui::InputInt("Samples", &samples, 1);
+		ImGui::SliderFloat("Fov", &camera->GetFovPointer(), 1, 179);
+		ImGui::SliderFloat("Zoom", &camera->GetDistancePointer(), 0, 20);
+		ImGui::SliderFloat3("Position", camera->GetPositionPointer(), -100, 100);
+		ImGui::SliderFloat3("Target", camera->GetTargetPointer(), -100, 100);
+		ImGui::SliderFloat("Pitch", &camera->GetPitchPointer(), 1, 89);
+		ImGui::SliderFloat("Yaw", &camera->GetYawPointer(), -360, 360);
+		ImGui::End();
+	}
+	ImGui::Render();
 }
 
 void Scene::RenderScene()
@@ -654,9 +737,9 @@ btVector3 Scene::TraceRay(const Ray &ray, int depth)
 	return color * TraceRay(reflected, depth);
 }
 
-void Scene::DebugTraceRay()
+void Scene::DebugTraceRay(bool dof)
 {
-	Ray ray = camera->GetRay(mousePos[0], mousePos[1], true);
+	Ray ray = camera->GetRay(mousePos[0], mousePos[1], 0, 0, dof);
 	ObjectIntersection intersection = Intersect(ray);
 	if (!intersection.hit)
 	{

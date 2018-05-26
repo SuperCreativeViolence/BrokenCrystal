@@ -5,6 +5,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <LinearMath/btQuickprof.h>
 #include <LinearMath\btScalar.h>
+#include <imgui_impl_glut.h>
 
 #include "Camera.h"
 #include "Object.h"
@@ -56,6 +57,9 @@ public:
 	// physics
 	void UpdateScene(float dt);
 
+	// gui
+	void RenderGUI();
+
 	// opengl
 	void RenderScene();
 	void DrawShape(Object* object);
@@ -67,7 +71,7 @@ public:
 	// path tracing
 	void RenderPath(int samples);
 	btVector3 TraceRay(const Ray &ray, int depth);
-	void DebugTraceRay();
+	void DebugTraceRay(bool dof = false);
 	btVector3 DebugPathTest(const Ray &ray, int depth, btVector3 hitPos);
 	ObjectIntersection Intersect(const Ray &ray);
 	void SaveImage(const char *filePath);
@@ -102,8 +106,11 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 1;
+	int samples = 4;
 	btVector3* pixelBuffer;
+
+	// gui
+	bool showDebugPanel;
 
 };
 

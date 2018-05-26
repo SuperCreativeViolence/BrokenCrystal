@@ -41,7 +41,7 @@ Ray Material::GetReflectedRay(const Ray & ray, const btVector3 & position, const
 	}
 	else if (type == GLOSS)
 	{
-		double roughness = 2.0;
+		double roughness = 0.7;
 		btVector3 reflected = ray.direction - normal * 2 * normal.dot(ray.direction);
 		reflected = btVector3(
 			reflected[0] + (erand48() - 0.5) * roughness,

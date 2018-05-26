@@ -68,7 +68,7 @@ void Camera::Rotate(float deltaX, float deltaY)
 	pitch -= deltaX;
 	yaw -= deltaY;
 	yaw = btFmod(yaw, 360.0f);
-	btClamp(pitch, 10.0f, 89.0f);
+	btClamp(pitch, 1.0f, 89.0f);
 	UpdateCamera();
 }
 
@@ -83,6 +83,36 @@ void Camera::Fov(float delta)
 {
 	fov += delta;
 	UpdateCamera();
+}
+
+float& Camera::GetFovPointer()
+{
+	return fov;
+}
+
+float* Camera::GetTargetPointer()
+{
+	return target.m_floats;
+}
+
+float* Camera::GetPositionPointer()
+{
+	return position.m_floats;
+}
+
+float& Camera::GetPitchPointer()
+{
+	return pitch;
+}
+
+float& Camera::GetYawPointer()
+{
+	return yaw;
+}
+
+float& Camera::GetDistancePointer()
+{
+	return distance;
 }
 
 Ray Camera::GetRay(int x, int y, bool jitter)
@@ -143,15 +173,15 @@ Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
 	float bottom = -top;
 	float left = -right;
 
-	float imPlaneUPos = left + (right - left)*(((float)x + sx + dx + 0.5f) / (float)width);
-	float imPlaneVPos = bottom + (top - bottom)*(((float)y + sy + dy + 0.5f) / (float)height);
+	float imPlaneUPos = left + (right - left)*(((float)x + sx + dx - 0.5f) / (float)width);
+	float imPlaneVPos = bottom + (top - bottom)*(((float)y + sy + dy - 0.5f) / (float)height);
 
 	Ray result = Ray(position, (imPlaneUPos*uDir + imPlaneVPos * vDir - wDir).normalize());
 
 	if (dof)
 	{
-		double u1 = (erand48() * 2.0) - 1.0;
-		double u2 = (erand48() * 2.0) - 1.0;
+		double u1 = r1 - 1.0;
+		double u2 = r2 - 1.0;
 
 		double fac = (double)(2 * 3.14159265358979323846 * u2);
 
@@ -162,7 +192,6 @@ Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
 	}
 
 	return result;
-
 }
 
 int Camera::GetWidht()

@@ -65,15 +65,23 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
 	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+
+	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 100);
+	for (auto& mesh : meshes)
+	{
+		AddObject(static_cast<Object*>(mesh));
+	}
+	DeleteObject(crystal);
 	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
@@ -82,20 +90,17 @@ void Scene::Initialize()
 	//CreateSphere(btVector3(0, 10, 10), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
 
-	CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
+	//CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(2, 4, 0), btVector3(2, 2, 2), 0, Material(DIFF, btVector3(0.4, 0.3, 0.1)));
-
-	//CreateMesh(btVector3(0, 5, 0), "dragon.obj", 1, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
-
 
 
 	// material test
 	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
 	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateSphere(btVector3(-7, 1, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
 	//CreateSphere(btVector3(-3, 1, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
@@ -168,9 +173,18 @@ void Scene::CreateSphere(const btVector3 &position, double radius, float mass, M
 	AddObject(static_cast<Object*>(new Sphere(position, radius, mass, material)));
 }
 
-void Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
+Mesh* Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
 {
-	AddObject(static_cast<Object*>(new Mesh(position, fileName, mass, material)));
+	Mesh* mesh = new Mesh(position, fileName, mass, material);
+	AddObject(static_cast<Object*>(mesh));
+	return mesh;
+}
+
+void Scene::DeleteObject(Object* object)
+{
+	objects.erase(std::remove(objects.begin(), objects.end(), object), objects.end());
+	world->removeRigidBody(object->GetRigidBody());
+	delete object;
 }
 
 bool Scene::IsKeyDown(unsigned char key)
@@ -191,7 +205,7 @@ void Scene::Keyboard(unsigned char key, int x, int y)
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.AddInputCharacter(key);
-
+	glutPostRedisplay();
 }
 
 void Scene::KeyboardUp(unsigned char key, int x, int y)
@@ -202,37 +216,24 @@ void Scene::KeyboardUp(unsigned char key, int x, int y)
 
 	if (key == 9)
 		showDebugPanel = !showDebugPanel;
+	glutPostRedisplay();
 }
 
 void Scene::Special(int key, int x, int y)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.AddInputCharacter(key);
+	glutPostRedisplay();
 }
 
 void Scene::SpecialUp(int key, int x, int y)
 {
+	glutPostRedisplay();
 }
 
 void Scene::Reshape(int w, int h)
 {
 	camera->UpdateScreen(w, h);
-}
-
-void Scene::Idle()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	float dt = clock.getTimeMilliseconds();
-	clock.reset();
-
-	camera->UpdateCamera();
-	RenderScene();
-	RenderGUI();
-
-	UpdateScene(dt / 1000.0f);
-
-	glutSwapBuffers();
 }
 
 void Scene::Mouse(int button, int state, int x, int y)
@@ -264,6 +265,7 @@ void Scene::Mouse(int button, int state, int x, int y)
 		io.MouseDown[1] = true;
 	else
 		io.MouseDown[1] = false;
+	glutPostRedisplay();
 }
 
 void Scene::PassiveMotion(int x, int y)
@@ -274,6 +276,7 @@ void Scene::PassiveMotion(int x, int y)
 	deltaDrag[1] = 0;
 	ImGuiIO& io = ImGui::GetIO();
 	io.MousePos = ImVec2(float(x), float(y));
+	glutPostRedisplay();
 }
 
 void Scene::Motion(int x, int y)
@@ -293,11 +296,27 @@ void Scene::Motion(int x, int y)
 	}
 	ImGuiIO& io = ImGui::GetIO();
 	io.MousePos = ImVec2(float(x), float(y));
+	glutPostRedisplay();
 }
 
 void Scene::Display()
 {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	camera->UpdateCamera();
+	RenderScene();
+	RenderGUI();
+
+	glutSwapBuffers();
+}
+
+
+void Scene::Idle()
+{
+	float dt = clock.getTimeMilliseconds();
+	clock.reset();
+	UpdateScene(dt / 1000.0f);
+	glutPostRedisplay();
 }
 
 void Scene::UpdateScene(float dt)
@@ -352,47 +371,30 @@ void Scene::RenderGUI()
 	int height = camera->GetHeight();
 	ImGui_ImplGLUT_NewFrame(width, height);
 
-	//// 1. Show a simple window
-	//// Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets appears in a window automatically called "Debug"
-	//{
-	//	static float f = 0.0f;
-	//	ImGui::Text("Hello, world!");
-	//	ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-	//	if (ImGui::Button("Test Window")) show_test_window ^= 1;
-	//	if (ImGui::Button("Another Window")) show_another_window ^= 1;
-	//	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-	//}
-
-	//// 2. Show another simple window, this time using an explicit Begin/End pair
-	//if (show_another_window)
-	//{
-	//	ImGui::SetNextWindowSize(ImVec2(200, 100), ImGuiSetCond_FirstUseEver);
-	//	ImGui::Begin("Another Window", &show_another_window);
-	//	ImGui::Text("Hello");
-	//	ImGui::End();
-	//}
-
-	//// 3. Show the ImGui test window. Most of the sample code is in ImGui::ShowTestWindow()
-	//if (show_test_window)
-	//{
-	//	ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiSetCond_FirstUseEver);
-	//	ImGui::ShowTestWindow();
-	//}
-
 	if (showDebugPanel)
 	{
 		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiSetCond_Once);
 		ImGui::SetNextWindowSize(ImVec2(width / 3, height / 2), ImGuiSetCond_Appearing);
 		ImGui::Begin("Debug Panel", &showDebugPanel);
-		ImGui::InputInt("Samples", &samples, 1);
+		if(isTracing)
+			ImGui::Text("Raytracing... %0.1f%% [ETC %.3dh%.2dm%.2ds]", completion, remaining / 3600, (remaining % 3600) / 60, remaining % 60);
+		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::InputInt("Samples", &samples, 1, 1);
+		samples = std::max(samples, 1);
 		ImGui::SliderFloat("Fov", &camera->GetFovPointer(), 1, 179);
 		ImGui::SliderFloat("Zoom", &camera->GetDistancePointer(), 0, 20);
 		ImGui::SliderFloat3("Position", camera->GetPositionPointer(), -100, 100);
 		ImGui::SliderFloat3("Target", camera->GetTargetPointer(), -100, 100);
 		ImGui::SliderFloat("Pitch", &camera->GetPitchPointer(), 1, 89);
 		ImGui::SliderFloat("Yaw", &camera->GetYawPointer(), -360, 360);
+		if (!isTracing && ImGui::Button("Start Tracing"))
+		{
+			RenderPath(samples);
+			SaveImage("Render.png");
+		}
 		ImGui::End();
 	}
+
 	ImGui::Render();
 }
 
@@ -670,42 +672,64 @@ void Scene::DrawMesh(const Mesh* mesh)
 
 void Scene::RenderPath(int samples)
 {
-	int time = clock.getTimeMilliseconds();
+	isTracing = true;
 	int width = camera->GetWidht();
 	int height = camera->GetHeight();
 	double samplesP = 1.0 / samples;
 	pixelBuffer = new btVector3[width * height];
-
+	remaining = 0;
+	completion = 0;
+	unsigned int startTime = time(nullptr);
+	unsigned int lastTime = startTime;
+	unsigned int progress = 0;
+	unsigned int lastProgress = 0;
+	float lastSpeed = 0;
+	int pixelCount = width * height;
 #pragma omp parallel for schedule(dynamic, 1)
-	for (int y = 0; y < height; y++)
+	
+	for (int t = 0; t < pixelCount; t++)
 	{
-		fprintf(stderr, "\rRendering (%i samples): %.2f%% | Time remaining : %0.4fs", samples, (double)y / height * 100, ((float)(clock.getTimeMilliseconds() - time) / 1000) * ((height / (float)y) - 1));
+		int x = t % width;
+		int y = t / width;
+		btVector3 resultColor = btVector3(0, 0, 0);
 
-		for (int x = 0; x < width; x++)
+		for (int sy = 0; sy < 2; sy++)
 		{
-			btVector3 resultColor = btVector3(0, 0, 0);
-
-			for (int sy = 0; sy < 2; sy++)
+			for (int sx = 0; sx < 2; sx++)
 			{
-				for (int sx = 0; sx < 2; sx++)
+				btVector3 color = btVector3(0, 0, 0);
+				for (int s = 0; s < samples; s++)
 				{
-					btVector3 color = btVector3(0,0,0);
-					for (int s = 0; s < samples; s++)
-					{
-						//Ray ray = camera->GetRay(x, y, s > 0);
-						Ray ray = camera->GetRay(x, y, sx, sy, false); // dof 효과 미완성
-						color = color + TraceRay(ray, 0);
-						//printf("%f %f %f\n", color[0], color[1], color[2]);
-						//Sleep(1000);
-					}
-					resultColor = resultColor + color * samplesP;
-					//printf("final : %f %f %f\n", color[0] * samplesP, color[1] * samplesP, color[2] * samplesP);
+					//Ray ray = camera->GetRay(x, y, s > 0);
+					Ray ray = camera->GetRay(x, y, sx, sy, false); // dof 효과 미완성
+					color = color + TraceRay(ray, 0);
+					//printf("%f %f %f\n", color[0], color[1], color[2]);
+					//Sleep(1000);
 				}
+				resultColor = resultColor + color * samplesP;
+				//printf("final : %f %f %f\n", color[0] * samplesP, color[1] * samplesP, color[2] * samplesP);
 			}
-			pixelBuffer[(y) * width + x] = resultColor * 0.25;
+		}
+		pixelBuffer[(y)* width + x] = resultColor * 0.25;
+
+#pragma omp critical
+		{
+			++progress;
+			if (progress > 0 && ((float)difftime(time(nullptr), lastTime) >= 1.0f))
+			{
+				completion = (float)(progress - 1) / pixelCount * 100;
+				float speed = (float)(progress - lastProgress) / difftime(time(nullptr), lastTime);
+				remaining = (int)((pixelCount - progress) / speed);
+				printf("\rPathTracing (%d samples)  %0.1f%% [ETC %.3dh%.2dm%.2ds]", samples, completion, remaining / 3600, (remaining % 3600) / 60, remaining % 60);
+				lastTime = time(nullptr);
+				lastProgress = progress;
+				lastSpeed = speed;
+			}
 		}
 	}
-	fprintf(stderr, "\rRendering (%i samples): done %0.4fs\n", samples, (float)(clock.getTimeMilliseconds() - time) / 1000);
+	int elapsedTime = (int)difftime(time(nullptr), startTime);
+	printf("\rPathTracing complete, time taken: %.2dh%.2dm%.2ds.\n", elapsedTime / 3600, (elapsedTime % 3600) / 60, elapsedTime % 60);
+	isTracing = false;
 }
 
 

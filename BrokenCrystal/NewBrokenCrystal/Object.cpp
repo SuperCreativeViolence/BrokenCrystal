@@ -86,6 +86,9 @@ Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float
 
 	btRigidBody::btRigidBodyConstructionInfo cInfo(mass, motionState, shape, localInteria);
 	body = new btRigidBody(cInfo);
+	body->setRollingFriction(0.5f);
+	body->setSpinningFriction(0.5f);
+	body->setFriction(0.5f);
 }
 
 Mesh::Mesh(const btVector3& position_, const char* filePath, float mass) : Object(new btEmptyShape(), position_, btQuaternion(0, 0, 0, 1))

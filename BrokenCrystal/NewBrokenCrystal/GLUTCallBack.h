@@ -47,7 +47,7 @@ int glutmain(int argc, char **argv, int width, int height, const char* title, Sc
 	scene = pScene;
 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_MULTISAMPLE);
 	glutInitWindowPosition(0, 0);
 	glutInitWindowSize(width, height);
 	glutCreateWindow(title);
@@ -69,6 +69,7 @@ int glutmain(int argc, char **argv, int width, int height, const char* title, Sc
 	scene->Idle();
 
 	glutMainLoop();
+	ImGui_ImplGLUT_Shutdown();
 	return 0;
 }
 

@@ -4,6 +4,7 @@
 #include <GL/freeglut.h>
 #include <btBulletDynamicsCommon.h>
 #include <assert.h>
+#include <array>
 #include "Ray.h"
 #include "erand48.h"
 #include "CameraCU.h"
@@ -27,7 +28,15 @@ public:
 	int GetHeight();
 	btVector3 GetPosition();
 
+
 	void CopyCamera(CameraCU *cam);
+	// gui
+	float& GetFovPointer();
+	float* GetTargetPointer();
+	float* GetPositionPointer();
+	float& GetPitchPointer();
+	float& GetYawPointer();
+	float& GetDistancePointer();
 
 private:
 	btVector3 position;

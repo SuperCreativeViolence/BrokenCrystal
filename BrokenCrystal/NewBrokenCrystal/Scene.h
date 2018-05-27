@@ -1,23 +1,23 @@
 #ifndef SCENE_H
 #define SCENE_H
-
+#define NOMINMAX
 #include <gl/freeglut.h>
 #include <btBulletDynamicsCommon.h>
 #include <LinearMath/btQuickprof.h>
 #include <LinearMath\btScalar.h>
+#include <imgui_impl_glut.h>
 
 #include "Camera.h"
 #include "Object.h"
 #include "lodepng.h"
 #include "TracePath.h"
+#include "voronoi.h"
 
 #include <iostream>
 #include <vector>
 
-
 // Clamp double to min/max of 0/1
 inline double clamp(double x) { return x < 0 ? 0 : x>1 ? 1 : x; }
-// Clamp to between 0-255
 inline int toInt(double x) { return int(clamp(x) * 255 + .5); }
 
 typedef std::vector<Object*> Objects;
@@ -35,7 +35,8 @@ public:
 	void AddObject(Object* object);
 	void CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
 	void CreateSphere(const btVector3 &position, double radius, float mass, Material material);
-	void CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
+	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
+	void DeleteObject(Object* object);
 
 	// input
 	bool IsKeyDown(unsigned char key);
@@ -47,14 +48,17 @@ public:
 	void Special(int key, int x, int y);
 	void SpecialUp(int key, int x, int y);
 	void Reshape(int w, int h);
-	void Idle();
 	void Mouse(int button, int state, int x, int y);
 	void PassiveMotion(int x, int y);
 	void Motion(int x, int y);
 	void Display();
+	void Idle();
 
 	// physics
 	void UpdateScene(float dt);
+
+	// gui
+	void RenderGUI();
 
 	// opengl
 	void RenderScene();
@@ -67,7 +71,7 @@ public:
 	// path tracing
 	void RenderPath(int samples);
 	btVector3 TraceRay(const Ray &ray, int depth);
-	void DebugTraceRay();
+	void DebugTraceRay(bool dof = false);
 	btVector3 DebugPathTest(const Ray &ray, int depth, btVector3 hitPos);
 	ObjectIntersection Intersect(const Ray &ray);
 	void SaveImage(const char *filePath);
@@ -102,8 +106,14 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 2;
+	int samples = 10;
 	btVector3* pixelBuffer;
+
+	// gui
+	bool showDebugPanel = true;
+	bool isTracing = false;
+	float completion;
+	int remaining;
 
 };
 

@@ -26,8 +26,8 @@
     <ProjectGuid>{FB223BA0-3C90-41F5-9EC9-2B6060879440}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>NewBrokenCrystal</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
     <ProjectName>BrokenCrystal</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -41,7 +41,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -87,8 +87,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <ExecutablePath>$(SolutionDir)dll;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(SolutionDir)include;$(SolutionDir)include\gl;$(SolutionDir)include\BulletPhysics;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)include;$(SolutionDir)include\gl;$(SolutionDir)include\BulletPhysics;$(SolutionDir)include\imgui;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <SourcePath>$(SolutionDir)include\imgui;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -98,7 +99,7 @@
     <SourcePath>$(VC_SourcePath)</SourcePath>
     <ExcludePath>$(ExcludePath);$(SystemRoot)</ExcludePath>
     <ExecutablePath>$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
-    <IncludePath>$(SolutionDir)include/BulletPhysics;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)include/BulletPhysics;$(SolutionDir)include/imgui;$(SolutionDir)include/gl;$(SolutionDir)include/dynlink;$(IncludePath)</IncludePath>
     <ReferencePath>$(VC_ReferencesPath_x64);</ReferencePath>
     <OutDir>$(SolutionDir)/$(Platform)/$(Configuration)/</OutDir>
     <IntDir>$(Platform)/$(Configuration)/</IntDir>
@@ -189,6 +190,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="erand48.cpp" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_demo.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
+    <ClCompile Include="imgui_impl_glut.cpp" />
     <ClCompile Include="KDTree.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="lodepng.cpp" />
@@ -199,6 +204,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="tiny_obj_loader.cpp" />
     <ClCompile Include="Triangle.cpp" />
+    <ClCompile Include="voronoi.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABBox.h" />
@@ -220,6 +226,7 @@
     <ClInclude Include="KDTree.h" />
     <ClInclude Include="TracePath.h" />
     <ClInclude Include="Triangle.h" />
+    <ClInclude Include="voronoi.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="TracePath.cu" />

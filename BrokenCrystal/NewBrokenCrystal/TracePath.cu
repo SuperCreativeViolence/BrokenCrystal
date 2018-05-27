@@ -157,10 +157,11 @@ __global__ void RenderPathCUKernel(float3* output, ObjectCU* object_list, int nu
 	curandState randState;
 	curand_init(threadId, 0, 0, &randState);
 
-	int i = (height - y - 1) * width + x;
-
-	if (i < width * height)
+	int pixelCount = width * height;
+	for (int t = 0; t < pixelCount; t++)
 	{
+		int x = t % width;
+		int y = t / width;
 
 		float samplesP = 1.0f / TRACE_SAMPLES;
 		float3 resultcolor = make_float3(0.0f, 0.0f, 0.0f);
@@ -181,7 +182,7 @@ __global__ void RenderPathCUKernel(float3* output, ObjectCU* object_list, int nu
 		}
 
 		resultcolor = resultcolor * 0.25f;
-		output[i] = make_float3(clampf(resultcolor.x), clampf(resultcolor.y), clampf(resultcolor.z));
+		output[t] = make_float3(clampf(resultcolor.x), clampf(resultcolor.y), clampf(resultcolor.z));
 	}
 }
 

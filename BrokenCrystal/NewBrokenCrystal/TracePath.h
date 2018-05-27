@@ -16,7 +16,7 @@
 
 #define EPSILON_CU 1e-10
 
-#define TRACE_SAMPLES 4
+#define TRACE_SAMPLES 128
 
 #define THREAD_NUM 
 

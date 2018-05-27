@@ -350,9 +350,10 @@ void Scene::CUMemInitialize()
 
 
 	float3* result = tp->RenderPathCU(objects_p, loaded_object.size(), cam_p, camera->GetWidht(), camera->GetHeight());
+	std::cout << "CU path tracing finished! Start SaveImageCU.." << std::endl;
 	SaveImageCU(result, "RenderCU.png");
-	
-	delete(result);
+
+	std::cout << "SaveImageCU successed!" << std::endl;
 	// need to pass cam_p, objects_p, objects_p size
 }
 
@@ -616,7 +617,7 @@ void Scene::RenderPath(int samples)
 						//Sleep(1000);
 					}
 					resultColor = resultColor + color * samplesP;
-					//printf("final : %f %f %f\n", color[0] * samplesP, color[1] * samplesP, color[2] * samplesP);
+					//printf("final : %f %f %f\n", resultColor[0], resultColor[1], resultColor[2]);
 				}
 			}
 			pixelBuffer[(y) * width + x] = resultColor * 0.25;
@@ -786,6 +787,7 @@ ObjectIntersection Scene::Intersect(const Ray &ray)
 
 void Scene::SaveImage(const char *filePath)
 {
+	
 	int width = camera->GetWidht();
 	int height = camera->GetHeight();
 
@@ -798,6 +800,9 @@ void Scene::SaveImage(const char *filePath)
 		buffer.push_back(toInt(pixelBuffer[i].y()));
 		buffer.push_back(toInt(pixelBuffer[i].z()));
 		buffer.push_back(255);
+
+		printf("%d %d %d\n", toInt(pixelBuffer[i].x()), toInt(pixelBuffer[i].y()), toInt(pixelBuffer[i].z()));
+
 	}
 
 	unsigned error = lodepng::encode(filePath, buffer, width, height);
@@ -809,6 +814,7 @@ void Scene::SaveImage(const char *filePath)
 	buffer.clear();
 	buffer.shrink_to_fit();
 	delete pixelBuffer;
+	
 }
 
 void Scene::SaveImageCU(float3* pixels, const char *filePath)
@@ -825,6 +831,8 @@ void Scene::SaveImageCU(float3* pixels, const char *filePath)
 		buffer.push_back(toInt(pixels[i].y));
 		buffer.push_back(toInt(pixels[i].z));
 		buffer.push_back(255);
+
+		printf("%d %d %d\n", toInt(pixels[i].x), toInt(pixels[i].y), toInt(pixels[i].z));
 	}
 
 	unsigned error = lodepng::encode(filePath, buffer, width, height);
@@ -835,5 +843,5 @@ void Scene::SaveImageCU(float3* pixels, const char *filePath)
 	vclear.clear();
 	buffer.clear();
 	buffer.shrink_to_fit();
-	delete pixelBuffer;
+	delete pixels;
 }

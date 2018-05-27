@@ -135,15 +135,29 @@ float3* TracePath::RenderPathCU(ObjectCU* object_list, int num_objects, CameraCU
 	std::cout << "output_device cudaMalloc successed" << std::endl;
 
 	dim3 block(16, 16, 1); // calculate this
-	dim3 grid(width / block.x, height / block.y, 1);  // calculate this
+
+	size_t blocks_width = ceilf(width / block.x);
+	size_t blocks_height = ceilf(height / block.y);
+
+	dim3 grid(blocks_width, blocks_height, 1);  // calculate this
+
+	std::cout << "dim set successed" << std::endl;
+
+	// cuda 내부 디버그 memcpy 이용하자
 
 	RenderPathCUKernel <<< grid, block >>>(output_device, object_list, num_objects, camera, width, height);
 
+	std::cout << "RenderPathCUKernel successed" << std::endl;
+
 	cudaMemcpy(output_host, output_device, width * height * sizeof(float3), cudaMemcpyDeviceToHost);
+
+	std::cout << "copy result device to host successed" << std::endl;
 
 	cudaFree(output_device);
 	cudaFree(object_list);
 	cudaFree(camera);
+
+	std::cout << "cudaFree successed" << std::endl;
 
 	return output_host;
 }

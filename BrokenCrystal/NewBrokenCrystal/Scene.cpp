@@ -68,10 +68,10 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
@@ -99,7 +99,6 @@ void Scene::Initialize()
 	//CreateSphere(btVector3(-3, 1, 3), 3, 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateSphere(btVector3(3, 1, -3), 3, 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
 	//CreateSphere(btVector3(7, 1, -3), 3, 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
-
 
 	// island
 	//CreateMesh(btVector3(0, 5, 0), "island.obj", 0, Material());
@@ -483,8 +482,6 @@ void Scene::CUMemInitialize()
 	CameraCU* cam_cuda = new CameraCU;
 	camera->CopyCamera(cam_cuda);
 	CameraCU* cam_p;
-//	std::cout << camera->GetPosition().x() << " " <<camera->GetPosition().y()<<" "<< camera->GetPosition().z() <<std::endl;
-//	std::cout << cam_cuda.position.x << " "<< cam_cuda.position.y <<" "<< cam_cuda.position.z << std::endl;
 	
 	cudaMalloc((void**)&cam_p, sizeof(CameraCU));	//cam_p contains device memory address
 	cudaMemcpy(cam_p, cam_cuda, sizeof(CameraCU), cudaMemcpyHostToDevice);
@@ -570,45 +567,13 @@ ObjectCU* Scene::CULoadObj(Object* object)
 			temp->color = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetColorF();
 			temp->emission = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetEmissionF();;
 
-			//std::cout << "triangles num: " << temp->triangles_num / sizeof(float3) << "material: " << temp->material << "color: " << temp->color.x << " " << temp->color.y << " " << temp->color.z << std::endl;
 			ObjectCU* object_p;
 			cudaMalloc((void**)&object_p, sizeof(ObjectCU));
 			cudaMemcpy(object_p, temp, sizeof(ObjectCU), cudaMemcpyHostToDevice);
 
 			return object_p;
-		}
-		
+		}		
 	}
-/*
-	glPushMatrix();
-	glMultMatrixf(transform);
-	glColor3fv(object->GetMaterial().GetColor());
-
-	switch (pShape->getShapeType())
-	{
-		case BOX_SHAPE_PROXYTYPE:
-		{
-			const btBoxShape* box = static_cast<const btBoxShape*>(pShape);
-			btVector3 halfSize = box->getHalfExtentsWithMargin();
-			DrawBox(halfSize);
-			break;
-		}
-
-		case SPHERE_SHAPE_PROXYTYPE:
-		{
-			const btSphereShape* sphere = static_cast<const btSphereShape*>(pShape);
-			float radius = sphere->getMargin();
-			DrawSphere(radius);
-			break;
-		}
-
-		case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
-		{
-			const Mesh* mesh = static_cast<const Mesh*>(object);
-			DrawMesh(mesh);
-			break;
-		}
-	}*/
 }
 
 void Scene::DrawMeshDebugCU()
@@ -619,15 +584,6 @@ void Scene::DrawMeshDebugCU()
 	{
 		float transform[16];
 		object->GetTransform(transform);
-		/*for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < 4; j++)
-			{
-				std::cout << transform[i * 4 + j] << " ";
-			}
-			std::cout << std::endl;
-		}
-		std::cout << std::endl;*/
 
 		const Mesh* mesh = static_cast<const Mesh*>(object);
 		Triangle* t;
@@ -651,15 +607,11 @@ void Scene::DrawMeshDebugCU()
 		temp->color = object->GetMaterial().GetColorF();
 		temp->emission = object->GetMaterial().GetEmissionF();
 
-		//std::cout << "triangles size: " << temp.triangles_size / sizeof(float3) << "material: " << temp.material << "color: " << temp.color.x << " " << temp.color.y << " " << temp.color.z << std::endl;
-
 		loaded_object.push_back(temp);
 		std::cout << temp->triangles_p << std::endl;
 	}
-	//std::cout <<"\n";
 
 	for (int i = 0; i < loaded_object.size(); i++)
-	//for(int i = 0; i < 1; i++)
 	{
 		ObjectCU* mesh = loaded_object[i];
 		
@@ -672,9 +624,7 @@ void Scene::DrawMeshDebugCU()
 			btVector3 p2 = btVector3(mesh->triangles_p[i + 2].x, mesh->triangles_p[i + 2].y, mesh->triangles_p[i + 2].z);
 			DrawTriangle(p0, p1, p2);
 		}
-		//std::cout << mesh->material << std::endl;
 	}
-	//std::cout << testval << std::endl;
 }
 
 void Scene::DebugPathCU()

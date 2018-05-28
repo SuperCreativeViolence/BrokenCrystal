@@ -172,7 +172,7 @@ void Scene::CreateSphere(const btVector3 &position, double radius, float mass, M
 
 Mesh* Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
 {
-	Mesh* mesh = new Mesh(position, fileName, mass, material);
+	Mesh* mesh = new Mesh(position, fileName, mass);
 	AddObject(static_cast<Object*>(mesh));
 	return mesh;
 }
@@ -338,6 +338,7 @@ void Scene::UpdateScene(float dt)
 	{
 		RenderPath(samples);
 		SaveImage("Render.png");
+		delete pixelBuffer;
 	}
 	if (IsKeyDown('d'))
 	{
@@ -353,6 +354,10 @@ void Scene::UpdateScene(float dt)
 	if (IsKeyDown('g'))
 	{
 		DebugTraceRay(true);
+	}
+	if (IsKeyDown('p'))
+	{
+		RenderContinuousPath();
 	}
 
 	world->stepSimulation(dt);
@@ -598,6 +603,63 @@ void Scene::RenderPath(int samples)
 	isTracing = false;
 }
 
+void Scene::RenderContinuousPath(int maxSamples)
+{
+	isTracing = true;
+	int width = camera->GetWidht();
+	int height = camera->GetHeight();
+	pixelBuffer = new btVector3[width * height];
+	for (int i = 1; i < maxSamples; i++)
+	{
+		remaining = 0;
+		completion = 0;
+		unsigned int startTime = time(nullptr);
+		unsigned int lastTime = startTime;
+		unsigned int progress = 0;
+		unsigned int lastProgress = 0;
+		float lastSpeed = 0;
+		int pixelCount = width * height;
+#pragma omp parallel for schedule(dynamic, 1)
+		for (int t = 0; t < pixelCount; t++)
+		{
+			int x = t % width;
+			int y = t / width;
+			btVector3 resultColor = btVector3(0, 0, 0);
+
+			for (int sy = 0; sy < 2; sy++)
+			{
+				for (int sx = 0; sx < 2; sx++)
+				{
+					Ray ray = camera->GetRay(x, y, sx, sy, false); // dof 효과 미완성
+					resultColor += TraceRay(ray, 0);
+				}
+			}
+			btVector3 post = pixelBuffer[(y) * width + x];
+			pixelBuffer[(y) * width + x] = (post * (i - 1) + resultColor * 0.25) / i;
+#pragma omp critical
+			{
+				++progress;
+				if (progress > 0 && ((float) difftime(time(nullptr), lastTime) >= 1.0f))
+				{
+					completion = (float) (progress - 1) / pixelCount * 100;
+					float speed = (float) (progress - lastProgress) / difftime(time(nullptr), lastTime);
+					remaining = (int) ((pixelCount - progress) / speed);
+					printf("\rPathTracing (%d)  %0.1f%% [ETC %.3dh%.2dm%.2ds]", i, completion, remaining / 3600, (remaining % 3600) / 60, remaining % 60);
+					lastTime = time(nullptr);
+					lastProgress = progress;
+					lastSpeed = speed;
+				}
+			}
+		}
+		std::string fileName;
+		fileName.append("Render");
+		fileName.append(std::to_string(i));
+		fileName.append(".png");
+		SaveImage(fileName.c_str());
+	}
+	isTracing = false;
+}
+
 
 btVector3 Scene::TraceRay(const Ray &ray, int depth)
 {
@@ -762,24 +824,33 @@ void Scene::SaveImage(const char *filePath)
 	int width = camera->GetWidht();
 	int height = camera->GetHeight();
 
-	std::vector<unsigned char> buffer;
 	int pixelCount = width * height;
+	std::string fileName;
+	std::vector<unsigned char> buffer;
+	unsigned char * out = 0;
 
 	for (int i = 0; i < pixelCount; i++)
 	{
 		buffer.push_back(toInt(pixelBuffer[i].x()));
 		buffer.push_back(toInt(pixelBuffer[i].y()));
 		buffer.push_back(toInt(pixelBuffer[i].z()));
-		buffer.push_back(255);
 	}
-
-	unsigned error = lodepng::encode(filePath, buffer, width, height);
+	fileName.append("before");
+	fileName.append(filePath);
+	unsigned error = lodepng::encode(fileName.c_str(), buffer, width, height, LCT_RGB);
 	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 
+	for (int i = 0; i < 100; i++)
+		recursive_bf(buffer.data(), out, 0.01, 0.5, width, height, 3);
+
+	fileName = std::string("after");
+	fileName.append(filePath);
+	error = lodepng::encode(fileName.c_str(), out, width, height, LCT_RGB);
+	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 	std::vector<unsigned char> vclear;
 	buffer.swap(vclear);
 	vclear.clear();
 	buffer.clear();
 	buffer.shrink_to_fit();
-	delete pixelBuffer;
 }
+

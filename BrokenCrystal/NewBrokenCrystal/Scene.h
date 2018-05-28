@@ -6,6 +6,7 @@
 #include <LinearMath/btQuickprof.h>
 #include <LinearMath\btScalar.h>
 #include <imgui_impl_glut.h>
+#include <rbf.hpp>
 
 #include "Camera.h"
 #include "Object.h"
@@ -67,6 +68,7 @@ public:
 
 	// path tracing
 	void RenderPath(int samples);
+	void RenderContinuousPath(int maxSamples = 1000000);
 	btVector3 TraceRay(const Ray &ray, int depth);
 	void DebugTraceRay(bool dof = false);
 	btVector3 DebugPathTest(const Ray &ray, int depth, btVector3 hitPos);

@@ -1,6 +1,7 @@
 #include "voronoi.h"
 
-typedef struct Line {
+typedef struct Line
+{
 
 	btVector3 point[2];
 
@@ -30,7 +31,24 @@ std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 	btVector3 position;
 	btTransform transform = mesh->GetRigidBody()->getWorldTransform();
 
-	float x, y, z;
+	float x = 0, y = 0, z = 0;
+
+	//오브젝트의 비중(specific gravity) 구하기
+	triangles = mesh->GetTriangles();
+	for (int j = 0; j < size(triangles); j++)
+	{
+		x += triangles[j]->pos[0].m_floats[0] + triangles[j]->pos[1].m_floats[0] + triangles[j]->pos[2].m_floats[0];
+		y += triangles[j]->pos[0].m_floats[1] + triangles[j]->pos[1].m_floats[1] + triangles[j]->pos[2].m_floats[1];
+		z += triangles[j]->pos[0].m_floats[2] + triangles[j]->pos[1].m_floats[2] + triangles[j]->pos[2].m_floats[2];
+	}
+	x /= (size(triangles) * 3);
+	y /= (size(triangles) * 3);
+	z /= (size(triangles) * 3);
+	position = btVector3(x, y, z);
+
+	float mass;
+	float specific_gravity = mesh->GetRigidBody()->getInvMass() * get_mesh_mass(triangles, position);
+
 	for (int i = 0; i < triangles_sets.size(); i++)
 	{
 
@@ -46,8 +64,9 @@ std::vector<Mesh*> break_into_pieces(Mesh* mesh, int pieces)
 		y /= (size(triangles) * 3);
 		z /= (size(triangles) * 3);
 		position = btVector3(x, y, z);
+		mass = get_mesh_mass(triangles, position) / specific_gravity;
 		position = transform * position;
-		m = new Mesh(position, triangles, 1, Material());
+		m = new Mesh(position, triangles, mass, Material());
 		meshes.push_back(m);
 	}
 
@@ -76,7 +95,24 @@ std::vector<Mesh*> break_into_pieces2(Mesh* mesh, int pieces)
 	btVector3 position;
 	btTransform transform = mesh->GetRigidBody()->getWorldTransform();
 
-	float x, y, z;
+	float x = 0, y = 0, z = 0;
+
+	//오브젝트의 비중(specific gravity) 구하기
+	triangles = mesh->GetTriangles();
+	for (int j = 0; j < size(triangles); j++)
+	{
+		x += triangles[j]->pos[0].m_floats[0] + triangles[j]->pos[1].m_floats[0] + triangles[j]->pos[2].m_floats[0];
+		y += triangles[j]->pos[0].m_floats[1] + triangles[j]->pos[1].m_floats[1] + triangles[j]->pos[2].m_floats[1];
+		z += triangles[j]->pos[0].m_floats[2] + triangles[j]->pos[1].m_floats[2] + triangles[j]->pos[2].m_floats[2];
+	}
+	x /= (size(triangles) * 3);
+	y /= (size(triangles) * 3);
+	z /= (size(triangles) * 3);
+	position = btVector3(x, y, z);
+
+	float mass;
+	float specific_gravity = get_mesh_mass(triangles, position) * mesh->GetRigidBody()->getInvMass();
+
 	for (int i = 0; i < size(triangles_sets); i++)
 	{
 
@@ -92,8 +128,9 @@ std::vector<Mesh*> break_into_pieces2(Mesh* mesh, int pieces)
 		y /= (size(triangles) * 3);
 		z /= (size(triangles) * 3);
 		position = btVector3(x, y, z);
+		mass = get_mesh_mass(triangles, position) / specific_gravity;
 		position = transform * position;
-		m = new Mesh(position, triangles, 1, Material());
+		m = new Mesh(position, triangles, mass, Material());
 		meshes.push_back(m);
 	}
 
@@ -364,4 +401,23 @@ std::vector<std::vector<Triangle*>> voronoi_Fracture(std::vector<Triangle*> tria
 	result.push_back(obj_1_triangles);
 	result.push_back(obj_2_triangles);
 	return result;
+}
+
+float get_mesh_mass(std::vector<Triangle*> triangles, btVector3 position)
+{
+
+	float sum_volume = 0;
+	float volume, height, area;
+	btVector3 normal;
+
+	for (auto & triangle : triangles)
+	{
+		normal = (triangle->pos[1] - triangle->pos[0]).cross(triangle->pos[2] - triangle->pos[0]).normalize();
+		height = (triangle->pos[0] - position).dot((-1) * normal) / normal.dot((-1) * normal) * normal.length();
+		area = (triangle->pos[1] - triangle->pos[0]).cross(triangle->pos[2] - triangle->pos[0]).length() / 2;
+		volume = height * area / 3;
+		sum_volume += volume;
+	}
+
+	return volume;
 }

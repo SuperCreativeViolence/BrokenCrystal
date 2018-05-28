@@ -66,15 +66,16 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	//CreateBox(btVector3(0, 0, 0), btVector3(20, 1, 20), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 0, 0), btVector3(100, 1, 100), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateBox(btVector3(0, 50, 0), btVector3(20, 1, 20), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2,2.2, 2.2)));
 
 	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
-	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
+	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.75)));
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.75, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(SPEC, btVector3(0.9, 0.9, 0.9)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.0, 0.75, 0.0)));
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
 
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
@@ -320,9 +321,11 @@ void Scene::Idle()
 	clock.reset();
 	if (isAnimation)
 	{
-		UpdateScene(0.60 * timeScale);
-		CudaAnimationRendering(++animationFrame);
-		animationTime += 0.60;
+		UpdateScene(0.06 * timeScale);
+		animationFrame++;
+		if(animationFrame % animationSkip == 0)
+			CudaAnimationRendering(animationFrame / animationSkip);
+		animationTime += 0.06;
 		if (animationIndex == 1 && animationTime >= 11)
 		{
 			ACrystalExplosion();
@@ -1272,10 +1275,10 @@ void Scene::Animation()
 	camera->SetYaw(-360);
 	camera->SetZoom(6);
 
-	currentMeshes.push_back(CreateMesh(btVector3(-7, 7, 5), "corn.obj", 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));
-	currentMeshes.push_back(CreateMesh(btVector3(-3, 7, 5), "corn.obj", 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0))));
-	currentMeshes.push_back(CreateMesh(btVector3(3, 7, -5), "corn.obj", 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0))));
-	currentMeshes.push_back(CreateMesh(btVector3(7, 7, -5), "corn.obj", 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(10, 10, 10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
+	currentMeshes.push_back(CreateMesh(btVector3(10, 10, -10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
+	currentMeshes.push_back(CreateMesh(btVector3(-10, 10, 10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
+	currentMeshes.push_back(CreateMesh(btVector3(-10, 10, -10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
 	// start
 	ARotateCamera();
 }
@@ -1295,7 +1298,6 @@ void Scene::ACrystalExplosion()
 	cameraRotate = false;
 	crystalExplosion = true;
 	btVector3 crystalPos = currentCrystal->GetPosition();
-	crystalPos[1] -= 2;
 	DeleteObject(currentCrystal);
 	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(TRANS, btVector3(0.6, 0.6, 1.0)));
 	std::vector<Mesh*> meshes = break_into_pieces2(currentCrystal, 10);
@@ -1304,7 +1306,7 @@ void Scene::ACrystalExplosion()
 		AddObject(static_cast<Object*>(mesh));
 		btVector3 meshPos = mesh->GetPosition();
 		btVector3 dir = (meshPos - crystalPos).normalize();
-		mesh->GetRigidBody()->applyCentralImpulse(dir / 10.0f);
+		mesh->GetRigidBody()->applyCentralImpulse(dir/3.0f);
 	}
 	DeleteObject(currentCrystal);
 }
@@ -1323,13 +1325,14 @@ void Scene::AMeshExplosion(int index)
 	Mesh* currentMesh = currentMeshes.at(index);
 	animationIndex++;
 	btVector3 currentMeshPos = currentMesh->GetPosition();
+	currentMeshPos[1] -= 2;
 	std::vector<Mesh*> meshes = break_into_pieces2(currentMesh, 5);
 	for (auto& mesh : meshes)
 	{
 		AddObject(static_cast<Object*>(mesh));
 		btVector3 meshPos = mesh->GetPosition();
 		btVector3 dir = (meshPos - currentMeshPos).normalize();
-		mesh->GetRigidBody()->applyCentralImpulse(dir / 30.0f);
+		mesh->GetRigidBody()->applyCentralImpulse(dir / 5.0f);
 	}
 	DeleteObject(currentMesh);
 }

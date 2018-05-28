@@ -104,6 +104,7 @@ public:
 	int animationFrame = 0;
 	float animationTime = 0;
 	int animationIndex = 0;
+	int animationSkip = 3;
 
 
 private:

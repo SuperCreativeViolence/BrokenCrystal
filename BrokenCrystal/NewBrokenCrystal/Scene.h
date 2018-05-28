@@ -86,10 +86,12 @@ public:
 
 	// animation
 	Mesh* currentCrystal = nullptr;
+	std::vector<Mesh*> currentMeshes;
 	void Animation();
 	static void ARotateCamera(int value);
 	static void ACrystalExplosion(int value);
 	static void AStopCrystal(int value);
+	static void AMeshExplosion(int index);
 	static void AFinishAnimation(int value);
 	bool cameraRotate = false;
 	bool crystalExplosion = false;

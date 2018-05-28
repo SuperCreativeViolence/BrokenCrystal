@@ -35,7 +35,7 @@ void Scene::Initialize()
 	GLfloat ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f }; // dark grey
 	GLfloat diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // white
 	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // white
-	GLfloat position[] = { 5.0f, 10.0f, 1.0f, 0.0f };
+	GLfloat position[] = { 0.0f, 10.0f, 0.0f, 0.0f };
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
@@ -72,7 +72,7 @@ void Scene::Initialize()
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
 	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
@@ -94,10 +94,10 @@ void Scene::Initialize()
 	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateSphere(btVector3(-7, 1, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
-	//CreateSphere(btVector3(-3, 1, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(3, 1, 0), 3, 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(7, 1, 0), 3, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(-7, 1, 3), 3, 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
+	//CreateSphere(btVector3(-3, 1, 3), 3, 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(3, 1, -3), 3, 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(7, 1, -3), 3, 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
 	// island
 	//CreateMesh(btVector3(0, 5, 0), "island.obj", 0, Material());
@@ -111,8 +111,6 @@ void Scene::Initialize()
 	//	CreateSphere(btVector3(3, 5, i), 2, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
 	//}
 	//CreateBox(btVector3(0, 50, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-
-	Animation();
 }
 
 void Scene::AddObject(Object* object)
@@ -409,6 +407,10 @@ void Scene::RenderGUI()
 		{
 			RenderPath(samples);
 			SaveImage("Render.png");
+		}
+		if (ImGui::Button("Start Animation"))
+		{
+			Animation();
 		}
 		ImGui::End();
 	}
@@ -883,6 +885,10 @@ void Scene::Animation()
 	camera->SetYaw(-360);
 	camera->SetZoom(6);
 
+	currentMeshes.push_back(CreateMesh(btVector3(-7, 1, 3), "Sphere.obj", 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));
+	currentMeshes.push_back(CreateMesh(btVector3(-3, 1, 3), "Sphere.obj", 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(3, 1, -3), "Sphere.obj", 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(7, 1, -3), "Sphere.obj", 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0))));
 	// start
 	glutTimerFunc(500, &Scene::ARotateCamera, 0);
 
@@ -931,8 +937,29 @@ void Scene::AStopCrystal(int value)
 	printf("[Animation] Freeze Crystal\n");
 	Scene::GetInstance()->crystalExplosion = false;
 	Scene::GetInstance()->cameraRotate = true;
-	Scene::GetInstance()->SetTimeScale(0.1f);
-	glutTimerFunc(3000, &Scene::AFinishAnimation, 0);
+	Scene::GetInstance()->SetTimeScale(0.05f);
+	glutTimerFunc(4000, &Scene::AFinishAnimation, 0);
+	glutTimerFunc(700, &Scene::AMeshExplosion, 0);
+	glutTimerFunc(1400, &Scene::AMeshExplosion, 1);
+	glutTimerFunc(2100, &Scene::AMeshExplosion, 2);
+	glutTimerFunc(2800, &Scene::AMeshExplosion, 3);
+
+}
+
+void Scene::AMeshExplosion(int index)
+{
+	Mesh* currentMesh = Scene::GetInstance()->currentMeshes.at(index);
+	btVector3 currentMeshPos = currentMesh->GetPosition();
+	currentMeshPos[1] -= 1;
+	std::vector<Mesh*> meshes = break_into_pieces2(currentMesh, 20);
+	for (auto& mesh : meshes)
+	{
+		Scene::GetInstance()->AddObject(static_cast<Object*>(mesh));
+		btVector3 meshPos = mesh->GetPosition();
+		btVector3 dir = (meshPos - currentMeshPos).normalize();
+		mesh->GetRigidBody()->applyCentralImpulse(dir / 10.0f);
+	}
+	Scene::GetInstance()->DeleteObject(currentMesh);
 }
 
 void Scene::AFinishAnimation(int value)

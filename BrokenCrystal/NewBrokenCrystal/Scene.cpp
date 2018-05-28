@@ -587,26 +587,42 @@ ObjectCU* Scene::CULoadObj(Object* object)
 		{
 			const Mesh* mesh = static_cast<const Mesh*>(object);
 			Triangle* t;
-			std::vector<float3>* triangles = new std::vector<float3>;
+			std::vector<TriangleCU*>* triangles = new std::vector<TriangleCU*>;	// contains device memory pointer to each TriangleCU
 			for (int i = 0; i < mesh->GetTriangles().size(); i++)
 			{
 				t = mesh->GetTriangles().at((unsigned)i);
-				triangles->push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
+				TriangleCU* t_device;
+				TriangleCU t_struct;
+				t_struct.vertexes[0] = make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform;
+				t_struct.vertexes[1] = make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform;
+				t_struct.vertexes[2] = make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform;
+				t_struct.color = t->GetMaterial().GetColorF();
+				t_struct.emission = t->GetMaterial().GetEmissionF();
+				t_struct.material = t->GetMaterial().GetType();
+				cudaMalloc((void**)&t_device, sizeof(TriangleCU));
+				cudaMemcpy(t_device, &t_struct, sizeof(TriangleCU), cudaMemcpyHostToDevice);
+				triangles->push_back(t_device);
+				/*triangles->push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
 				triangles->push_back(make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform);
-				triangles->push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);
+				triangles->push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);*/
 			}
-			float3* mesh_p;
-			unsigned int triangles_size = (unsigned int)(triangles->size() * sizeof(float3));
-			cudaMalloc((void**)&mesh_p, triangles_size);	//mesh_p contains device memory address for triangles
-			cudaMemcpy(mesh_p, triangles->data(), triangles_size, cudaMemcpyHostToDevice);
+			TriangleCU** mesh_p;
+			unsigned int triangles_size = (unsigned int)(triangles->size());
+			cudaMalloc((void**)&mesh_p, triangles_size * sizeof(TriangleCU*));	//mesh_p contains device memory address for triangles
+			cudaMemcpy(mesh_p, triangles->data(), triangles_size * sizeof(TriangleCU*), cudaMemcpyHostToDevice);
+
+			//float3* mesh_p;
+			//unsigned int triangles_size = (unsigned int)(triangles->size() * sizeof(float3));
+			//cudaMalloc((void**)&mesh_p, triangles_size);	//mesh_p contains device memory address for triangles
+			//cudaMemcpy(mesh_p, triangles->data(), triangles_size, cudaMemcpyHostToDevice);
 
 			ObjectCU* temp = new ObjectCU;
 			temp->triangles_size = triangles_size;
 			temp->triangles_num = (unsigned int)triangles->size();
 			temp->triangles_p = mesh_p;
-			temp->material = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetType();
-			temp->color = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetColorF();
-			temp->emission = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetEmissionF();;
+			//temp->material = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetType();
+			//temp->color = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetColorF();
+			//temp->emission = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetEmissionF();;
 
 			ObjectCU* object_p;
 			cudaMalloc((void**)&object_p, sizeof(ObjectCU));
@@ -619,53 +635,62 @@ ObjectCU* Scene::CULoadObj(Object* object)
 
 void Scene::DrawMeshDebugCU()
 {
-	std::vector<ObjectCU*> loaded_object;	//loaded_object contains array of device memory address of Object
-	int testval = 0;
-	for (auto & object : objects)
-	{
-		float transform[16];
-		object->GetTransform(transform);
+	//
+	//std::vector<ObjectCU*> loaded_object;	//loaded_object contains array of device memory address of Object
+	//int testval = 0;
+	//for (auto & object : objects)
+	//{
+	//	float transform[16];
+	//	object->GetTransform(transform);
 
-		const Mesh* mesh = static_cast<const Mesh*>(object);
-		Triangle* t;
-		std::vector<float3>* triangles = new std::vector<float3>;
-		for (int i = 0; i < mesh->GetTriangles().size(); i++)
-		{
-			t = mesh->GetTriangles().at((unsigned)i);
-			triangles->push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
-			triangles->push_back(make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform);
-			triangles->push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);
-		}
+	//	const Mesh* mesh = static_cast<const Mesh*>(object);
+	//	Triangle* t;
+	//	std::vector<TriangleCU*>* triangles = new std::vector<TriangleCU*>;	// contains device memory pointer to each TriangleCU
+	//	for (int i = 0; i < mesh->GetTriangles().size(); i++)
+	//	{
+	//		t = mesh->GetTriangles().at((unsigned)i);
+	//		TriangleCU* t_device;
+	//		TriangleCU t_struct;
+	//		t_struct.vertexes[0] = make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform;
+	//		t_struct.vertexes[1] = make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform;
+	//		t_struct.vertexes[2] = make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform;
+	//		t_struct.color = t->GetMaterial().GetColorF();
+	//		t_struct.emission = t->GetMaterial().GetEmissionF();
+	//		t_struct.material = t->GetMaterial().GetType();
+	//		cudaMalloc((void**)&t_device, sizeof(TriangleCU));
+	//		cudaMemcpy(t_device, &t_struct, sizeof(TriangleCU), cudaMemcpyHostToDevice);
+	//		triangles->push_back(t_device);
+	//		/*triangles->push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
+	//		triangles->push_back(make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform);
+	//		triangles->push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);*/
+	//	}
 
 
-		unsigned int triangles_size = (unsigned int)(triangles->size() * sizeof(float3));
+	//	unsigned int triangles_size = (unsigned int)(triangles->size() * sizeof(float3));
 
-		ObjectCU* temp = new ObjectCU;
-		temp->triangles_size = triangles_size;
-		temp->triangles_num = (unsigned int)triangles->size();
-		temp->triangles_p = triangles->data();
-		temp->material = object->GetMaterial().GetType();
-		temp->color = object->GetMaterial().GetColorF();
-		temp->emission = object->GetMaterial().GetEmissionF();
+	//	ObjectCU* temp = new ObjectCU;
+	//	temp->triangles_size = triangles_size;
+	//	temp->triangles_num = (unsigned int)triangles->size();
+	//	temp->triangles_p = triangles->data();
 
-		loaded_object.push_back(temp);
-		std::cout << temp->triangles_p << std::endl;
-	}
+	//	loaded_object.push_back(temp);
+	//	std::cout << temp->triangles_p << std::endl;
+	//}
 
-	for (int i = 0; i < loaded_object.size(); i++)
-	{
-		ObjectCU* mesh = loaded_object[i];
-		
-		glColor3f(mesh->color.x, mesh->color.y, mesh->color.z);
+	//for (int i = 0; i < loaded_object.size(); i++)
+	//{
+	//	ObjectCU* mesh = loaded_object[i];
+	//	
+	//	glColor3f(mesh->color.x, mesh->color.y, mesh->color.z);
 
-		for (int i = 0; i < mesh->triangles_num; i += 3)
-		{
-			btVector3 p0 = btVector3(mesh->triangles_p[i].x, mesh->triangles_p[i].y, mesh->triangles_p[i].z);
-			btVector3 p1 = btVector3(mesh->triangles_p[i + 1].x, mesh->triangles_p[i + 1].y, mesh->triangles_p[i + 1].z);
-			btVector3 p2 = btVector3(mesh->triangles_p[i + 2].x, mesh->triangles_p[i + 2].y, mesh->triangles_p[i + 2].z);
-			DrawTriangle(p0, p1, p2);
-		}
-	}
+	//	for (int i = 0; i < mesh->triangles_num; i += 3)
+	//	{
+	//		btVector3 p0 = btVector3(mesh->triangles_p[i].x, mesh->triangles_p[i].y, mesh->triangles_p[i].z);
+	//		btVector3 p1 = btVector3(mesh->triangles_p[i + 1].x, mesh->triangles_p[i + 1].y, mesh->triangles_p[i + 1].z);
+	//		btVector3 p2 = btVector3(mesh->triangles_p[i + 2].x, mesh->triangles_p[i + 2].y, mesh->triangles_p[i + 2].z);
+	//		DrawTriangle(p0, p1, p2);
+	//	}
+	//}
 }
 
 void Scene::CudaAnimationRendering(int index)

@@ -25,12 +25,20 @@
 
 #define EPSILON_CU 1e-10
 
-#define TRACE_SAMPLES 2
-#define TRACE_SAMPLES_LOOP_X 8
-#define TRACE_SAMPLES_LOOP_Y 8
+#define TRACE_SAMPLES 16
+#define TRACE_SAMPLES_LOOP_X 6
+#define TRACE_SAMPLES_LOOP_Y 6
 
 
 
+
+struct TriangleCU
+{
+	float3 vertexes[3];
+	MaterialType material;
+	float3 color;
+	float3 emission;
+};
 
 struct ObjectIntersectionCU
 {
@@ -58,17 +66,19 @@ struct ObjectCU
 		triangles_num = 0;
 		triangles_size = 0;
 		triangles_p = NULL;
-		material = DIFF;
-		color = make_float3(0.0f, 0.0f, 0.0f);
-		emission = make_float3(0.0f, 0.0f, 0.0f);
+		//material = DIFF;
+		//color = make_float3(0.0f, 0.0f, 0.0f);
+		//emission = make_float3(0.0f, 0.0f, 0.0f);
 	}
 	unsigned int triangles_num;	// number of triangle vertexes
 	unsigned int triangles_size; // byte size of triangles
-	float3* triangles_p;
+	/*float3* triangles_p;
 	MaterialType material;
 	float3 color;
-	float3 emission;
+	float3 emission;*/
+	TriangleCU** triangles_p;
 };
+
 
 
 class TracePath

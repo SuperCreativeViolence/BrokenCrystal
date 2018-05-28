@@ -73,15 +73,15 @@ void Scene::Initialize()
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
 
-	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 100);
-	for (auto& mesh : meshes)
-	{
-		AddObject(static_cast<Object*>(mesh));
-	}
-	DeleteObject(crystal);
+	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	//std::vector<Mesh*> meshes = break_into_pieces2(crystal, 30);
+	//for (auto& mesh : meshes)
+	//{
+	//	AddObject(static_cast<Object*>(mesh));
+	//}
+	//DeleteObject(crystal);
 	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
@@ -171,6 +171,13 @@ void Scene::CreateSphere(const btVector3 &position, double radius, float mass, M
 }
 
 Mesh* Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
+{
+	Mesh* mesh = new Mesh(position, fileName, mass, material);
+	AddObject(static_cast<Object*>(mesh));
+	return mesh;
+}
+
+Mesh* Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass)
 {
 	Mesh* mesh = new Mesh(position, fileName, mass);
 	AddObject(static_cast<Object*>(mesh));
@@ -346,7 +353,7 @@ void Scene::UpdateScene(float dt)
 	}
 	if (IsKeyDown('f'))
 	{
-		Ray ray = camera->GetRay(mousePos[0], mousePos[1], true);
+		Ray ray = camera->GetRay(mousePos[0], mousePos[1], 0, 0, false);
 		system("cls");
 		btVector3 color = DebugPathTest(ray, 0, ray.origin);
 		printf("\nresult = %.1f %.1f %.1f\n", color[0], color[1], color[2]);

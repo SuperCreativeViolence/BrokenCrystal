@@ -19,8 +19,6 @@ public:
 	void Rotate(float deltaX, float deltaY);
 	void Zoom(float delta);
 	void Fov(float delta);
-	btVector3 GetScreenPosition(int x, int y);
-	Ray GetRay(int x, int y, bool jitter);
 	Ray GetRay(int x, int y, int sx, int sy, bool dof = false);
 	int GetWidht();
 	int GetHeight();

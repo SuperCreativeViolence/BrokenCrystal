@@ -34,6 +34,7 @@ public:
 	void CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
 	void CreateSphere(const btVector3 &position, double radius, float mass, Material material);
 	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
+	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass);
 	void DeleteObject(Object* object);
 
 	// input

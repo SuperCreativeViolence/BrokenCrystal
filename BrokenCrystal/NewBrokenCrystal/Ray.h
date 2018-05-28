@@ -13,9 +13,9 @@ struct Ray
 	{
 		direction_inv = btVector3
 		(
-			1.0 / direction.getX(),
-			1.0 / direction.getY(),
-			1.0 / direction.getZ()
+			1.0f / direction.getX(),
+			1.0f / direction.getY(),
+			1.0f / direction.getZ()
 		);
  	}
 };

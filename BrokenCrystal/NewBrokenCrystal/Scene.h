@@ -80,6 +80,8 @@ public:
 	void CUMemInitialize();
 	ObjectCU* CULoadObj(Object* object);
 	void SaveImageCU(float3* pixels, const char *filePath);
+	void DebugPathCU();
+	void DrawMeshDebugCU();
 
 private:
 	Objects objects;
@@ -91,6 +93,9 @@ private:
 	int mousePos[2];
 	int clickPos[2];
 	int deltaDrag[2];
+
+	// cuda debug
+	int cuda_mesh_flag;
 
 	// ÄÚ¾î Bullet Physics
 	btBroadphaseInterface * broadphase;
@@ -106,7 +111,7 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 4;
+	int samples = 2;
 	btVector3* pixelBuffer;
 
 	// gui

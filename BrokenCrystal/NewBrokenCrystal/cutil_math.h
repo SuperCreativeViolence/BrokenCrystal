@@ -206,9 +206,9 @@ inline __host__ __device__ float3 fabs(float3 v)
 inline __host__ __device__ float3 operator*(float3 v, float* trans)
 {
 	return make_float3
-		(v.x * trans[0] + v.y * trans[1] + v.z * trans[2] + trans[3],
-		v.x * trans[4] + v.y * trans[5] + v.z * trans[6] + trans[7],
-		v.x * trans[8] + v.y * trans[9] + v.z * trans[10] + trans[11]);
+		(v.x * trans[0] + v.y * trans[4] + v.z * trans[8] + trans[12],
+		v.x * trans[1] + v.y * trans[5] + v.z * trans[9] + trans[13],
+		v.x * trans[2] + v.y * trans[6] + v.z * trans[10] + trans[14]);
 }
 
 #endif

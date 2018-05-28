@@ -6,17 +6,26 @@
 #include "curand.h"
 #include "curand_kernel.h"
 #include "cutil_math.h"
+#include "cuda_runtime_api.h"
+#include "helper_functions.h" 
+#include "helper_cuda.h" 
 
 #include "CameraCU.h"
 #include "MaterialType.h"
 #include <iostream>
+#include <cmath>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 
 #define FLT_MAX_CU	3.402823466e+38F 
 
 #define EPSILON_CU 1e-10
 
-#define TRACE_SAMPLES 128
+#define TRACE_SAMPLES 10
+#define TRACE_SAMPLES_LOOP 1
 
 #define THREAD_NUM 
 
@@ -24,13 +33,13 @@
 
 struct ObjectIntersectionCU
 {
-	bool hit;
-	double u;
+	int hit;
+	float u;
 	float3 normal;
 	MaterialType material;
 	float3 color;
 	float3 emission;
-	__host__ __device__ ObjectIntersectionCU(bool hit_ = false, double u_ = 0, const float3& normal_ = make_float3(0.0f, 0.0f, 0.0f), MaterialType material_ = DIFF, const float3& color_ = make_float3(0.0f, 0.0f, 0.0f), const float3& emission_ = make_float3(0.0f, 0.0f, 0.0f))
+	__host__ __device__ ObjectIntersectionCU(int hit_ = 0, float u_ = 0, const float3& normal_ = make_float3(0.0f, 0.0f, 0.0f), MaterialType material_ = DIFF, const float3& color_ = make_float3(0.0f, 0.0f, 0.0f), const float3& emission_ = make_float3(0.0f, 0.0f, 0.0f))
 	{
 		hit = hit_;
 		u = u_;
@@ -43,9 +52,19 @@ struct ObjectIntersectionCU
 
 struct ObjectCU
 {
-	unsigned int triangles_size;
+	ObjectCU()
+	{
+		triangles_num = 0;
+		triangles_size = 0;
+		triangles_p = NULL;
+		material = DIFF;
+		color = make_float3(0.0f, 0.0f, 0.0f);
+		emission = make_float3(0.0f, 0.0f, 0.0f);
+	}
+	unsigned int triangles_num;	// number of triangle vertexes
+	unsigned int triangles_size; // byte size of triangles
 	float3* triangles_p;
-	int material;
+	MaterialType material;
 	float3 color;
 	float3 emission;
 };
@@ -56,7 +75,8 @@ class TracePath
 public:
 	TracePath() {}
 	~TracePath(){}
-	float3* RenderPathCU(ObjectCU* object_list, int num_objects, CameraCU* camera, int width, int height);
+	void RenderPathCUDebug(ObjectCU** object_list, int num_objects, CameraCU* camera, int* mousePos);
+	float3* RenderPathCU(ObjectCU** object_list, int num_objects, CameraCU* camera, int width, int height);
 };
 
 

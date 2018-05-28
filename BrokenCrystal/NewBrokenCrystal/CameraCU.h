@@ -35,26 +35,26 @@ public:
 
 	__device__ RayCU GetRay(curandState* randState, int x, int y, int sx, int sy, int dof)
 	{
-		const double r1 = 2.0 * curand_uniform(randState);
-		const double r2 = 2.0 * curand_uniform(randState);
+		const float r1 = 2.0f * curand_uniform(randState);
+		const float r2 = 2.0f * curand_uniform(randState);
 
-		double dx;
-		if (r1 < 1.0)
-			dx = sqrt(r1) - 1.0;
+		float dx;
+		if (r1 < 1.0f)
+			dx = sqrt(r1) - 1.0f;
 		else
-			dx = 1.0 - sqrt(2.0 - r1);
+			dx = 1.0f - sqrt(2.0f - r1);
 
-		double dy;
-		if (r2 < 1.0)
-			dy = sqrt(r2) - 1.0;
+		float dy;
+		if (r2 < 1.0f)
+			dy = sqrt(r2) - 1.0f;
 		else
-			dy = 1.0 - sqrt(2.0 - r2);
+			dy = 1.0f - sqrt(2.0f - r2);
 
 		float3 wDir = normalize(-direction);
 		float3 uDir = normalize(cross(upVector, wDir));
 		float3 vDir = cross(wDir, -uDir);
 
-		float top = tan(fov * 0.5 * CU_SIMD_RADS_PER_DEG);
+		float top = tan(fov * 0.5f * CU_SIMD_RADS_PER_DEG);
 		float right = aspectRatio * top;
 		float bottom = -top;
 		float left = -right;

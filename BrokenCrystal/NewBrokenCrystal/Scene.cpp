@@ -28,6 +28,7 @@ Scene::~Scene()
 
 void Scene::Initialize()
 {
+	cuda_mesh_flag = 0;
 	// gui √ ±‚»≠
 	ImGui_ImplGLUT_Init();
 
@@ -67,16 +68,16 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
-
+	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	
 	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 100);
+	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 8);
 	for (auto& mesh : meshes)
 	{
 		AddObject(static_cast<Object*>(mesh));
@@ -96,16 +97,16 @@ void Scene::Initialize()
 
 
 	// material test
-	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
-	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
-	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateSphere(btVector3(-7, 1, 0), 3, 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
-	//CreateSphere(btVector3(-3, 1, 0), 3, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(3, 1, 0), 3, 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(7, 1, 0), 3, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.7, 0.4, 0.4)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.5, 0.0, 0.0)));
+	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(-7, 1, 0), btVector3(1, 1, 1), 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
+	//CreateBox(btVector3(-3, 1, 0), btVector3(1, 1, 1), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateBox(btVector3(3, 1, 0), btVector3(1, 1, 1), 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
+	//CreateBox(btVector3(7, 1, 0), btVector3(1, 1, 1), 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
 	// island
 	//CreateMesh(btVector3(0, 5, 0), "island.obj", 0, Material());
@@ -346,6 +347,27 @@ void Scene::UpdateScene(float dt)
 	{
 		CUMemInitialize();
 	}
+	if (IsKeyDown('n'))
+	{
+		DebugPathCU();
+	}
+	if (IsKeyDown('b'))
+	{
+		cuda_mesh_flag = 1;
+	}
+	if (IsKeyDown('v'))
+	{
+		cuda_mesh_flag = 0;
+	}
+	if (IsKeyDown('h'))
+	{
+		cudaError_t error = cudaDeviceReset();
+		if (error != cudaSuccess)
+		{
+			// print the CUDA error message and exit
+			printf("CUDA error: %s\n", cudaGetErrorString(error));
+		}
+	}
 	if (IsKeyDown('d'))
 	{
 		DebugTraceRay();
@@ -400,9 +422,16 @@ void Scene::RenderGUI()
 
 void Scene::RenderScene()
 {
-	for (auto & object : objects)
+	if (cuda_mesh_flag == 0)
 	{
-		DrawShape(object);
+		for (auto & object : objects)
+		{
+			DrawShape(object);
+		}
+	}
+	else
+	{
+		DrawMeshDebugCU();
 	}
 }
 
@@ -410,33 +439,48 @@ void Scene::RenderScene()
 
 void Scene::CUMemInitialize()
 {
-	// Camera
-	CameraCU cam_cuda = CameraCU();
-	camera->CopyCamera(&cam_cuda);
-	CameraCU* cam_p;
+	size_t freemem;
+	size_t totalmem;
 
+	cudaError_t error = cudaMemGetInfo(&freemem, &totalmem);
+	if (error != cudaSuccess)
+	{
+		// print the CUDA error message and exit
+		printf("CUDA error: %s\n", cudaGetErrorString(error));
+		exit(-1);
+	}
+
+	std::cout << &freemem << " " << &totalmem << std::endl;
+	// Camera
+	CameraCU* cam_cuda = new CameraCU;
+	camera->CopyCamera(cam_cuda);
+	CameraCU* cam_p;
+//	std::cout << camera->GetPosition().x() << " " <<camera->GetPosition().y()<<" "<< camera->GetPosition().z() <<std::endl;
+//	std::cout << cam_cuda.position.x << " "<< cam_cuda.position.y <<" "<< cam_cuda.position.z << std::endl;
+	
 	cudaMalloc((void**)&cam_p, sizeof(CameraCU));	//cam_p contains device memory address
-	cudaMemcpy(cam_p, &cam_cuda, sizeof(CameraCU), cudaMemcpyHostToDevice);
+	cudaMemcpy(cam_p, cam_cuda, sizeof(CameraCU), cudaMemcpyHostToDevice);
 
 	std::cout << "cam copy to device successed" << std::endl;
 	// Objects
-	std::vector<ObjectCU*> loaded_object;	//loaded_object contains array of device memory address of Object
+	std::vector<ObjectCU*>* loaded_object = new std::vector<ObjectCU*>;	//loaded_object contains array of device memory address of Object
 	for (auto & object : objects)
 	{
-		loaded_object.push_back(CULoadObj(object));
+		loaded_object->push_back(CULoadObj(object));
 	}
 
-	ObjectCU* objects_p;
-	cudaMalloc((void**)&objects_p, loaded_object.size() * sizeof(ObjectCU*));
-	cudaMemcpy(objects_p, &loaded_object[0], loaded_object.size() * sizeof(ObjectCU*), cudaMemcpyHostToDevice);
+	ObjectCU** objects_p;
+	cudaMalloc((void**)&objects_p, loaded_object->size() * sizeof(ObjectCU**));
+	cudaMemcpy(objects_p, loaded_object->data(), loaded_object->size() * sizeof(ObjectCU**), cudaMemcpyHostToDevice);
 	std::cout << "objects copy to device successed" << std::endl;
 
 	TracePath* tp = new TracePath;
 
 
-	float3* result = tp->RenderPathCU(objects_p, loaded_object.size(), cam_p, camera->GetWidht(), camera->GetHeight());
+	float3* result = tp->RenderPathCU(objects_p, loaded_object->size(), cam_p, camera->GetWidht(), camera->GetHeight());
 	std::cout << "CU path tracing finished! Start SaveImageCU.." << std::endl;
 	SaveImageCU(result, "RenderCU.png");
+	delete tp;
 
 	std::cout << "SaveImageCU successed!" << std::endl;
 	// need to pass cam_p, objects_p, objects_p size
@@ -450,14 +494,15 @@ ObjectCU* Scene::CULoadObj(Object* object)
 
 	switch (pShape->getShapeType())
 	{
-		/*case BOX_SHAPE_PROXYTYPE:
+		/*
+		case BOX_SHAPE_PROXYTYPE:
 		{
 			const btBoxShape* box = static_cast<const btBoxShape*>(pShape);
 			btVector3 halfSize = box->getHalfExtentsWithMargin();
 			DrawBox(halfSize);
 			break;
 		}
-
+		
 		case SPHERE_SHAPE_PROXYTYPE:
 		{
 			const btSphereShape* sphere = static_cast<const btSphereShape*>(pShape);
@@ -470,36 +515,36 @@ ObjectCU* Scene::CULoadObj(Object* object)
 		{
 			const Mesh* mesh = static_cast<const Mesh*>(object);
 			Triangle* t;
-			std::vector<float3> triangles;
+			std::vector<float3>* triangles = new std::vector<float3>;
 			for (int i = 0; i < mesh->GetTriangles().size(); i++)
 			{
 				t = mesh->GetTriangles().at((unsigned)i);
-				triangles.push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
-				triangles.push_back(make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform);
-				triangles.push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);
+				triangles->push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
+				triangles->push_back(make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform);
+				triangles->push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);
 			}
 			float3* mesh_p;
-			unsigned int triangles_size = (unsigned int)(triangles.size() * sizeof(float3));
+			unsigned int triangles_size = (unsigned int)(triangles->size() * sizeof(float3));
 			cudaMalloc((void**)&mesh_p, triangles_size);	//mesh_p contains device memory address for triangles
-			cudaMemcpy(mesh_p, &triangles[0], triangles_size, cudaMemcpyHostToDevice);
+			cudaMemcpy(mesh_p, triangles->data(), triangles_size, cudaMemcpyHostToDevice);
 
-			ObjectCU temp;
-			temp.triangles_size = triangles_size;
-			temp.triangles_p = mesh_p;
-			temp.material = object->GetMaterial().GetType();
-			temp.color = object->GetMaterial().GetColorF();
-			temp.emission = object->GetMaterial().GetEmissionF();
+			ObjectCU* temp = new ObjectCU;
+			temp->triangles_size = triangles_size;
+			temp->triangles_num = (unsigned int)triangles->size();
+			temp->triangles_p = mesh_p;
+			temp->material = object->GetMaterial().GetType();
+			temp->color = object->GetMaterial().GetColorF();
+			temp->emission = object->GetMaterial().GetEmissionF();
+
+			//std::cout << "triangles num: " << temp->triangles_num / sizeof(float3) << "material: " << temp->material << "color: " << temp->color.x << " " << temp->color.y << " " << temp->color.z << std::endl;
 			ObjectCU* object_p;
 			cudaMalloc((void**)&object_p, sizeof(ObjectCU));
-			cudaMemcpy(object_p, &temp, sizeof(ObjectCU), cudaMemcpyHostToDevice);
-
+			cudaMemcpy(object_p, temp, sizeof(ObjectCU), cudaMemcpyHostToDevice);
 
 			return object_p;
 		}
 		
 	}
-
-
 /*
 	glPushMatrix();
 	glMultMatrixf(transform);
@@ -530,6 +575,107 @@ ObjectCU* Scene::CULoadObj(Object* object)
 			break;
 		}
 	}*/
+}
+
+void Scene::DrawMeshDebugCU()
+{
+	std::vector<ObjectCU*> loaded_object;	//loaded_object contains array of device memory address of Object
+	int testval = 0;
+	for (auto & object : objects)
+	{
+		float transform[16];
+		object->GetTransform(transform);
+		/*for (int i = 0; i < 4; i++)
+		{
+			for (int j = 0; j < 4; j++)
+			{
+				std::cout << transform[i * 4 + j] << " ";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << std::endl;*/
+
+		const Mesh* mesh = static_cast<const Mesh*>(object);
+		Triangle* t;
+		std::vector<float3>* triangles = new std::vector<float3>;
+		for (int i = 0; i < mesh->GetTriangles().size(); i++)
+		{
+			t = mesh->GetTriangles().at((unsigned)i);
+			triangles->push_back(make_float3(t->pos[0].getX(), t->pos[0].getY(), t->pos[0].getZ()) * transform);
+			triangles->push_back(make_float3(t->pos[1].getX(), t->pos[1].getY(), t->pos[1].getZ()) * transform);
+			triangles->push_back(make_float3(t->pos[2].getX(), t->pos[2].getY(), t->pos[2].getZ()) * transform);
+		}
+
+
+		unsigned int triangles_size = (unsigned int)(triangles->size() * sizeof(float3));
+
+		ObjectCU* temp = new ObjectCU;
+		temp->triangles_size = triangles_size;
+		temp->triangles_num = (unsigned int)triangles->size();
+		temp->triangles_p = triangles->data();
+		temp->material = object->GetMaterial().GetType();
+		temp->color = object->GetMaterial().GetColorF();
+		temp->emission = object->GetMaterial().GetEmissionF();
+
+		//std::cout << "triangles size: " << temp.triangles_size / sizeof(float3) << "material: " << temp.material << "color: " << temp.color.x << " " << temp.color.y << " " << temp.color.z << std::endl;
+
+		loaded_object.push_back(temp);
+		std::cout << temp->triangles_p << std::endl;
+	}
+	//std::cout <<"\n";
+
+	for (int i = 0; i < loaded_object.size(); i++)
+	//for(int i = 0; i < 1; i++)
+	{
+		ObjectCU* mesh = loaded_object[i];
+		
+		glColor3f(mesh->color.x, mesh->color.y, mesh->color.z);
+
+		for (int i = 0; i < mesh->triangles_num; i += 3)
+		{
+			btVector3 p0 = btVector3(mesh->triangles_p[i].x, mesh->triangles_p[i].y, mesh->triangles_p[i].z);
+			btVector3 p1 = btVector3(mesh->triangles_p[i + 1].x, mesh->triangles_p[i + 1].y, mesh->triangles_p[i + 1].z);
+			btVector3 p2 = btVector3(mesh->triangles_p[i + 2].x, mesh->triangles_p[i + 2].y, mesh->triangles_p[i + 2].z);
+			DrawTriangle(p0, p1, p2);
+		}
+		//std::cout << mesh->material << std::endl;
+	}
+	//std::cout << testval << std::endl;
+}
+
+void Scene::DebugPathCU()
+{
+	// Camera
+	CameraCU* cam_cuda = new CameraCU;
+	camera->CopyCamera(cam_cuda);
+	CameraCU* cam_p;
+
+	cudaMalloc((void**)&cam_p, sizeof(CameraCU));	//cam_p contains device memory address
+	cudaMemcpy(cam_p, cam_cuda, sizeof(CameraCU), cudaMemcpyHostToDevice);
+
+	//std::cout << "cam copy to device successed" << std::endl;
+	// Objects
+	std::vector<ObjectCU*> *loaded_object = new std::vector<ObjectCU*>;	//loaded_object contains array of device memory address of Object
+	for (auto & object : objects)
+	{
+		loaded_object->push_back(CULoadObj(object));
+	}
+
+	ObjectCU** objects_p;
+	cudaMalloc((void**)&objects_p, loaded_object->size() * sizeof(ObjectCU**));
+	cudaMemcpy(objects_p, loaded_object->data(), loaded_object->size() * sizeof(ObjectCU**), cudaMemcpyHostToDevice);
+	//std::cout << "objects copy to device successed" << std::endl;
+
+	TracePath* tp = new TracePath;
+
+
+	tp->RenderPathCUDebug(objects_p, loaded_object->size(), cam_p, mousePos);
+	//std::cout << "RenderPathCUDebug successed" << std::endl;
+	delete tp;
+	delete loaded_object;
+	delete cam_cuda;
+
+	// need to pass cam_p, objects_p, objects_p size
 }
 
 
@@ -939,7 +1085,7 @@ void Scene::SaveImageCU(float3* pixels, const char *filePath)
 		buffer.push_back(toInt(pixels[i].z));
 		buffer.push_back(255);
 
-		printf("%d %d %d\n", toInt(pixels[i].x), toInt(pixels[i].y), toInt(pixels[i].z));
+		//printf("%d %d %d\n", toInt(pixels[i].x), toInt(pixels[i].y), toInt(pixels[i].z));
 	}
 
 	unsigned error = lodepng::encode(filePath, buffer, width, height);

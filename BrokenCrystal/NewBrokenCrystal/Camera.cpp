@@ -211,15 +211,19 @@ btVector3 Camera::GetPosition()
 
 void Camera::CopyCamera(CameraCU *cam)
 {
-	cam->aperture = this->aperture;
-	cam->aspectRatio = this->aspectRatio;
-	cam->distance = this->distance;
-	cam->farPlane = this->farPlane;
-	cam->focalLength = this->focalLength;
-	cam->fov = this->fov;
-	cam->height = this->height;
-	cam->nearPlane = this->nearPlane;
-	cam->pitch = this->pitch;
-	cam->width = this->width;
-	cam->yaw = this->yaw;
+	cam->position = make_float3(position.x(), position.y(), position.z());
+	cam->target = make_float3(target.x(), target.y(), target.z());
+	cam->direction = make_float3(direction.x(), direction.y(), direction.z());
+	cam->upVector = make_float3(upVector.x(), upVector.y(), upVector.z());
+	cam->aperture = aperture;
+	cam->aspectRatio = aspectRatio;
+	cam->distance = distance;
+	cam->farPlane = farPlane;
+	cam->focalLength = focalLength;
+	cam->fov = fov;
+	cam->height = height;
+	cam->nearPlane = nearPlane;
+	cam->pitch = pitch;
+	cam->width = width;
+	cam->yaw = yaw;
 }

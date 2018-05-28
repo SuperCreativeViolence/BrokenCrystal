@@ -73,7 +73,7 @@ void Scene::Initialize()
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.75)));
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.75, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(GLOSS));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(SPEC, btVector3(0.9, 0.9, 0.9)));
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
 
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
@@ -1248,12 +1248,10 @@ void Scene::SaveImageCU(float3* pixels, const char *filePath)
 		buffer.push_back(toInt(pixels[i].x));
 		buffer.push_back(toInt(pixels[i].y));
 		buffer.push_back(toInt(pixels[i].z));
-		buffer.push_back(255);
-
 		//printf("%d %d %d\n", toInt(pixels[i].x), toInt(pixels[i].y), toInt(pixels[i].z));
 	}
 
-	unsigned error = lodepng::encode(filePath, buffer, width, height);
+	unsigned error = lodepng::encode(filePath, buffer, width, height, LCT_RGB);
 	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 
 	std::vector<unsigned char> vclear;
@@ -1270,7 +1268,7 @@ void Scene::Animation()
 	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
 	camera->SetTarget(currentCrystal->GetPosition());
 	camera->SetPitch(31.5f);
-	camera->SetYaw(-180);
+	camera->SetYaw(-360);
 	camera->SetZoom(6);
 
 	currentMeshes.push_back(CreateMesh(btVector3(-7, 7, 5), "corn.obj", 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));

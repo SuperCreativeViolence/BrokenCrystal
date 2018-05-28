@@ -118,7 +118,10 @@ public:
   /**@brief No initialization constructor */
 	SIMD_FORCE_INLINE btVector3() 
 	{
-
+		m_floats[0] = btScalar(0.f);
+		m_floats[1] = btScalar(0.f);
+		m_floats[2] = btScalar(0.f);
+		m_floats[3] = btScalar(0.f);
 	}
 
  

@@ -72,6 +72,7 @@ Mesh::Mesh(const btVector3 & position_, std::vector<Triangle*> triangles_, float
 	}
 
 	// KDTree
+	printf("Build KD-Tree\n");
 	node = KDNode().Build(triangles, 0);
 
 	btConvexShape* tempShape = new btConvexTriangleMeshShape(triangleMesh);

@@ -9,21 +9,10 @@ __device__ float3 TraceRayCU(RayCU* ray, ObjectCU** object_list, int* num_object
 __device__ RayCU GetReflectedRayCU(RayCU* ray, float3 position, float3 normal, float3 color, MaterialType type, curandState* randState);
 
 
-
 inline __host__ __device__ float clampf(float x) { return x < 0.0f ? 0.0f : x > 1.0f ? 1.0f : x; }
 inline __host__ __device__ float cufabs(float x)
 {
 	return x > 0 ? x : -x;
-}
-
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
-{
-	if (code != cudaSuccess)
-	{
-		fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
-		if (abort) exit(code);
-	}
 }
 
 
@@ -39,9 +28,9 @@ __device__ RayCU GetReflectedRayCU(RayCU* ray, float3 position, float3 normal, f
 		float roughness = 0.5f;
 		float3 reflected = ray->direction - normal * 2 * dot(normal, ray->direction);
 		reflected = normalize(make_float3(
-			reflected.x + (curand_uniform(randState) - 0.5) * roughness,			// random generator for cuda?
-			reflected.y + (curand_uniform(randState) - 0.5) * roughness,			// random generator for cuda?
-			reflected.z + (curand_uniform(randState) - 0.5) * roughness			// random generator for cuda?
+			reflected.x + (curand_uniform(randState) - 0.5) * roughness,
+			reflected.y + (curand_uniform(randState) - 0.5) * roughness,
+			reflected.z + (curand_uniform(randState) - 0.5) * roughness	
 		));
 
 		return RayCU(position, reflected);
@@ -49,8 +38,8 @@ __device__ RayCU GetReflectedRayCU(RayCU* ray, float3 position, float3 normal, f
 	else if (type == DIFF)
 	{
 		float3 nl = dot(normal, ray->direction) < 0.0f ? normal : normal * -1.0f;
-		float r1 = 2.0f * CU_SIMD_PI * curand_uniform(randState);						// random generator for cuda?
-		float r2 = curand_uniform(randState);									// random generator for cuda?
+		float r1 = 2.0f * CU_SIMD_PI * curand_uniform(randState);
+		float r2 = curand_uniform(randState);
 		float r2s = sqrt(r2);
 
 		float3 w = nl;
@@ -107,7 +96,7 @@ __device__ RayCU GetReflectedRayCU(RayCU* ray, float3 position, float3 normal, f
 		RP = Re / P;
 		TP = Tr / (1 - P);
 
-		if (curand_uniform(randState) < P)		// random generator for cuda?
+		if (curand_uniform(randState) < P)
 		{
 			color = color * (RP);
 			return RayCU(position, reflection);
@@ -119,17 +108,6 @@ __device__ RayCU GetReflectedRayCU(RayCU* ray, float3 position, float3 normal, f
 	else {}
 }
 
-
-__global__ void initCURand(unsigned int seed, curandState_t* states)
-{
-
-	/* we have to initialize the state */
-	curand_init(seed, /* the seed can be the same for each core, here we pass the time in from the CPU */
-		blockIdx.x, /* the sequence number should be different for each core (unless you want all
-					cores to get the same sequence of numbers for some reason - use thread id! */
-		0, /* the offset is how much extra we advance in the sequence for each call, can be 0 */
-		&states[blockIdx.x]);
-}
 
 void TracePath::RenderPathCUDebug(ObjectCU** object_list, int num_objects, CameraCU* camera, int* mousePos)
 {
@@ -194,8 +172,6 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 			float3 v0 = current_obj->triangles_p[j];
 			float3 v1 = current_obj->triangles_p[j + 1];
 			float3 v2 = current_obj->triangles_p[j + 2];
-
-			// triangle->GetIntersection(ray, transform)
 
 			int hit = 0;
 			float u, v, t = 0;
@@ -345,10 +321,10 @@ float3* TracePath::RenderPathCU(ObjectCU** object_list, int* num_objects, Camera
 
 	dim3 block(16, 9, 1); // calculate this
 
-	size_t blocks_width = ceilf(width / block.x);
-	size_t blocks_height = ceilf(height / block.y);
+	size_t blocks_width = ceilf(ceilf(width / TRACE_SAMPLES_LOOP_X) / block.x);
+	size_t blocks_height = ceilf(ceilf(height / TRACE_SAMPLES_LOOP_Y) / block.y);
 
-	dim3 grid(20, 20, 1);  // calculate this
+	dim3 grid(blocks_width, blocks_height, 1);  // calculate this
 	//dim3 grid(blocks_width, blocks_height, 1);
 
 	std::cout << "dim set successed" << std::endl;
@@ -371,12 +347,11 @@ float3* TracePath::RenderPathCU(ObjectCU** object_list, int* num_objects, Camera
 			cudaMemcpy(loop_x_device, &loop_x_host, sizeof(int), cudaMemcpyHostToDevice);
 			cudaMemcpy(loop_y_device, &loop_y_host, sizeof(int), cudaMemcpyHostToDevice);
 
-			RenderPathCUKernelLoop << < grid, block >> > (output_device, object_list, num_objects, camera, debug_device, loop_x_device, loop_y_device);
+			RenderPathCUKernelLoop <<< grid, block >>> (output_device, object_list, num_objects, camera, debug_device, loop_x_device, loop_y_device);
 			
 			cudaError_t error = cudaDeviceSynchronize();
 			if (error != cudaSuccess)
 			{
-				// print the CUDA error message and exit
 				printf("CUDA error: %s\n", cudaGetErrorString(error));
 			}
 			std::cout << "Current loop: " << loop_x_host << " " << loop_y_host << std::endl;
@@ -397,18 +372,6 @@ float3* TracePath::RenderPathCU(ObjectCU** object_list, int* num_objects, Camera
 	}*/
 
 
-
-	
-	// make the host block until the device is finished with foo
-
-	// check for error
-	/*error = cudaGetLastError();
-	if (error != cudaSuccess)
-	{
-		// print the CUDA error message and exit
-		printf("CUDA error: %s\n", cudaGetErrorString(error));
-	}*/
-
 	std::cout << "RenderPathCUKernel successed" << std::endl;
 
 	cudaMemcpy(output_host, output_device, width * height * sizeof(float3), cudaMemcpyDeviceToHost);
@@ -425,14 +388,6 @@ float3* TracePath::RenderPathCU(ObjectCU** object_list, int* num_objects, Camera
 		//std::cout << debug_host[i].x <<" "<<debug_host[i].y << " " << debug_host[i].z << std::endl;
 	}*/
 	/* debug end */
-	/*	
-	for (int i = 0; i < num_objects; i++)
-	{
-		cudaFree(object_list[i]->triangles_p);
-		cudaFree(object_list);
-	}*/
-	
-	// check for error
 
 	cudaFree(output_device);
 	cudaFree(object_list);
@@ -461,16 +416,10 @@ __global__ void RenderPathCUKernel(float3* output, ObjectCU** object_list, int* 
 	curand_init(threadId, 0, 0, &randState);
 	int i = y * camera->width + x;
 
-
 	if (i < camera->width * camera->height)
 	{
-		//debug_buffer[i] = make_float3(0.0f, 0.0f, 0.0f);
-
 		float samplesP = 1.0f / TRACE_SAMPLES;
 		float3 resultcolor = make_float3(0.0f, 0.0f, 0.0f);
-
-		//debug_buffer[i].x = curand_uniform(&randState);
-		//debug_buffer[i].y = curand_uniform(&randState);
 
 		for (int sy = 0; sy < 2; sy++)
 		{
@@ -479,11 +428,8 @@ __global__ void RenderPathCUKernel(float3* output, ObjectCU** object_list, int* 
 				float3 color = make_float3(0.0f, 0.0f, 0.0f);
 				for (int s = 0; s < TRACE_SAMPLES; s++)
 				{
-					RayCU ray = camera->GetRay(&randState, x, y, sx, sy, 0); // ***
-																			 //ray = camera->GetRay(&randState, x, y, sx, sy, 0); // ***
+					RayCU ray = camera->GetRay(&randState, x, y, sx, sy, 0);
 					color = color + TraceRayCU(&ray, object_list, num_objects, &randState, debug_buffer, i);
-					//free(&ray);
-
 				}
 
 				resultcolor = resultcolor + (color * samplesP);
@@ -494,9 +440,6 @@ __global__ void RenderPathCUKernel(float3* output, ObjectCU** object_list, int* 
 		output[i] = make_float3(clampf(resultcolor.x), clampf(resultcolor.y), clampf(resultcolor.z));
 
 		free(&randState);
-		/* debug */
-		//debug_buffer[i].x = i;
-		/* debug end */
 	}
 }
 
@@ -513,13 +456,8 @@ __global__ void RenderPathCUKernelLoop(float3* output, ObjectCU** object_list, i
 
 	if (i < camera->width * camera->height)
 	{
-		//debug_buffer[i] = make_float3(0.0f, 0.0f, 0.0f);
-		
 		float samplesP = 1.0f / TRACE_SAMPLES;
 		float3 resultcolor = make_float3(0.0f, 0.0f, 0.0f);
-
-		//debug_buffer[i].x = curand_uniform(&randState);
-		//debug_buffer[i].y = curand_uniform(&randState);
 
 		for (int sy = 0; sy < 2; sy++)
 		{
@@ -528,24 +466,17 @@ __global__ void RenderPathCUKernelLoop(float3* output, ObjectCU** object_list, i
 				float3 color = make_float3(0.0f, 0.0f, 0.0f);
 				for (int s = 0; s < TRACE_SAMPLES; s++)
 				{
-					RayCU ray = camera->GetRay(&randState, x, y, sx, sy, 0); // ***
-					//ray = camera->GetRay(&randState, x, y, sx, sy, 0); // ***
+					RayCU ray = camera->GetRay(&randState, x, y, sx, sy, 0);
 					color = color + TraceRayCU(&ray, object_list, num_objects, &randState, debug_buffer, i);
-					//free(&ray);
-
 				}
 
 				resultcolor = resultcolor + (color * samplesP);
 			}
 		}
-
 		resultcolor = resultcolor * 0.25f;
 		output[i] = make_float3(clampf(resultcolor.x), clampf(resultcolor.y), clampf(resultcolor.z));
 		
 		free(&randState);
-		/* debug */
-		//debug_buffer[i].x = i;
-		/* debug end */
 	}
 }
 
@@ -556,15 +487,11 @@ __device__ float3 TraceRayCU(RayCU* ray, ObjectCU** object_list, int* num_object
 	for (int depth = 0; depth < 15; depth++)
 	{
 		ObjectIntersectionCU intersection = IntersectCU(ray, object_list, num_objects, debug_buffer, thread_index);
-		// debug 
-		//debug_buffer[thread_index].x = (int)intersection.material;
-
-		// debug end
 		
 		if (intersection.hit == 0) return make_float3(.0f, .0f, .0f);
+
 		if (intersection.material == EMIT)
 		{
-			//debug_buffer[thread_index].x += 1.0f;
 			if (depth == 0)
 			{
 				return intersection.emission;
@@ -573,11 +500,11 @@ __device__ float3 TraceRayCU(RayCU* ray, ObjectCU** object_list, int* num_object
 			{
 				return result_color * intersection.emission;
 			}
-		}	// need to be fixed
+		}
 
 		float3 color = intersection.color;
 		float maxReflection = color.x > color.y && color.x > color.z ? color.x : color.y > color.z ? color.y : color.z;
-		float random = curand_uniform(randState);// random number generator for cuda?
+		float random = curand_uniform(randState);
 
 		if (depth > 5)
 		{
@@ -624,18 +551,11 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 
 		float tNear = FLT_MAX_CU;
 
-		//debug_buffer[thread_index].z = num_objects;
 		for (unsigned int j = 0; j < current_obj->triangles_num; j += 3)
 		{
-		
-			//debug_buffer[thread_index].z += 1.0f;
-
-
 			float3 v0 = current_obj->triangles_p[j];
 			float3 v1 = current_obj->triangles_p[j + 1];
 			float3 v2 = current_obj->triangles_p[j + 2];
-			
-			// triangle->GetIntersection(ray, transform)
 
 			int hit = 0;
 			float u, v, t = 0;
@@ -691,8 +611,6 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 
 			if (v < 0 || u + v > det)
 			{
-
-				//debug_buffer[thread_index].z += 1.0f;
 				temp_inner.hit = hit;
 				temp_inner.material = current_obj->material;
 				temp_inner.u = t;
@@ -712,8 +630,6 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 
 			if (t < EPSILON_CU)
 			{
-
-				//debug_buffer[thread_index].x += 1.0f;
 				temp_inner.hit = hit;
 				temp_inner.material = current_obj->material;
 				temp_inner.u = t;
@@ -731,8 +647,6 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 
 			hit = 1;
 
-			//debug_buffer[thread_index].y += 1.0f;
-
 			temp_inner.hit = hit;
 			temp_inner.material = current_obj->material;
 			temp_inner.u = t;
@@ -749,11 +663,8 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 		
 		if (temp.hit == 1)
 		{
-
-			//if (temp.material == EMIT) debug_buffer[thread_index].x += 1.0f;
 			if (intersection.u == 0 || temp.u < intersection.u)
 			{
-				//debug_buffer[thread_index].y += 1.0f;
 				intersection.hit = temp.hit;
 				intersection.material = temp.material;
 				intersection.normal = temp.normal;
@@ -763,10 +674,6 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 			}
 		}
 	}
-	/*
-	free(&temp);
-	free(current_obj);
-	free(&temp_inner);*/
 
 	return intersection;
 }

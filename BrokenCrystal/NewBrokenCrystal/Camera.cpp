@@ -85,6 +85,12 @@ void Camera::Fov(float delta)
 	UpdateCamera();
 }
 
+void Camera::Target(float deltaX, float deltaY, float deltaZ)
+{
+	target += btVector3(deltaX, deltaY, deltaZ);
+	UpdateCamera();
+}
+
 float& Camera::GetFovPointer()
 {
 	return fov;
@@ -175,4 +181,24 @@ int Camera::GetHeight()
 btVector3 Camera::GetPosition()
 {
 	return position;
+}
+
+void Camera::SetTarget(const btVector3& pos)
+{
+	target = pos;
+}
+
+void Camera::SetPitch(float pitch)
+{
+	this->pitch = pitch;
+}
+
+void Camera::SetYaw(float yaw)
+{
+	this->yaw = yaw;
+}
+
+void Camera::SetZoom(float zoom)
+{
+	this->distance = zoom;
 }

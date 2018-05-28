@@ -74,14 +74,6 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
-
-	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	//std::vector<Mesh*> meshes = break_into_pieces2(crystal, 30);
-	//for (auto& mesh : meshes)
-	//{
-	//	AddObject(static_cast<Object*>(mesh));
-	//}
-	//DeleteObject(crystal);
 	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
@@ -119,6 +111,8 @@ void Scene::Initialize()
 	//	CreateSphere(btVector3(3, 5, i), 2, 0, Material(DIFF, btVector3(erand48(), erand48(), erand48())));
 	//}
 	//CreateBox(btVector3(0, 50, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+
+	Animation();
 }
 
 void Scene::AddObject(Object* object)
@@ -319,7 +313,7 @@ void Scene::Idle()
 {
 	float dt = clock.getTimeMilliseconds();
 	clock.reset();
-	UpdateScene(dt / 1000.0f);
+	UpdateScene((dt / 1000.0f) * timeScale);
 	glutPostRedisplay();
 }
 
@@ -367,7 +361,26 @@ void Scene::UpdateScene(float dt)
 		RenderContinuousPath();
 	}
 
+
+	// animation
+	if (cameraRotate)
+	{
+		camera->Rotate(0, 1);
+	}
+
+	if (crystalExplosion)
+	{
+		camera->Zoom(-0.1);
+		camera->Target(0, -0.01, 0);
+	}
+
+
 	world->stepSimulation(dt);
+}
+
+void Scene::SetTimeScale(float value)
+{
+	timeScale = value;
 }
 
 void Scene::RenderGUI()
@@ -834,7 +847,7 @@ void Scene::SaveImage(const char *filePath)
 	int pixelCount = width * height;
 	std::string fileName;
 	std::vector<unsigned char> buffer;
-	unsigned char * out = 0;
+	unsigned char * out = nullptr;
 
 	for (int i = 0; i < pixelCount; i++)
 	{
@@ -859,5 +872,73 @@ void Scene::SaveImage(const char *filePath)
 	vclear.clear();
 	buffer.clear();
 	buffer.shrink_to_fit();
+}
+
+void Scene::Animation()
+{
+	// Init
+	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	camera->SetTarget(currentCrystal->GetPosition());
+	camera->SetPitch(31.5f);
+	camera->SetYaw(-360);
+	camera->SetZoom(6);
+
+	// start
+	glutTimerFunc(500, &Scene::ARotateCamera, 0);
+
+
+
+
+	//	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 100);
+	//	for (auto& mesh : meshes)
+	//	{
+	//		AddObject(static_cast<Object*>(mesh));
+	//	}
+	//	DeleteObject(crystal);
+	//}
+}
+
+void Scene::ARotateCamera(int value)
+{
+	printf("[Animation] Rotate Camera\n");
+	Scene::GetInstance()->cameraRotate = true;
+	glutTimerFunc(3000, &Scene::ACrystalExplosion, 0);
+}
+
+void Scene::ACrystalExplosion(int value)
+{
+	printf("[Animation] Crystal Explosion\n");
+	Scene::GetInstance()->cameraRotate = false;
+	Scene::GetInstance()->crystalExplosion = true;
+	btVector3 crystalPos = Scene::GetInstance()->currentCrystal->GetPosition();
+	crystalPos[1] -= 2;
+	Scene::GetInstance()->DeleteObject(Scene::GetInstance()->currentCrystal);
+	Scene::GetInstance()->currentCrystal = Scene::GetInstance()->CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	std::vector<Mesh*> meshes = break_into_pieces2(Scene::GetInstance()->currentCrystal, 50);
+	for (auto& mesh : meshes)
+	{
+		Scene::GetInstance()->AddObject(static_cast<Object*>(mesh));
+		btVector3 meshPos = mesh->GetPosition();
+		btVector3 dir = (meshPos - crystalPos).normalize();
+		mesh->GetRigidBody()->applyCentralImpulse(dir / 10.0f);
+	}
+	Scene::GetInstance()->DeleteObject(Scene::GetInstance()->currentCrystal);
+	glutTimerFunc(1500, &Scene::AStopCrystal, 0);
+}
+
+void Scene::AStopCrystal(int value)
+{
+	printf("[Animation] Freeze Crystal\n");
+	Scene::GetInstance()->crystalExplosion = false;
+	Scene::GetInstance()->cameraRotate = true;
+	Scene::GetInstance()->SetTimeScale(0.1f);
+	glutTimerFunc(3000, &Scene::AFinishAnimation, 0);
+}
+
+void Scene::AFinishAnimation(int value)
+{
+	printf("[Animation] Freeze Crystal\n");
+	Scene::GetInstance()->cameraRotate = false;
+	Scene::GetInstance()->SetTimeScale(1.0f);
 }
 

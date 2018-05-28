@@ -19,10 +19,15 @@ public:
 	void Rotate(float deltaX, float deltaY);
 	void Zoom(float delta);
 	void Fov(float delta);
+	void Target(float deltaX, float deltaY, float deltaZ);
 	Ray GetRay(int x, int y, int sx, int sy, bool dof = false);
 	int GetWidht();
 	int GetHeight();
 	btVector3 GetPosition();
+	void SetTarget(const btVector3& pos);
+	void SetPitch(float pitch);
+	void SetYaw(float yaw);
+	void SetZoom(float zoom);
 
 	// gui
 	float& GetFovPointer();

@@ -68,12 +68,12 @@ void Scene::Initialize()
 
 	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 
-	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.2, 0.3, 0.1)));
 	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.75)));
+	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.75, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(GLOSS));
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
 
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
@@ -320,7 +320,7 @@ void Scene::Idle()
 	if (isAnimation)
 	{
 		UpdateScene(0.06 * timeScale);
-		//CudaAnimationRendering(++animationFrame);
+		CudaAnimationRendering(++animationFrame);
 		animationTime += 0.06;
 		if (animationIndex == 1 && animationTime >= 11)
 		{
@@ -1245,26 +1245,15 @@ void Scene::Animation()
 	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
 	camera->SetTarget(currentCrystal->GetPosition());
 	camera->SetPitch(31.5f);
-	camera->SetYaw(-360);
+	camera->SetYaw(-180);
 	camera->SetZoom(6);
 
-	currentMeshes.push_back(CreateBox(btVector3(-7, 1, 3), btVector3(3,3,3), 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));
-	currentMeshes.push_back(CreateBox(btVector3(-3, 1, 3), btVector3(3, 3, 3), 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0))));
-	currentMeshes.push_back(CreateBox(btVector3(3, 1, -3), btVector3(3, 3, 3), 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0))));
-	currentMeshes.push_back(CreateBox(btVector3(7, 1, -3), btVector3(3, 3, 3), 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(-7, 7, 5), "corn.obj", 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));
+	currentMeshes.push_back(CreateMesh(btVector3(-3, 7, 5), "corn.obj", 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(3, 7, -5), "corn.obj", 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(7, 7, -5), "corn.obj", 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0))));
 	// start
 	ARotateCamera();
-
-
-
-
-	//	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 100);
-	//	for (auto& mesh : meshes)
-	//	{
-	//		AddObject(static_cast<Object*>(mesh));
-	//	}
-	//	DeleteObject(crystal);
-	//}
 }
 
 void Scene::ARotateCamera()

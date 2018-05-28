@@ -113,7 +113,7 @@ private:
 	Camera* camera;
 
 	// path tracing
-	int samples = 2;
+	int samples = 1;
 	btVector3* pixelBuffer;
 
 	// gui

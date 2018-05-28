@@ -17,6 +17,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 
@@ -24,10 +25,10 @@
 
 #define EPSILON_CU 1e-10
 
-#define TRACE_SAMPLES 10
-#define TRACE_SAMPLES_LOOP 1
+#define TRACE_SAMPLES 16
+#define TRACE_SAMPLES_LOOP_X 4
+#define TRACE_SAMPLES_LOOP_Y 4
 
-#define THREAD_NUM 
 
 
 
@@ -76,7 +77,7 @@ public:
 	TracePath() {}
 	~TracePath(){}
 	void RenderPathCUDebug(ObjectCU** object_list, int num_objects, CameraCU* camera, int* mousePos);
-	float3* RenderPathCU(ObjectCU** object_list, int num_objects, CameraCU* camera, int width, int height);
+	float3* RenderPathCU(ObjectCU** object_list, int* num_objects, CameraCU* camera, int width, int height);
 };
 
 

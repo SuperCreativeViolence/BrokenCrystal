@@ -76,13 +76,13 @@ void Scene::Initialize()
 	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 	
-	Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 8);
+	/*Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 10);
 	for (auto& mesh : meshes)
 	{
 		AddObject(static_cast<Object*>(mesh));
 	}
-	DeleteObject(crystal);
+	DeleteObject(crystal);*/
 	
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
@@ -103,6 +103,7 @@ void Scene::Initialize()
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.5, 0.0, 0.0)));
 	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
 	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(SPEC, btVector3(0.4, 0.4, 1.0)));
 	//CreateBox(btVector3(-7, 1, 0), btVector3(1, 1, 1), 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
 	//CreateBox(btVector3(-3, 1, 0), btVector3(1, 1, 1), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
 	//CreateBox(btVector3(3, 1, 0), btVector3(1, 1, 1), 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
@@ -474,10 +475,16 @@ void Scene::CUMemInitialize()
 	cudaMemcpy(objects_p, loaded_object->data(), loaded_object->size() * sizeof(ObjectCU**), cudaMemcpyHostToDevice);
 	std::cout << "objects copy to device successed" << std::endl;
 
+	// Objects num
+	int* num_objects_device;
+	int num_objects_host = loaded_object->size();
+	cudaMalloc((void**)&num_objects_device, sizeof(int));
+	cudaMemcpy(num_objects_device, &num_objects_host, sizeof(int), cudaMemcpyHostToDevice);
+
 	TracePath* tp = new TracePath;
 
 
-	float3* result = tp->RenderPathCU(objects_p, loaded_object->size(), cam_p, camera->GetWidht(), camera->GetHeight());
+	float3* result = tp->RenderPathCU(objects_p, num_objects_device, cam_p, camera->GetWidht(), camera->GetHeight());
 	std::cout << "CU path tracing finished! Start SaveImageCU.." << std::endl;
 	SaveImageCU(result, "RenderCU.png");
 	delete tp;
@@ -532,9 +539,9 @@ ObjectCU* Scene::CULoadObj(Object* object)
 			temp->triangles_size = triangles_size;
 			temp->triangles_num = (unsigned int)triangles->size();
 			temp->triangles_p = mesh_p;
-			temp->material = object->GetMaterial().GetType();
-			temp->color = object->GetMaterial().GetColorF();
-			temp->emission = object->GetMaterial().GetEmissionF();
+			temp->material = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetType();
+			temp->color = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetColorF();
+			temp->emission = mesh->GetTriangles().at((unsigned)0)->GetMaterial().GetEmissionF();;
 
 			//std::cout << "triangles num: " << temp->triangles_num / sizeof(float3) << "material: " << temp->material << "color: " << temp->color.x << " " << temp->color.y << " " << temp->color.z << std::endl;
 			ObjectCU* object_p;

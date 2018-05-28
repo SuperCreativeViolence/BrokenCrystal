@@ -158,7 +158,6 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 	ObjectIntersectionCU intersection = ObjectIntersectionCU();
 	ObjectIntersectionCU temp = ObjectIntersectionCU();	// return value of objects.at((unsigned)i)->GetIntersection(ray)
 	ObjectCU* current_obj;
-
 	ObjectIntersectionCU temp_inner = ObjectIntersectionCU(); // return value of triangle->GetIntersect()
 
 	for (int i = 0; i < num_objects; i++)
@@ -167,11 +166,11 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 
 		float tNear = FLT_MAX_CU;
 
-		for (unsigned int j = 0; j < current_obj->triangles_num; j += 3)
+		for (unsigned int j = 0; j < current_obj->triangles_num; j++)
 		{
-			float3 v0 = current_obj->triangles_p[j];
-			float3 v1 = current_obj->triangles_p[j + 1];
-			float3 v2 = current_obj->triangles_p[j + 2];
+			float3 v0 = current_obj->triangles_p[j]->vertexes[0];
+			float3 v1 = current_obj->triangles_p[j]->vertexes[1];
+			float3 v2 = current_obj->triangles_p[j]->vertexes[2];
 
 			int hit = 0;
 			float u, v, t = 0;
@@ -187,9 +186,11 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 			{
 
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -197,6 +198,8 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -208,9 +211,11 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 			{
 
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit == 1 && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -218,6 +223,8 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -228,9 +235,11 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 			if (v < 0 || u + v > det)
 			{
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -238,6 +247,8 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -247,9 +258,11 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 			if (t < EPSILON_CU)
 			{
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -257,6 +270,8 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -264,9 +279,11 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 			hit = 1;
 
 			temp_inner.hit = hit;
-			temp_inner.material = current_obj->material;
+			temp_inner.material = current_obj->triangles_p[j]->material;
 			temp_inner.u = t;
 			temp_inner.normal = normal;
+			temp_inner.color = current_obj->triangles_p[j]->color;
+			temp_inner.emission = current_obj->triangles_p[j]->emission;
 			if (temp_inner.hit && temp_inner.u < tNear)
 			{
 				tNear = temp_inner.u;
@@ -274,6 +291,8 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 				temp.material = temp_inner.material;
 				temp.normal = temp_inner.normal;
 				temp.u = temp_inner.u;
+				temp.color = temp_inner.color;
+				temp.emission = temp_inner.emission;
 			}
 		}
 
@@ -285,8 +304,8 @@ __global__ void RenderPathCUDebugKernel(ObjectIntersectionCU* output, ObjectCU**
 				intersection.material = temp.material;
 				intersection.normal = temp.normal;
 				intersection.u = temp.u;
-				intersection.color = current_obj->color;
-				intersection.emission = current_obj->emission;
+				intersection.color = temp.color;
+				intersection.emission = temp.emission;
 			}
 		}
 	}
@@ -551,11 +570,11 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 
 		float tNear = FLT_MAX_CU;
 
-		for (unsigned int j = 0; j < current_obj->triangles_num; j += 3)
+		for (unsigned int j = 0; j < current_obj->triangles_num; j++)
 		{
-			float3 v0 = current_obj->triangles_p[j];
-			float3 v1 = current_obj->triangles_p[j + 1];
-			float3 v2 = current_obj->triangles_p[j + 2];
+			float3 v0 = current_obj->triangles_p[j]->vertexes[0];
+			float3 v1 = current_obj->triangles_p[j]->vertexes[1];
+			float3 v2 = current_obj->triangles_p[j]->vertexes[2];
 
 			int hit = 0;
 			float u, v, t = 0;
@@ -571,9 +590,11 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 			{
 
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -581,6 +602,8 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -592,9 +615,11 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 			{
 
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit == 1 && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -602,6 +627,8 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -612,9 +639,11 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 			if (v < 0 || u + v > det)
 			{
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -622,6 +651,8 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -631,9 +662,11 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 			if (t < EPSILON_CU)
 			{
 				temp_inner.hit = hit;
-				temp_inner.material = current_obj->material;
+				temp_inner.material = current_obj->triangles_p[j]->material;
 				temp_inner.u = t;
 				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
 				if (temp_inner.hit && temp_inner.u < tNear)
 				{
 					tNear = temp_inner.u;
@@ -641,6 +674,8 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 					temp.material = temp_inner.material;
 					temp.normal = temp_inner.normal;
 					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
 				}
 				continue;
 			}
@@ -648,9 +683,11 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 			hit = 1;
 
 			temp_inner.hit = hit;
-			temp_inner.material = current_obj->material;
+			temp_inner.material = current_obj->triangles_p[j]->material;
 			temp_inner.u = t;
 			temp_inner.normal = normal;
+			temp_inner.color = current_obj->triangles_p[j]->color;
+			temp_inner.emission = current_obj->triangles_p[j]->emission;
 			if (temp_inner.hit && temp_inner.u < tNear)
 			{
 				tNear = temp_inner.u;
@@ -658,6 +695,8 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 				temp.material = temp_inner.material;
 				temp.normal = temp_inner.normal;
 				temp.u = temp_inner.u;
+				temp.color = temp_inner.color;
+				temp.emission = temp_inner.emission;
 			}
 		}
 		
@@ -669,8 +708,8 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 				intersection.material = temp.material;
 				intersection.normal = temp.normal;
 				intersection.u = temp.u;
-				intersection.color = current_obj->color;
-				intersection.emission = current_obj->emission;
+				intersection.color = temp.color;
+				intersection.emission = temp.emission;
 			}
 		}
 	}

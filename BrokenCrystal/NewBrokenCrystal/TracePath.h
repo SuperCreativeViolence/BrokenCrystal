@@ -25,7 +25,7 @@
 
 #define EPSILON_CU 1e-10
 
-#define TRACE_SAMPLES 16
+#define TRACE_SAMPLES 4
 #define TRACE_SAMPLES_LOOP_X 6
 #define TRACE_SAMPLES_LOOP_Y 6
 

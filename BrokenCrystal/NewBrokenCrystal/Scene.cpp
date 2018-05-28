@@ -66,9 +66,10 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	//CreateBox(btVector3(0, 0, 0), btVector3(300, 1, 300), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 0, 0), btVector3(20, 1, 20), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 50, 0), btVector3(20, 1, 20), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2,2.2, 2.2)));
 
-	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.2, 0.3, 0.1)));
+	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
 	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.75)));
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.75, 0.0, 0.0)));
@@ -319,9 +320,9 @@ void Scene::Idle()
 	clock.reset();
 	if (isAnimation)
 	{
-		UpdateScene(0.06 * timeScale);
+		UpdateScene(0.60 * timeScale);
 		CudaAnimationRendering(++animationFrame);
-		animationTime += 0.06;
+		animationTime += 0.60;
 		if (animationIndex == 1 && animationTime >= 11)
 		{
 			ACrystalExplosion();
@@ -1265,7 +1266,7 @@ void Scene::SaveImageCU(float3* pixels, const char *filePath)
 void Scene::Animation()
 {
 	// Init
-	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(TRANS, btVector3(0.6, 0.6, 1.0)));
 	camera->SetTarget(currentCrystal->GetPosition());
 	camera->SetPitch(31.5f);
 	camera->SetYaw(-360);
@@ -1285,7 +1286,6 @@ void Scene::ARotateCamera()
 	animationIndex = 1;
 	isAnimation = true;
 	cameraRotate = true;
-	//glutTimerFunc(3000, &Scene::ACrystalExplosion, 0);
 }
 
 void Scene::ACrystalExplosion()
@@ -1297,8 +1297,8 @@ void Scene::ACrystalExplosion()
 	btVector3 crystalPos = currentCrystal->GetPosition();
 	crystalPos[1] -= 2;
 	DeleteObject(currentCrystal);
-	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	std::vector<Mesh*> meshes = break_into_pieces2(currentCrystal, 50);
+	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(TRANS, btVector3(0.6, 0.6, 1.0)));
+	std::vector<Mesh*> meshes = break_into_pieces2(currentCrystal, 10);
 	for (auto& mesh : meshes)
 	{
 		AddObject(static_cast<Object*>(mesh));
@@ -1323,7 +1323,7 @@ void Scene::AMeshExplosion(int index)
 	Mesh* currentMesh = currentMeshes.at(index);
 	animationIndex++;
 	btVector3 currentMeshPos = currentMesh->GetPosition();
-	std::vector<Mesh*> meshes = break_into_pieces2(currentMesh, 20);
+	std::vector<Mesh*> meshes = break_into_pieces2(currentMesh, 5);
 	for (auto& mesh : meshes)
 	{
 		AddObject(static_cast<Object*>(mesh));

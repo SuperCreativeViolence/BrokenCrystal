@@ -36,7 +36,7 @@ void Scene::Initialize()
 	GLfloat ambient[] = { 0.2f, 0.2f, 0.2f, 1.0f }; // dark grey
 	GLfloat diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // white
 	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f }; // white
-	GLfloat position[] = { 5.0f, 10.0f, 1.0f, 0.0f };
+	GLfloat position[] = { 0.0f, 10.0f, 0.0f, 0.0f };
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
@@ -73,17 +73,9 @@ void Scene::Initialize()
 	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
 	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
-	
-	/*Mesh* crystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 10);
-	for (auto& mesh : meshes)
-	{
-		AddObject(static_cast<Object*>(mesh));
-	}
-	DeleteObject(crystal);*/
-	
+	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.0, 0.85, 0.0)));
+	CreateMesh(btVector3(0, 0, 30), "board.obj", 0);
+
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
 	//CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
@@ -97,17 +89,17 @@ void Scene::Initialize()
 
 
 	// material test
-	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.7, 0.4, 0.4)));
-	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
-	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
-	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.5, 0.0, 0.0)));
-	CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
-	CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
-	CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(SPEC, btVector3(0.4, 0.4, 1.0)));
-	//CreateBox(btVector3(-7, 1, 0), btVector3(1, 1, 1), 1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
-	//CreateBox(btVector3(-3, 1, 0), btVector3(1, 1, 1), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	//CreateBox(btVector3(3, 1, 0), btVector3(1, 1, 1), 1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
-	//CreateBox(btVector3(7, 1, 0), btVector3(1, 1, 1), 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
+	//CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	//CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.85)));
+	//CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.85, 0.0, 0.0)));
+	//CreateMesh(btVector3(0, 0, 30), "board.obj", 0, Material(DIFF, btVector3(0.3, 0.5, 0.4)));
+	//CreateBox(btVector3(0, 15, -30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateSphere(btVector3(-7, 1, 3), 3, 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3)));
+	//CreateSphere(btVector3(-3, 1, 3), 3, 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(3, 1, -3), 3, 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0)));
+	//CreateSphere(btVector3(7, 1, -3), 3, 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
+
 
 	// island
 	//CreateMesh(btVector3(0, 5, 0), "island.obj", 0, Material());
@@ -178,6 +170,13 @@ void Scene::CreateSphere(const btVector3 &position, double radius, float mass, M
 Mesh* Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material)
 {
 	Mesh* mesh = new Mesh(position, fileName, mass, material);
+	AddObject(static_cast<Object*>(mesh));
+	return mesh;
+}
+
+Mesh* Scene::CreateMesh(const btVector3 &position, const char* fileName, float mass)
+{
+	Mesh* mesh = new Mesh(position, fileName, mass);
 	AddObject(static_cast<Object*>(mesh));
 	return mesh;
 }
@@ -317,7 +316,7 @@ void Scene::Idle()
 {
 	float dt = clock.getTimeMilliseconds();
 	clock.reset();
-	UpdateScene(dt / 1000.0f);
+	UpdateScene((dt / 1000.0f) * timeScale);
 	glutPostRedisplay();
 }
 
@@ -343,6 +342,7 @@ void Scene::UpdateScene(float dt)
 	{
 		RenderPath(samples);
 		SaveImage("Render.png");
+		delete pixelBuffer;
 	}
 	if (IsKeyDown('m'))
 	{
@@ -375,7 +375,7 @@ void Scene::UpdateScene(float dt)
 	}
 	if (IsKeyDown('f'))
 	{
-		Ray ray = camera->GetRay(mousePos[0], mousePos[1], true);
+		Ray ray = camera->GetRay(mousePos[0], mousePos[1], 0, 0, false);
 		system("cls");
 		btVector3 color = DebugPathTest(ray, 0, ray.origin);
 		printf("\nresult = %.1f %.1f %.1f\n", color[0], color[1], color[2]);
@@ -384,8 +384,31 @@ void Scene::UpdateScene(float dt)
 	{
 		DebugTraceRay(true);
 	}
+	if (IsKeyDown('p'))
+	{
+		RenderContinuousPath();
+	}
+
+
+	// animation
+	if (cameraRotate)
+	{
+		camera->Rotate(0, 1);
+	}
+
+	if (crystalExplosion)
+	{
+		camera->Zoom(-0.1);
+		camera->Target(0, -0.01, 0);
+	}
+
 
 	world->stepSimulation(dt);
+}
+
+void Scene::SetTimeScale(float value)
+{
+	timeScale = value;
 }
 
 void Scene::RenderGUI()
@@ -403,7 +426,7 @@ void Scene::RenderGUI()
 			ImGui::Text("Raytracing... %0.1f%% [ETC %.3dh%.2dm%.2ds]", completion, remaining / 3600, (remaining % 3600) / 60, remaining % 60);
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::InputInt("Samples", &samples, 1, 1);
-		samples = std::max(samples, 1);
+		samples = dmax(samples, 1);
 		ImGui::SliderFloat("Fov", &camera->GetFovPointer(), 1, 179);
 		ImGui::SliderFloat("Zoom", &camera->GetDistancePointer(), 0, 20);
 		ImGui::SliderFloat3("Position", camera->GetPositionPointer(), -100, 100);
@@ -414,6 +437,10 @@ void Scene::RenderGUI()
 		{
 			RenderPath(samples);
 			SaveImage("Render.png");
+		}
+		if (ImGui::Button("Start Animation"))
+		{
+			Animation();
 		}
 		ImGui::End();
 	}
@@ -886,6 +913,63 @@ void Scene::RenderPath(int samples)
 	isTracing = false;
 }
 
+void Scene::RenderContinuousPath(int maxSamples)
+{
+	isTracing = true;
+	int width = camera->GetWidht();
+	int height = camera->GetHeight();
+	pixelBuffer = new btVector3[width * height];
+	for (int i = 1; i < maxSamples; i++)
+	{
+		remaining = 0;
+		completion = 0;
+		unsigned int startTime = time(nullptr);
+		unsigned int lastTime = startTime;
+		unsigned int progress = 0;
+		unsigned int lastProgress = 0;
+		float lastSpeed = 0;
+		int pixelCount = width * height;
+#pragma omp parallel for schedule(dynamic, 1)
+		for (int t = 0; t < pixelCount; t++)
+		{
+			int x = t % width;
+			int y = t / width;
+			btVector3 resultColor = btVector3(0, 0, 0);
+
+			for (int sy = 0; sy < 2; sy++)
+			{
+				for (int sx = 0; sx < 2; sx++)
+				{
+					Ray ray = camera->GetRay(x, y, sx, sy, false); // dof 효과 미완성
+					resultColor += TraceRay(ray, 0);
+				}
+			}
+			btVector3 post = pixelBuffer[(y) * width + x];
+			pixelBuffer[(y) * width + x] = (post * (i - 1) + resultColor * 0.25) / i;
+#pragma omp critical
+			{
+				++progress;
+				if (progress > 0 && ((float) difftime(time(nullptr), lastTime) >= 1.0f))
+				{
+					completion = (float) (progress - 1) / pixelCount * 100;
+					float speed = (float) (progress - lastProgress) / difftime(time(nullptr), lastTime);
+					remaining = (int) ((pixelCount - progress) / speed);
+					printf("\rPathTracing (%d)  %0.1f%% [ETC %.3dh%.2dm%.2ds]", i, completion, remaining / 3600, (remaining % 3600) / 60, remaining % 60);
+					lastTime = time(nullptr);
+					lastProgress = progress;
+					lastSpeed = speed;
+				}
+			}
+		}
+		std::string fileName;
+		fileName.append("Render");
+		fileName.append(std::to_string(i));
+		fileName.append(".png");
+		SaveImage(fileName.c_str());
+	}
+	isTracing = false;
+}
+
 
 btVector3 Scene::TraceRay(const Ray &ray, int depth)
 {
@@ -1051,30 +1135,34 @@ void Scene::SaveImage(const char *filePath)
 	int width = camera->GetWidht();
 	int height = camera->GetHeight();
 
-	std::vector<unsigned char> buffer;
 	int pixelCount = width * height;
+	std::string fileName;
+	std::vector<unsigned char> buffer;
+	unsigned char * out = nullptr;
 
 	for (int i = 0; i < pixelCount; i++)
 	{
 		buffer.push_back(toInt(pixelBuffer[i].x()));
 		buffer.push_back(toInt(pixelBuffer[i].y()));
 		buffer.push_back(toInt(pixelBuffer[i].z()));
-		buffer.push_back(255);
-
-		printf("%d %d %d\n", toInt(pixelBuffer[i].x()), toInt(pixelBuffer[i].y()), toInt(pixelBuffer[i].z()));
-
 	}
-
-	unsigned error = lodepng::encode(filePath, buffer, width, height);
+	fileName.append("before");
+	fileName.append(filePath);
+	unsigned error = lodepng::encode(fileName.c_str(), buffer, width, height, LCT_RGB);
 	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 
+	for (int i = 0; i < 100; i++)
+		recursive_bf(buffer.data(), out, 0.01, 0.5, width, height, 3);
+
+	fileName = std::string("after");
+	fileName.append(filePath);
+	error = lodepng::encode(fileName.c_str(), out, width, height, LCT_RGB);
+	if (error) std::cout << "encoder error " << error << ": " << lodepng_error_text(error) << std::endl;
 	std::vector<unsigned char> vclear;
 	buffer.swap(vclear);
 	vclear.clear();
 	buffer.clear();
-	buffer.shrink_to_fit();
-	delete pixelBuffer;
-	
+	buffer.shrink_to_fit();	
 }
 
 void Scene::SaveImageCU(float3* pixels, const char *filePath)
@@ -1105,3 +1193,99 @@ void Scene::SaveImageCU(float3* pixels, const char *filePath)
 	buffer.shrink_to_fit();
 	delete pixels;
 }
+
+void Scene::Animation()
+{
+	// Init
+	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 0, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	camera->SetTarget(currentCrystal->GetPosition());
+	camera->SetPitch(31.5f);
+	camera->SetYaw(-360);
+	camera->SetZoom(6);
+
+	currentMeshes.push_back(CreateMesh(btVector3(-7, 1, 3), "Sphere.obj", 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));
+	currentMeshes.push_back(CreateMesh(btVector3(-3, 1, 3), "Sphere.obj", 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(3, 1, -3), "Sphere.obj", 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateMesh(btVector3(7, 1, -3), "Sphere.obj", 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0))));
+	// start
+	glutTimerFunc(500, &Scene::ARotateCamera, 0);
+
+
+
+
+	//	std::vector<Mesh*> meshes = break_into_pieces2(crystal, 100);
+	//	for (auto& mesh : meshes)
+	//	{
+	//		AddObject(static_cast<Object*>(mesh));
+	//	}
+	//	DeleteObject(crystal);
+	//}
+}
+
+void Scene::ARotateCamera(int value)
+{
+	printf("[Animation] Rotate Camera\n");
+	Scene::GetInstance()->isAnimation = true;
+	Scene::GetInstance()->cameraRotate = true;
+	glutTimerFunc(3000, &Scene::ACrystalExplosion, 0);
+}
+
+void Scene::ACrystalExplosion(int value)
+{
+	printf("[Animation] Crystal Explosion\n");
+	Scene::GetInstance()->cameraRotate = false;
+	Scene::GetInstance()->crystalExplosion = true;
+	btVector3 crystalPos = Scene::GetInstance()->currentCrystal->GetPosition();
+	crystalPos[1] -= 2;
+	Scene::GetInstance()->DeleteObject(Scene::GetInstance()->currentCrystal);
+	Scene::GetInstance()->currentCrystal = Scene::GetInstance()->CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	std::vector<Mesh*> meshes = break_into_pieces2(Scene::GetInstance()->currentCrystal, 50);
+	for (auto& mesh : meshes)
+	{
+		Scene::GetInstance()->AddObject(static_cast<Object*>(mesh));
+		btVector3 meshPos = mesh->GetPosition();
+		btVector3 dir = (meshPos - crystalPos).normalize();
+		mesh->GetRigidBody()->applyCentralImpulse(dir / 10.0f);
+	}
+	Scene::GetInstance()->DeleteObject(Scene::GetInstance()->currentCrystal);
+	glutTimerFunc(1500, &Scene::AStopCrystal, 0);
+}
+
+void Scene::AStopCrystal(int value)
+{
+	printf("[Animation] Freeze Crystal\n");
+	Scene::GetInstance()->crystalExplosion = false;
+	Scene::GetInstance()->cameraRotate = true;
+	Scene::GetInstance()->SetTimeScale(0.05f);
+	glutTimerFunc(4000, &Scene::AFinishAnimation, 0);
+	glutTimerFunc(700, &Scene::AMeshExplosion, 0);
+	glutTimerFunc(1400, &Scene::AMeshExplosion, 1);
+	glutTimerFunc(2100, &Scene::AMeshExplosion, 2);
+	glutTimerFunc(2800, &Scene::AMeshExplosion, 3);
+
+}
+
+void Scene::AMeshExplosion(int index)
+{
+	Mesh* currentMesh = Scene::GetInstance()->currentMeshes.at(index);
+	btVector3 currentMeshPos = currentMesh->GetPosition();
+	currentMeshPos[1] -= 1;
+	std::vector<Mesh*> meshes = break_into_pieces2(currentMesh, 20);
+	for (auto& mesh : meshes)
+	{
+		Scene::GetInstance()->AddObject(static_cast<Object*>(mesh));
+		btVector3 meshPos = mesh->GetPosition();
+		btVector3 dir = (meshPos - currentMeshPos).normalize();
+		mesh->GetRigidBody()->applyCentralImpulse(dir / 10.0f);
+	}
+	Scene::GetInstance()->DeleteObject(currentMesh);
+}
+
+void Scene::AFinishAnimation(int value)
+{
+	printf("[Animation] Animation Finished\n");
+	Scene::GetInstance()->cameraRotate = false;
+	Scene::GetInstance()->SetTimeScale(1.0f);
+	Scene::GetInstance()->isAnimation = false;
+}
+

@@ -1,6 +1,7 @@
 #include "voronoi.h"
 
-typedef struct Line {
+typedef struct Line
+{
 
 	btVector3 point[2];
 

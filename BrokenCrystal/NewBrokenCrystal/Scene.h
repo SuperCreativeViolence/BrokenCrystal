@@ -30,6 +30,13 @@ public:
 	Scene();
 	~Scene();
 
+	// singleton
+	static Scene* GetInstance()
+	{
+		static Scene* instance = new Scene();
+		return instance;
+	}
+
 	void Initialize();
 
 	// object
@@ -37,6 +44,7 @@ public:
 	void CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
 	void CreateSphere(const btVector3 &position, double radius, float mass, Material material);
 	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
+	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass);
 	void DeleteObject(Object* object);
 
 	// input
@@ -57,6 +65,7 @@ public:
 
 	// physics
 	void UpdateScene(float dt);
+	void SetTimeScale(float value);
 
 	// gui
 	void RenderGUI();
@@ -78,12 +87,28 @@ public:
 	ObjectIntersection Intersect(const Ray &ray);
 	void SaveImage(const char *filePath);
 
+
 	// CUDA
 	void CUMemInitialize();
 	ObjectCU* CULoadObj(Object* object);
 	void SaveImageCU(float3* pixels, const char *filePath);
 	void DebugPathCU();
 	void DrawMeshDebugCU();
+
+	// animation
+	Mesh* currentCrystal = nullptr;
+	std::vector<Mesh*> currentMeshes;
+	void Animation();
+	static void ARotateCamera(int value);
+	static void ACrystalExplosion(int value);
+	static void AStopCrystal(int value);
+	static void AMeshExplosion(int index);
+	static void AFinishAnimation(int value);
+	bool cameraRotate = false;
+	bool crystalExplosion = false;
+	bool isAnimation = false;
+
+
 
 private:
 	Objects objects;
@@ -108,6 +133,7 @@ private:
 
 	// physics
 	btClock clock;
+	float timeScale = 1;
 
 	// Ä«¸Þ¶ó
 	Camera* camera;
@@ -121,7 +147,6 @@ private:
 	bool isTracing = false;
 	float completion;
 	int remaining;
-
 };
 
 #endif

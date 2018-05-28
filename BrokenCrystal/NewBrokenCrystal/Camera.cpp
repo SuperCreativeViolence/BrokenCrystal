@@ -2,8 +2,8 @@
 
 Camera::Camera() :
 	position(10.0, 5.0, 0.0),
-	target(0.0, 5.0, 0.0),
-	distance(16.0),
+	target(0.0, 10.0, 0.0),
+	distance(6.0),
 	fov(90),
 	pitch(20.0),
 	yaw(0.0),
@@ -85,6 +85,12 @@ void Camera::Fov(float delta)
 	UpdateCamera();
 }
 
+void Camera::Target(float deltaX, float deltaY, float deltaZ)
+{
+	target += btVector3(deltaX, deltaY, deltaZ);
+	UpdateCamera();
+}
+
 float& Camera::GetFovPointer()
 {
 	return fov;
@@ -113,38 +119,6 @@ float& Camera::GetYawPointer()
 float& Camera::GetDistancePointer()
 {
 	return distance;
-}
-
-Ray Camera::GetRay(int x, int y, bool jitter)
-{
-	const double r1 = 2.0 * erand48();
-	const double r2 = 2.0 * erand48();
-
-	double dx;
-	if (r1 < 1.0)
-		dx = sqrt(r1) - 1.0;
-	else
-		dx = 1.0 - sqrt(2.0 - r1);
-
-	double dy;
-	if (r2 < 1.0)
-		dy = sqrt(r2) - 1.0;
-	else
-		dy = 1.0 - sqrt(2.0 - r2);
-
-	btVector3 wDir = btVector3(-direction).normalize();
-	btVector3 uDir = upVector.cross(wDir).normalize();
-	btVector3 vDir = wDir.cross(-uDir);
-
-	float top = tan(btRadians(fov * 0.5));
-	float right = aspectRatio * top;
-	float bottom = -top;
-	float left = -right;
-
-	float imPlaneUPos = left + (right - left)*(((float)x + dx + 0.5f) / (float)width);
-	float imPlaneVPos = bottom + (top - bottom)*(((float)y + dy + 0.5f) / (float)height);
-
-	return Ray(position, (imPlaneUPos*uDir + imPlaneVPos * vDir - wDir).normalize());
 }
 
 Ray Camera::GetRay(int x, int y, int sx, int sy, bool dof)
@@ -226,4 +200,24 @@ void Camera::CopyCamera(CameraCU *cam)
 	cam->pitch = pitch;
 	cam->width = width;
 	cam->yaw = yaw;
+}
+
+void Camera::SetTarget(const btVector3& pos)
+{
+	target = pos;
+}
+
+void Camera::SetPitch(float pitch)
+{
+	this->pitch = pitch;
+}
+
+void Camera::SetYaw(float yaw)
+{
+	this->yaw = yaw;
+}
+
+void Camera::SetZoom(float zoom)
+{
+	this->distance = zoom;
 }

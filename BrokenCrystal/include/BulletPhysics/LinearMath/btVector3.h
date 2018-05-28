@@ -354,6 +354,14 @@ public:
 #endif
 	}
 
+	SIMD_FORCE_INLINE btVector3& Clamp()
+	{
+		m_floats[0] = m_floats[0] < 0 ? 0.0f : m_floats[0] > 1.0f ? 1.0f : m_floats[0];
+		m_floats[1] = m_floats[1] < 0 ? 0.0f : m_floats[1] > 1.0f ? 1.0f : m_floats[1];
+		m_floats[2] = m_floats[2] < 0 ? 0.0f : m_floats[2] > 1.0f ? 1.0f : m_floats[2];
+		return *this;
+	}
+
   /**@brief Return a normalized version of this vector */
 	SIMD_FORCE_INLINE btVector3 normalized() const;
 

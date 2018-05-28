@@ -123,7 +123,7 @@ void Scene::AddObject(Object* object)
 	world->addRigidBody(object->GetRigidBody());
 }
 
-void Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material)
+Mesh* Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material)
 {
 	float halfWidth = halfExtents[0];
 	float halfHeight = halfExtents[1];
@@ -156,9 +156,11 @@ void Scene::CreateBox(const btVector3 &position, const btVector3 &halfExtents, f
 		triangles.push_back(new Triangle(vertices[indices[i]], vertices[indices[i + 1]], vertices[indices[i + 2]], material));
 	}
 
-	AddObject(static_cast<Object*>(new Mesh(position, triangles, mass, material)));
+	Mesh* mesh = new Mesh(position, triangles, mass, material);
+	AddObject(static_cast<Object*>(mesh));
 	triangles.clear();
 	triangles.shrink_to_fit();
+	return mesh;
 }
 
 void Scene::CreateSphere(const btVector3 &position, double radius, float mass, Material material)
@@ -315,7 +317,46 @@ void Scene::Idle()
 {
 	float dt = clock.getTimeMilliseconds();
 	clock.reset();
-	UpdateScene((dt / 1000.0f) * timeScale);
+	if (isAnimation)
+	{
+		UpdateScene(0.06 * timeScale);
+		//CudaAnimationRendering(++animationFrame);
+		animationTime += 0.06;
+		if (animationIndex == 1 && animationTime >= 11)
+		{
+			ACrystalExplosion();
+		}
+		if (animationIndex == 2 && animationTime >= 16.5)
+		{
+			AStopCrystal();
+		}
+		if (animationIndex == 3 && animationTime >= 23.87)
+		{
+			AMeshExplosion(0);
+		}
+		if (animationIndex == 4 && animationTime >= 31.24)
+		{
+			AMeshExplosion(1);
+		}
+		if (animationIndex == 5 && animationTime >= 38.61)
+		{
+			AMeshExplosion(2);
+		}
+		if (animationIndex == 6 && animationTime >= 45.98)
+		{
+			AMeshExplosion(3);
+		}
+		if (animationIndex == 7 && animationTime >= 50)
+		{
+			AFinishAnimation();
+		}
+		if (animationTime >= 60)
+		{
+			isAnimation = false;
+		}
+	}
+	else
+		UpdateScene((dt / 1000.0f) * timeScale);
 	glutPostRedisplay();
 }
 
@@ -625,6 +666,60 @@ void Scene::DrawMeshDebugCU()
 			DrawTriangle(p0, p1, p2);
 		}
 	}
+}
+
+void Scene::CudaAnimationRendering(int index)
+{
+	size_t freemem;
+	size_t totalmem;
+
+	cudaError_t error = cudaMemGetInfo(&freemem, &totalmem);
+	if (error != cudaSuccess)
+	{
+		// print the CUDA error message and exit
+		printf("CUDA error: %s\n", cudaGetErrorString(error));
+		exit(-1);
+	}
+
+	std::cout << &freemem << " " << &totalmem << std::endl;
+	// Camera
+	CameraCU* cam_cuda = new CameraCU;
+	camera->CopyCamera(cam_cuda);
+	CameraCU* cam_p;
+
+	cudaMalloc((void**) &cam_p, sizeof(CameraCU));	//cam_p contains device memory address
+	cudaMemcpy(cam_p, cam_cuda, sizeof(CameraCU), cudaMemcpyHostToDevice);
+
+	std::cout << "cam copy to device successed" << std::endl;
+	// Objects
+	std::vector<ObjectCU*>* loaded_object = new std::vector<ObjectCU*>;	//loaded_object contains array of device memory address of Object
+	for (auto & object : objects)
+	{
+		loaded_object->push_back(CULoadObj(object));
+	}
+
+	ObjectCU** objects_p;
+	cudaMalloc((void**) &objects_p, loaded_object->size() * sizeof(ObjectCU**));
+	cudaMemcpy(objects_p, loaded_object->data(), loaded_object->size() * sizeof(ObjectCU**), cudaMemcpyHostToDevice);
+	std::cout << "objects copy to device successed" << std::endl;
+
+	// Objects num
+	int* num_objects_device;
+	int num_objects_host = loaded_object->size();
+	cudaMalloc((void**) &num_objects_device, sizeof(int));
+	cudaMemcpy(num_objects_device, &num_objects_host, sizeof(int), cudaMemcpyHostToDevice);
+
+	TracePath* tp = new TracePath;
+
+	float3* result = tp->RenderPathCU(objects_p, num_objects_device, cam_p, camera->GetWidht(), camera->GetHeight());
+	std::cout << "CU path tracing finished! Start SaveImageCU.." << std::endl;
+
+	std::string fileName = "Animation/";
+	fileName.append(std::to_string(index));
+	fileName.append(".png");
+	SaveImageCU(result, fileName.c_str());
+	delete tp;
+	std::cout << "SaveImageCU successed!" << std::endl;
 }
 
 void Scene::DebugPathCU()
@@ -1153,12 +1248,12 @@ void Scene::Animation()
 	camera->SetYaw(-360);
 	camera->SetZoom(6);
 
-	currentMeshes.push_back(CreateMesh(btVector3(-7, 1, 3), "Sphere.obj", 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));
-	currentMeshes.push_back(CreateMesh(btVector3(-3, 1, 3), "Sphere.obj", 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0))));
-	currentMeshes.push_back(CreateMesh(btVector3(3, 1, -3), "Sphere.obj", 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0))));
-	currentMeshes.push_back(CreateMesh(btVector3(7, 1, -3), "Sphere.obj", 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateBox(btVector3(-7, 1, 3), btVector3(3,3,3), 0.1, Material(DIFF, btVector3(0.3, 0.5, 0.3))));
+	currentMeshes.push_back(CreateBox(btVector3(-3, 1, 3), btVector3(3, 3, 3), 0.1, Material(SPEC, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateBox(btVector3(3, 1, -3), btVector3(3, 3, 3), 0.1, Material(GLOSS, btVector3(1.0, 1.0, 1.0))));
+	currentMeshes.push_back(CreateBox(btVector3(7, 1, -3), btVector3(3, 3, 3), 0.1, Material(TRANS, btVector3(1.0, 1.0, 1.0))));
 	// start
-	glutTimerFunc(500, &Scene::ARotateCamera, 0);
+	ARotateCamera();
 
 
 
@@ -1172,70 +1267,66 @@ void Scene::Animation()
 	//}
 }
 
-void Scene::ARotateCamera(int value)
+void Scene::ARotateCamera()
 {
 	printf("[Animation] Rotate Camera\n");
-	Scene::GetInstance()->isAnimation = true;
-	Scene::GetInstance()->cameraRotate = true;
-	glutTimerFunc(3000, &Scene::ACrystalExplosion, 0);
+	animationIndex = 1;
+	isAnimation = true;
+	cameraRotate = true;
+	//glutTimerFunc(3000, &Scene::ACrystalExplosion, 0);
 }
 
-void Scene::ACrystalExplosion(int value)
+void Scene::ACrystalExplosion()
 {
 	printf("[Animation] Crystal Explosion\n");
-	Scene::GetInstance()->cameraRotate = false;
-	Scene::GetInstance()->crystalExplosion = true;
-	btVector3 crystalPos = Scene::GetInstance()->currentCrystal->GetPosition();
+	animationIndex = 2;
+	cameraRotate = false;
+	crystalExplosion = true;
+	btVector3 crystalPos = currentCrystal->GetPosition();
 	crystalPos[1] -= 2;
-	Scene::GetInstance()->DeleteObject(Scene::GetInstance()->currentCrystal);
-	Scene::GetInstance()->currentCrystal = Scene::GetInstance()->CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
-	std::vector<Mesh*> meshes = break_into_pieces2(Scene::GetInstance()->currentCrystal, 50);
+	DeleteObject(currentCrystal);
+	currentCrystal = CreateMesh(btVector3(0, 15, 0), "Crystal_Low.obj", 10, Material(GLOSS, btVector3(0.4, 0.4, 1.0)));
+	std::vector<Mesh*> meshes = break_into_pieces2(currentCrystal, 50);
 	for (auto& mesh : meshes)
 	{
-		Scene::GetInstance()->AddObject(static_cast<Object*>(mesh));
+		AddObject(static_cast<Object*>(mesh));
 		btVector3 meshPos = mesh->GetPosition();
 		btVector3 dir = (meshPos - crystalPos).normalize();
 		mesh->GetRigidBody()->applyCentralImpulse(dir / 10.0f);
 	}
-	Scene::GetInstance()->DeleteObject(Scene::GetInstance()->currentCrystal);
-	glutTimerFunc(1500, &Scene::AStopCrystal, 0);
+	DeleteObject(currentCrystal);
 }
 
-void Scene::AStopCrystal(int value)
+void Scene::AStopCrystal()
 {
 	printf("[Animation] Freeze Crystal\n");
-	Scene::GetInstance()->crystalExplosion = false;
-	Scene::GetInstance()->cameraRotate = true;
-	Scene::GetInstance()->SetTimeScale(0.05f);
-	glutTimerFunc(4000, &Scene::AFinishAnimation, 0);
-	glutTimerFunc(700, &Scene::AMeshExplosion, 0);
-	glutTimerFunc(1400, &Scene::AMeshExplosion, 1);
-	glutTimerFunc(2100, &Scene::AMeshExplosion, 2);
-	glutTimerFunc(2800, &Scene::AMeshExplosion, 3);
-
+	animationIndex = 3;
+	crystalExplosion = false;
+	cameraRotate = true;
+	SetTimeScale(0.05f);
 }
 
 void Scene::AMeshExplosion(int index)
 {
-	Mesh* currentMesh = Scene::GetInstance()->currentMeshes.at(index);
+	Mesh* currentMesh = currentMeshes.at(index);
+	animationIndex++;
 	btVector3 currentMeshPos = currentMesh->GetPosition();
-	currentMeshPos[1] -= 1;
 	std::vector<Mesh*> meshes = break_into_pieces2(currentMesh, 20);
 	for (auto& mesh : meshes)
 	{
-		Scene::GetInstance()->AddObject(static_cast<Object*>(mesh));
+		AddObject(static_cast<Object*>(mesh));
 		btVector3 meshPos = mesh->GetPosition();
 		btVector3 dir = (meshPos - currentMeshPos).normalize();
-		mesh->GetRigidBody()->applyCentralImpulse(dir / 10.0f);
+		mesh->GetRigidBody()->applyCentralImpulse(dir / 30.0f);
 	}
-	Scene::GetInstance()->DeleteObject(currentMesh);
+	DeleteObject(currentMesh);
 }
 
-void Scene::AFinishAnimation(int value)
+void Scene::AFinishAnimation()
 {
 	printf("[Animation] Animation Finished\n");
-	Scene::GetInstance()->cameraRotate = false;
-	Scene::GetInstance()->SetTimeScale(1.0f);
-	Scene::GetInstance()->isAnimation = false;
+	animationIndex = 8;
+	cameraRotate = false;
+	SetTimeScale(1.0f);
 }
 

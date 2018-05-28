@@ -30,18 +30,11 @@ public:
 	Scene();
 	~Scene();
 
-	// singleton
-	static Scene* GetInstance()
-	{
-		static Scene* instance = new Scene();
-		return instance;
-	}
-
 	void Initialize();
 
 	// object
 	void AddObject(Object* object);
-	void CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
+	Mesh* CreateBox(const btVector3 &position, const btVector3 &halfExtents, float mass, Material material);
 	void CreateSphere(const btVector3 &position, double radius, float mass, Material material);
 	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass, Material material);
 	Mesh* CreateMesh(const btVector3 &position, const char* fileName, float mass);
@@ -94,20 +87,23 @@ public:
 	void SaveImageCU(float3* pixels, const char *filePath);
 	void DebugPathCU();
 	void DrawMeshDebugCU();
+	void CudaAnimationRendering(int index);
 
 	// animation
 	Mesh* currentCrystal = nullptr;
 	std::vector<Mesh*> currentMeshes;
 	void Animation();
-	static void ARotateCamera(int value);
-	static void ACrystalExplosion(int value);
-	static void AStopCrystal(int value);
-	static void AMeshExplosion(int index);
-	static void AFinishAnimation(int value);
+	void ARotateCamera();
+	void ACrystalExplosion();
+	void AStopCrystal();
+	void AMeshExplosion(int index);
+	void AFinishAnimation();
 	bool cameraRotate = false;
 	bool crystalExplosion = false;
 	bool isAnimation = false;
-
+	int animationFrame = 0;
+	float animationTime = 0;
+	int animationIndex = 0;
 
 
 private:

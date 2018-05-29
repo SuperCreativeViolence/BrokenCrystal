@@ -25,9 +25,9 @@
 
 #define EPSILON_CU 1e-10
 
-#define TRACE_SAMPLES 64
-#define TRACE_SAMPLES_LOOP_X 12
-#define TRACE_SAMPLES_LOOP_Y 12
+#define TRACE_SAMPLES 16
+#define TRACE_SAMPLES_LOOP_X 6
+#define TRACE_SAMPLES_LOOP_Y 6
 
 
 
@@ -38,6 +38,16 @@ struct TriangleCU
 	MaterialType material;
 	float3 color;
 	float3 emission;
+};
+
+struct SphereCU
+{
+	float radius;
+	float3 position;
+	MaterialType material;
+	float3 color;
+	float3 emission;
+	
 };
 
 struct ObjectIntersectionCU
@@ -63,13 +73,16 @@ struct ObjectCU
 {
 	ObjectCU()
 	{
+		object_type = 0;
 		triangles_num = 0;
 		triangles_size = 0;
 		triangles_p = NULL;
+		sphere_p = NULL;
 		//material = DIFF;
 		//color = make_float3(0.0f, 0.0f, 0.0f);
 		//emission = make_float3(0.0f, 0.0f, 0.0f);
 	}
+	int object_type;	// 0: Sphere, 1: Mesh
 	unsigned int triangles_num;	// number of triangle vertexes
 	unsigned int triangles_size; // byte size of triangles
 	/*float3* triangles_p;
@@ -77,6 +90,7 @@ struct ObjectCU
 	float3 color;
 	float3 emission;*/
 	TriangleCU** triangles_p;
+	SphereCU* sphere_p;
 };
 
 

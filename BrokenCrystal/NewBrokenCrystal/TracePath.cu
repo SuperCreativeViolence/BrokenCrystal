@@ -570,136 +570,179 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 
 		float tNear = FLT_MAX_CU;
 
-		for (unsigned int j = 0; j < current_obj->triangles_num; j++)
+		if (current_obj->object_type == 0)
 		{
-			float3 v0 = current_obj->triangles_p[j]->vertexes[0];
-			float3 v1 = current_obj->triangles_p[j]->vertexes[1];
-			float3 v2 = current_obj->triangles_p[j]->vertexes[2];
-
 			int hit = 0;
-			float u, v, t = 0;
+			float distance = .0f;
+			float radius = current_obj->sphere_p->radius;
+			float3 normal = make_float3(0.0f, 0.0f, 0.0f);
+			float3 position = current_obj->sphere_p->position;
 
-			float3 normal = normalize(cross(v1 - v0, v2 - v0));
+			float3 op = position - ray->origin;
+			float t;
+			float b = dot(op, ray->direction);
+			float det = b * b - dot(op, op) + radius * radius;
 
-			float3 v0v1 = v1 - v0;
-			float3 v0v2 = v2 - v0;
-			float3 pvec = cross(ray->direction, v0v2);
-			float det = dot(v0v1, pvec);
-
-			if (cufabs(det) < EPSILON_CU)
+			if (det < 0.0f)
 			{
-
-				temp_inner.hit = hit;
-				temp_inner.material = current_obj->triangles_p[j]->material;
-				temp_inner.u = t;
-				temp_inner.normal = normal;
-				temp_inner.color = current_obj->triangles_p[j]->color;
-				temp_inner.emission = current_obj->triangles_p[j]->emission;
-				if (temp_inner.hit && temp_inner.u < tNear)
-				{
-					tNear = temp_inner.u;
-					temp.hit = temp_inner.hit;
-					temp.material = temp_inner.material;
-					temp.normal = temp_inner.normal;
-					temp.u = temp_inner.u;
-					temp.color = temp_inner.color;
-					temp.emission = temp_inner.emission;
-				}
-				continue;
+				temp.hit = hit;
+				temp.material = current_obj->sphere_p->material;
+				temp.normal = normal;
+				temp.u = distance;
+				temp.color = current_obj->sphere_p->color;
+				temp.emission = current_obj->sphere_p->emission;
 			}
-
-			float3 tvec = ray->origin - v0;
-			u = dot(tvec, pvec);
-
-			if (u < 0 || u > det)
+			else
 			{
+				det = sqrt(det);
 
-				temp_inner.hit = hit;
-				temp_inner.material = current_obj->triangles_p[j]->material;
-				temp_inner.u = t;
-				temp_inner.normal = normal;
-				temp_inner.color = current_obj->triangles_p[j]->color;
-				temp_inner.emission = current_obj->triangles_p[j]->emission;
-				if (temp_inner.hit == 1 && temp_inner.u < tNear)
+				distance = (t = b - det) > EPSILON_CU ? t : ((t = b + det) > EPSILON_CU ? t : 0);
+
+				if (distance != 0.0f)
 				{
-					tNear = temp_inner.u;
-					temp.hit = temp_inner.hit;
-					temp.material = temp_inner.material;
-					temp.normal = temp_inner.normal;
-					temp.u = temp_inner.u;
-					temp.color = temp_inner.color;
-					temp.emission = temp_inner.emission;
+					hit = 1;
+					normal = normalize((ray->origin + ray->direction * distance) - position);
+					temp.hit = hit;
+					temp.material = current_obj->sphere_p->material;
+					temp.normal = normal;
+					temp.u = distance;
+					temp.color = current_obj->sphere_p->color;
+					temp.emission = current_obj->sphere_p->emission;
 				}
-				continue;
-			}
-
-			float3 qvec = cross(tvec, v0v1);
-			v = dot(ray->direction, qvec);
-
-			if (v < 0 || u + v > det)
-			{
-				temp_inner.hit = hit;
-				temp_inner.material = current_obj->triangles_p[j]->material;
-				temp_inner.u = t;
-				temp_inner.normal = normal;
-				temp_inner.color = current_obj->triangles_p[j]->color;
-				temp_inner.emission = current_obj->triangles_p[j]->emission;
-				if (temp_inner.hit && temp_inner.u < tNear)
-				{
-					tNear = temp_inner.u;
-					temp.hit = temp_inner.hit;
-					temp.material = temp_inner.material;
-					temp.normal = temp_inner.normal;
-					temp.u = temp_inner.u;
-					temp.color = temp_inner.color;
-					temp.emission = temp_inner.emission;
-				}
-				continue;
-			}
-
-			t = dot(v0v2, qvec) / det;
-
-			if (t < EPSILON_CU)
-			{
-				temp_inner.hit = hit;
-				temp_inner.material = current_obj->triangles_p[j]->material;
-				temp_inner.u = t;
-				temp_inner.normal = normal;
-				temp_inner.color = current_obj->triangles_p[j]->color;
-				temp_inner.emission = current_obj->triangles_p[j]->emission;
-				if (temp_inner.hit && temp_inner.u < tNear)
-				{
-					tNear = temp_inner.u;
-					temp.hit = temp_inner.hit;
-					temp.material = temp_inner.material;
-					temp.normal = temp_inner.normal;
-					temp.u = temp_inner.u;
-					temp.color = temp_inner.color;
-					temp.emission = temp_inner.emission;
-				}
-				continue;
-			}
-
-			hit = 1;
-
-			temp_inner.hit = hit;
-			temp_inner.material = current_obj->triangles_p[j]->material;
-			temp_inner.u = t;
-			temp_inner.normal = normal;
-			temp_inner.color = current_obj->triangles_p[j]->color;
-			temp_inner.emission = current_obj->triangles_p[j]->emission;
-			if (temp_inner.hit && temp_inner.u < tNear)
-			{
-				tNear = temp_inner.u;
-				temp.hit = temp_inner.hit;
-				temp.material = temp_inner.material;
-				temp.normal = temp_inner.normal;
-				temp.u = temp_inner.u;
-				temp.color = temp_inner.color;
-				temp.emission = temp_inner.emission;
 			}
 		}
-		
+		else
+		{
+			for (unsigned int j = 0; j < current_obj->triangles_num; j++)
+			{
+				float3 v0 = current_obj->triangles_p[j]->vertexes[0];
+				float3 v1 = current_obj->triangles_p[j]->vertexes[1];
+				float3 v2 = current_obj->triangles_p[j]->vertexes[2];
+
+				int hit = 0;
+				float u, v, t = 0;
+
+				float3 normal = normalize(cross(v1 - v0, v2 - v0));
+
+				float3 v0v1 = v1 - v0;
+				float3 v0v2 = v2 - v0;
+				float3 pvec = cross(ray->direction, v0v2);
+				float det = dot(v0v1, pvec);
+
+				if (cufabs(det) < EPSILON_CU)
+				{
+
+					temp_inner.hit = hit;
+					temp_inner.material = current_obj->triangles_p[j]->material;
+					temp_inner.u = t;
+					temp_inner.normal = normal;
+					temp_inner.color = current_obj->triangles_p[j]->color;
+					temp_inner.emission = current_obj->triangles_p[j]->emission;
+					if (temp_inner.hit && temp_inner.u < tNear)
+					{
+						tNear = temp_inner.u;
+						temp.hit = temp_inner.hit;
+						temp.material = temp_inner.material;
+						temp.normal = temp_inner.normal;
+						temp.u = temp_inner.u;
+						temp.color = temp_inner.color;
+						temp.emission = temp_inner.emission;
+					}
+					continue;
+				}
+
+				float3 tvec = ray->origin - v0;
+				u = dot(tvec, pvec);
+
+				if (u < 0 || u > det)
+				{
+
+					temp_inner.hit = hit;
+					temp_inner.material = current_obj->triangles_p[j]->material;
+					temp_inner.u = t;
+					temp_inner.normal = normal;
+					temp_inner.color = current_obj->triangles_p[j]->color;
+					temp_inner.emission = current_obj->triangles_p[j]->emission;
+					if (temp_inner.hit == 1 && temp_inner.u < tNear)
+					{
+						tNear = temp_inner.u;
+						temp.hit = temp_inner.hit;
+						temp.material = temp_inner.material;
+						temp.normal = temp_inner.normal;
+						temp.u = temp_inner.u;
+						temp.color = temp_inner.color;
+						temp.emission = temp_inner.emission;
+					}
+					continue;
+				}
+
+				float3 qvec = cross(tvec, v0v1);
+				v = dot(ray->direction, qvec);
+
+				if (v < 0 || u + v > det)
+				{
+					temp_inner.hit = hit;
+					temp_inner.material = current_obj->triangles_p[j]->material;
+					temp_inner.u = t;
+					temp_inner.normal = normal;
+					temp_inner.color = current_obj->triangles_p[j]->color;
+					temp_inner.emission = current_obj->triangles_p[j]->emission;
+					if (temp_inner.hit && temp_inner.u < tNear)
+					{
+						tNear = temp_inner.u;
+						temp.hit = temp_inner.hit;
+						temp.material = temp_inner.material;
+						temp.normal = temp_inner.normal;
+						temp.u = temp_inner.u;
+						temp.color = temp_inner.color;
+						temp.emission = temp_inner.emission;
+					}
+					continue;
+				}
+
+				t = dot(v0v2, qvec) / det;
+
+				if (t < EPSILON_CU)
+				{
+					temp_inner.hit = hit;
+					temp_inner.material = current_obj->triangles_p[j]->material;
+					temp_inner.u = t;
+					temp_inner.normal = normal;
+					temp_inner.color = current_obj->triangles_p[j]->color;
+					temp_inner.emission = current_obj->triangles_p[j]->emission;
+					if (temp_inner.hit && temp_inner.u < tNear)
+					{
+						tNear = temp_inner.u;
+						temp.hit = temp_inner.hit;
+						temp.material = temp_inner.material;
+						temp.normal = temp_inner.normal;
+						temp.u = temp_inner.u;
+						temp.color = temp_inner.color;
+						temp.emission = temp_inner.emission;
+					}
+					continue;
+				}
+
+				hit = 1;
+
+				temp_inner.hit = hit;
+				temp_inner.material = current_obj->triangles_p[j]->material;
+				temp_inner.u = t;
+				temp_inner.normal = normal;
+				temp_inner.color = current_obj->triangles_p[j]->color;
+				temp_inner.emission = current_obj->triangles_p[j]->emission;
+				if (temp_inner.hit && temp_inner.u < tNear)
+				{
+					tNear = temp_inner.u;
+					temp.hit = temp_inner.hit;
+					temp.material = temp_inner.material;
+					temp.normal = temp_inner.normal;
+					temp.u = temp_inner.u;
+					temp.color = temp_inner.color;
+					temp.emission = temp_inner.emission;
+				}
+			}
+		}
 		if (temp.hit == 1)
 		{
 			if (intersection.u == 0 || temp.u < intersection.u)
@@ -712,6 +755,7 @@ __device__ ObjectIntersectionCU IntersectCU(RayCU* ray, ObjectCU** object_list, 
 				intersection.emission = temp.emission;
 			}
 		}
+		
 	}
 
 	return intersection;

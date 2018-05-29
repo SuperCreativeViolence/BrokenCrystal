@@ -38,6 +38,23 @@ Sphere::Sphere(const btVector3 &position_, double radius_, float mass_, Material
 	radius = radius_;
 }
 
+double Sphere::GetRadius() const
+{
+	return radius;
+}
+
+float3 Sphere::GetPositionF() const
+{
+	assert(motionState);
+	btVector3 temp = motionState->GetWorldPosition();
+	return make_float3(temp.x(), temp.y(), temp.z());
+}
+
+Material Sphere::GetMaterialC() const
+{
+	return material;
+}
+
 ObjectIntersection Sphere::GetIntersection(const Ray& ray)
 {
 	bool hit = false;

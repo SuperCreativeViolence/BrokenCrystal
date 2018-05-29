@@ -73,6 +73,10 @@ class Sphere : public Object
 public:
 	Sphere(const btVector3 &position_, double radius_, float mass_, Material material_);
 	virtual ObjectIntersection GetIntersection(const Ray& ray) override;
+	
+	double GetRadius() const;
+	float3 GetPositionF() const;
+	Material GetMaterialC() const;
 
 private:
 	double radius;

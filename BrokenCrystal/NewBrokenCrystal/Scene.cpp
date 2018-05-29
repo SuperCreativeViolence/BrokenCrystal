@@ -66,12 +66,12 @@ void Scene::Initialize()
 
 	camera = new Camera();
 
-	CreateBox(btVector3(0, 0, 0), btVector3(100, 1, 100), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
+	//CreateBox(btVector3(0, 0, 0), btVector3(100, 1, 100), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
 	//CreateBox(btVector3(0, 50, 0), btVector3(20, 1, 20), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2,2.2, 2.2)));
 
 	CreateBox(btVector3(0, 0, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
-	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
-	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
+	//CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(DIFF, btVector3(0.9, 0.9, 0.9)));
+	CreateBox(btVector3(0, 30, 0), btVector3(30, 1, 30), 0, Material(EMIT, btVector3(1.0, 1.0, 1.0), btVector3(2.2, 2.2, 2.2)));
 	CreateBox(btVector3(30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.0, 0.0, 0.75)));
 	CreateBox(btVector3(-30, 15, 0), btVector3(1, 15, 30), 0, Material(DIFF, btVector3(0.75, 0.0, 0.0)));
 	//CreateBox(btVector3(0, 15, 30), btVector3(30, 15, 1), 0, Material(DIFF, btVector3(0.8, 0.8, 0.8)));
@@ -80,10 +80,10 @@ void Scene::Initialize()
 
 	//CreateSphere(btVector3(0, 3, 0), 7, 1, Material(TRANS, btVector3(1.0, 1.0, 1.0)));
 
-	//CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(0, 4, 0), 2, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
-	//CreateSphere(btVector3(0, 10, 10), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
-	//CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
+	CreateSphere(btVector3(10, 10, 0), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateSphere(btVector3(0, 4, 0), 2, 1, Material(DIFF, btVector3(0.3, 0.3, 0.1)));
+	CreateSphere(btVector3(0, 10, 10), 2, 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
+	CreateSphere(btVector3(-3, 4, 4), 4, 1, Material(DIFF, btVector3(0.3, 0.1, 0.3)));
 
 	//CreateBox(btVector3(0, 3, 3), btVector3(2, 2, 2), 1, Material(DIFF, btVector3(0.1, 0.2, 0.1)));
 	//CreateBox(btVector3(0, 2, -4), btVector3(2, 2, 2), 1, Material(SPEC, btVector3(1.0, 1.0, 1.0)));
@@ -577,15 +577,37 @@ ObjectCU* Scene::CULoadObj(Object* object)
 			btVector3 halfSize = box->getHalfExtentsWithMargin();
 			DrawBox(halfSize);
 			break;
-		}
+		}*/
 		
 		case SPHERE_SHAPE_PROXYTYPE:
 		{
-			const btSphereShape* sphere = static_cast<const btSphereShape*>(pShape);
-			float radius = sphere->getMargin();
-			DrawSphere(radius);
-			break;
-		}*/
+			const Sphere* sphere = static_cast<const Sphere*>(object);
+			float radius = sphere->GetRadius();
+
+			SphereCU* s = new SphereCU;
+			SphereCU* s_device;
+
+			s->radius = sphere->GetRadius();
+			s->position = sphere->GetPositionF();
+			s->color = sphere->GetMaterialC().GetColorF();
+			s->emission = sphere->GetMaterialC().GetEmissionF();
+			s->material = sphere->GetMaterialC().GetType();
+
+			cudaMalloc((void**)&s_device, sizeof(SphereCU));
+			cudaMemcpy(s_device, s, sizeof(SphereCU), cudaMemcpyHostToDevice);
+
+			ObjectCU* temp = new ObjectCU;
+			temp->object_type = 0;
+			temp->triangles_size = 0;
+			temp->triangles_num = 0;
+			temp->sphere_p = s_device;
+
+			ObjectCU* object_p;
+			cudaMalloc((void**)&object_p, sizeof(ObjectCU));
+			cudaMemcpy(object_p, temp, sizeof(ObjectCU), cudaMemcpyHostToDevice);
+
+			return object_p;
+		}
 
 		case CONVEX_TRIANGLEMESH_SHAPE_PROXYTYPE:
 		{
@@ -621,6 +643,7 @@ ObjectCU* Scene::CULoadObj(Object* object)
 			//cudaMemcpy(mesh_p, triangles->data(), triangles_size, cudaMemcpyHostToDevice);
 
 			ObjectCU* temp = new ObjectCU;
+			temp->object_type = 1;
 			temp->triangles_size = triangles_size;
 			temp->triangles_num = (unsigned int)triangles->size();
 			temp->triangles_p = mesh_p;
@@ -1275,10 +1298,10 @@ void Scene::Animation()
 	camera->SetYaw(-360);
 	camera->SetZoom(6);
 
-	currentMeshes.push_back(CreateMesh(btVector3(10, 10, 10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
-	currentMeshes.push_back(CreateMesh(btVector3(10, 10, -10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
-	currentMeshes.push_back(CreateMesh(btVector3(-10, 10, 10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
-	currentMeshes.push_back(CreateMesh(btVector3(-10, 10, -10), "corn.obj", 1, Material(EMIT, btVector3(erand48(), erand48(), erand48()), btVector3(erand48() + 2.5, erand48() + 2.5, erand48() + 2.5))));
+	currentMeshes.push_back(CreateMesh(btVector3(10, 10, 10), "corn.obj", 1, Material(DIFF, btVector3(erand48(), erand48(), erand48()))));
+	currentMeshes.push_back(CreateMesh(btVector3(10, 10, -10), "corn.obj", 1, Material(DIFF, btVector3(erand48(), erand48(), erand48()))));
+	currentMeshes.push_back(CreateMesh(btVector3(-10, 10, 10), "corn.obj", 1, Material(DIFF, btVector3(erand48(), erand48(), erand48()))));
+	currentMeshes.push_back(CreateMesh(btVector3(-10, 10, -10), "corn.obj", 1, Material(DIFF, btVector3(erand48(), erand48(), erand48()))));
 	// start
 	ARotateCamera();
 }
